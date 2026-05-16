@@ -213,8 +213,6 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
 .btn-log-run{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;}
 .btn-log-run:hover{background:var(--green);color:#fff;}
 .btn-log-run:disabled{opacity:.5;cursor:not-allowed;}
-.btn-delete-idea{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b,#fca5a5);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;}
-.btn-delete-idea:hover{background:var(--red);color:#fff;}
 
 /* ── PROFILE PANEL ── */
 .profile-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh);margin-bottom:16px;}
@@ -250,7 +248,6 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
     box-shadow: var(--shm);
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -297,7 +294,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
     <div class="nav-div"></div>
     <div class="nav-group">
       <div class="nav-group-label">Tools</div>
-      <button class="nav-btn" data-panel="livecheck"><span class="nav-icon">📡</span>Live Check-In</button>
+      
     </div>
     <div class="nav-div"></div>
     <div class="nav-group">
@@ -468,54 +465,6 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
         </div>
       </div>
     </div>
-
-    <div id="panel-livecheck" class="panel">
-      <div class="page-hd-row">
-        <div class="page-hd"><h1>📡 Live Check-In</h1><p>Generate a QR code for your event and track attendance in real time.</p></div>
-      </div>
-
-      <div id="lc-setup" class="card" style="max-width:560px;">
-        <div class="card-hd" style="margin-bottom:16px;">Start a Live Session</div>
-        <div class="field">
-          <label>Select an event</label>
-          <select id="lc-event-select" style="width:100%;padding:9px 11px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);">
-            <option value="">— Choose an upcoming or planned event —</option>
-          </select>
-          <div class="field-hint">Only planned/upcoming events are shown. <span id="lc-or-add">You can also <a href="#" id="lc-add-event-link" style="color:var(--green);">add a new event first</a>.</span></div>
-        </div>
-        <button class="btn btn-primary" id="lc-start-btn" style="width:100%;margin-top:4px;">Generate QR Code →</button>
-      </div>
-
-      <div id="lc-session" style="display:none;">
-        <div style="display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start;max-width:760px;">
-          <div class="card" style="text-align:center;min-width:220px;">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;">Scan to Check In</div>
-            <div id="lc-qr" style="width:180px;height:180px;margin:0 auto 12px;"></div>
-            <div style="font-size:11px;color:var(--text3);word-break:break-all;" id="lc-url-display"></div>
-          </div>
-          <div>
-            <div class="card" style="margin-bottom:16px;">
-              <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:6px;" id="lc-event-name-display">Event</div>
-              <div style="font-size:48px;font-weight:800;color:var(--green);line-height:1;" id="lc-count">0</div>
-              <div style="font-size:13px;color:var(--text2);margin-top:4px;">attendees checked in</div>
-              <div style="font-size:11px;color:var(--text3);margin-top:8px;" id="lc-last-scan"></div>
-            </div>
-            <div style="display:flex;gap:8px;">
-              <button class="btn btn-green" id="lc-end-btn" style="flex:1;">✓ End Session &amp; Save</button>
-              <button class="btn" id="lc-cancel-btn">Cancel</button>
-            </div>
-            <div style="font-size:11px;color:var(--text3);margin-top:8px;">Ending the session saves the live count to the event's attendee field.</div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:20px;max-width:760px;">
-          <div class="card-hd" style="margin-bottom:12px;">Live Scan Log</div>
-          <div id="lc-scan-list" style="max-height:220px;overflow-y:auto;font-size:12px;color:var(--text2);">
-            <div style="color:var(--text3);">No scans yet — waiting for attendees...</div>
-          </div>
-        </div>
-      </div>
-    </div>
   </main>
 </div>
 
@@ -580,7 +529,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, increment, getDocs, where } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc, increment, getDocs, where } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3ZA_XQyhcOZpEK8WbP5UbuxQnnKwFGW8",
@@ -792,20 +741,6 @@ window.editEvent = (i) => {
     document.getElementById('f-idea-link').value = e.linkedIdeaId || '';
     document.getElementById('modal-title').textContent = 'Edit Event';
     document.getElementById('event-modal').classList.add('open');
-};
-
-window.deleteIdea = async (ideaId, ideaTitle) => {
-    if (!confirm('Delete "' + ideaTitle + '"? This cannot be undone.')) return;
-    const card = document.getElementById('idea-card-' + ideaId);
-    if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
-    try {
-        await deleteDoc(doc(db, 'ideas', ideaId));
-        // onSnapshot will remove it from the grid automatically
-    } catch(err) {
-        console.error('Delete idea failed:', err);
-        if (card) { card.style.opacity = ''; card.style.pointerEvents = ''; }
-        alert('Could not delete idea: ' + err.message);
-    }
 };
 
 window.deleteEvent = (i) => {
@@ -1349,10 +1284,7 @@ function renderMarketplace(ideas) {
                     ${linkHtml}
                 </div>
                 <div class="idea-card-actions">
-                    ${!isOwn
-                        ? `<button class="btn-log-run" onclick="window.openLogRun('${idea.id}','${escHtml(idea.title).replace(/'/g,"\'")}')">+ Log my run</button>`
-                        : `<button class="btn-delete-idea" onclick="window.deleteIdea('${idea.id}','${escHtml(idea.title).replace(/'/g,"\'")}')">🗑 Delete</button>`
-                    }
+                    ${!isOwn ? `<button class="btn-log-run" onclick="window.openLogRun('${idea.id}','${escHtml(idea.title).replace(/'/g,"\\'")}')">+ Log my run</button>` : '<span style="font-size:11px;color:var(--text3);">Your idea</span>'}
                 </div>
                 <div class="idea-submitter">Shared by ${escHtml(idea.submittedBy || 'Anonymous')}</div>
             </div>
@@ -1533,145 +1465,6 @@ document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
     const orig = btn.onclick;
     if (btn.dataset.panel === 'profile') {
         btn.addEventListener('click', () => renderProfilePanel());
-    }
-});
-
-// ── LIVE CHECK-IN ──
-let _liveSessionId = null;
-let _liveEventIdx = null;
-let _unsubLive = null;
-
-function populateLiveEventSelect() {
-    const sel = document.getElementById('lc-event-select');
-    const planned = (DB.events || [])
-        .map((e, i) => ({ ...e, _idx: i }))
-        .filter(e => e.status === 'planned' || e.status === 'done');
-    sel.innerHTML = '<option value="">— Choose an event —</option>' +
-        planned.map(e => `<option value="${e._idx}">${e.name} (${e.date || 'no date'})</option>`).join('');
-}
-
-document.getElementById('lc-add-event-link').onclick = (ev) => {
-    ev.preventDefault();
-    document.getElementById('nav-add-event').click();
-};
-
-document.getElementById('lc-start-btn').onclick = async () => {
-    const sel = document.getElementById('lc-event-select');
-    const idx = sel.value;
-    if (idx === '') { alert('Please select an event first.'); return; }
-    const ev = DB.events[parseInt(idx)];
-    if (!ev) return;
-
-    // Create a session doc in Firestore
-    const sessionRef = await addDoc(collection(db, 'checkin_sessions'), {
-        eventName: ev.name,
-        eventIdx: parseInt(idx),
-        ownerUid: currentUser.uid,
-        count: 0,
-        scans: [],
-        createdAt: new Date().toISOString(),
-        active: true
-    });
-
-    _liveSessionId = sessionRef.id;
-    _liveEventIdx = parseInt(idx);
-    startLiveSession(sessionRef.id, ev.name);
-};
-
-function startLiveSession(sessionId, eventName) {
-    document.getElementById('lc-setup').style.display = 'none';
-    document.getElementById('lc-session').style.display = 'block';
-    document.getElementById('lc-event-name-display').textContent = eventName;
-    document.getElementById('lc-count').textContent = '0';
-    document.getElementById('lc-last-scan').textContent = '';
-    document.getElementById('lc-scan-list').innerHTML = '<div style="color:var(--text3);">No scans yet — waiting for attendees...</div>';
-
-    // Build check-in URL
-    const base = window.location.origin + window.location.pathname.replace('index.html','');
-    const url = base + 'checkin.html?session=' + sessionId;
-    document.getElementById('lc-url-display').textContent = url;
-
-    // Generate QR using Google Charts API
-    const qrEl = document.getElementById('lc-qr');
-    qrEl.innerHTML = '';
-    // Use qrcode.js loaded in <head>
-    new QRCode(qrEl, {
-        text: url,
-        width: 180,
-        height: 180,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-    });
-
-    // Live listener on session doc
-    if (_unsubLive) _unsubLive();
-    _unsubLive = onSnapshot(doc(db, 'checkin_sessions', sessionId), (snap) => {
-        if (!snap.exists()) return;
-        const data = snap.data();
-        const count = data.count || 0;
-        document.getElementById('lc-count').textContent = count;
-
-        // Scan log
-        const scans = data.scans || [];
-        if (scans.length) {
-            const last = scans[scans.length - 1];
-            document.getElementById('lc-last-scan').textContent = 'Last scan: ' + new Date(last).toLocaleTimeString();
-            document.getElementById('lc-scan-list').innerHTML = scans.slice().reverse().map((t, i) =>
-                `<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
-                    <span>#${scans.length - i}</span>
-                    <span>${new Date(t).toLocaleTimeString()}</span>
-                 </div>`
-            ).join('');
-        }
-    });
-}
-
-document.getElementById('lc-end-btn').onclick = async () => {
-    if (!_liveSessionId) return;
-    const snap = await getDocs(query(collection(db, 'checkin_sessions'), where('__name__', '==', _liveSessionId)));
-    // Get final count from Firestore
-    const sessionSnap = await getDocs(collection(db, 'checkin_sessions'));
-    const sessionDoc = sessionSnap.docs.find(d => d.id === _liveSessionId);
-    const finalCount = sessionDoc ? (sessionDoc.data().count || 0) : 0;
-
-    // Save count back to event
-    if (_liveEventIdx !== null && DB.events[_liveEventIdx]) {
-        DB.events[_liveEventIdx].attendees = finalCount;
-        DB.events[_liveEventIdx].status = 'done';
-        await saveDB();
-        renderOverview();
-        applyFilters();
-    }
-
-    // Mark session inactive
-    await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false });
-
-    if (_unsubLive) { _unsubLive(); _unsubLive = null; }
-    _liveSessionId = null;
-    _liveEventIdx = null;
-
-    document.getElementById('lc-session').style.display = 'none';
-    document.getElementById('lc-setup').style.display = 'block';
-    alert('Session ended! ' + finalCount + ' attendees saved to the event.');
-};
-
-document.getElementById('lc-cancel-btn').onclick = async () => {
-    if (!confirm('Cancel session? Attendance will not be saved.')) return;
-    if (_liveSessionId) {
-        await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false });
-    }
-    if (_unsubLive) { _unsubLive(); _unsubLive = null; }
-    _liveSessionId = null;
-    _liveEventIdx = null;
-    document.getElementById('lc-session').style.display = 'none';
-    document.getElementById('lc-setup').style.display = 'block';
-};
-
-// Populate event select when navigating to live check-in panel
-document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
-    if (btn.dataset.panel === 'livecheck') {
-        btn.addEventListener('click', () => populateLiveEventSelect());
     }
 });
 
