@@ -414,22 +414,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
       <div id="mkt-grid" class="idea-grid" style="display:none;"></div>
       <div id="mkt-empty" class="empty" style="display:none;"><div class="empty-ico">💡</div><div class="empty-txt">No ideas yet. Be the first to share one!</div></div>
 
-      <!-- National Planner: upcoming planned events from all ambassadors -->
-      <div style="margin-top:32px;">
-        <div class="card-hd-row" style="margin-bottom:12px;">
-          <span class="card-hd">🗺 National Planner — Upcoming events across all ambassadors</span>
-        </div>
-        <div id="pln-loading" style="color:var(--text3);font-size:13px;padding:8px 0;">Loading planned events…</div>
-        <div id="pln-wrap" class="card" style="display:none;padding:0;overflow:hidden;">
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>Ambassador</th><th>Event</th><th>Date</th><th>Type</th><th>Location</th></tr></thead>
-              <tbody id="pln-tbody"></tbody>
-            </table>
-            <div id="pln-empty" class="empty" style="display:none;"><div class="empty-ico">🗺</div><div class="empty-txt">No upcoming events planned yet. Add a Planned event to appear here!</div></div>
-          </div>
-        </div>
-      </div>
+
     </div>
     <div id="panel-profile" class="panel">
       <div class="page-hd"><h1>👤 My Profile</h1><p>Your hub identity and personal impact stats.</p></div>
@@ -450,7 +435,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
                 <input type="text" id="prof-name-input" placeholder="e.g. Alex - UW Madison" style="flex:1;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;"/>
                 <button class="btn btn-primary" id="prof-save-name-btn">Save</button>
               </div>
-              <div class="field-hint">Shown in the Idea Marketplace and National Planner.</div>
+              
             </div>
           </div>
           <div class="profile-section">
@@ -654,7 +639,6 @@ document.getElementById('btn-logout').onclick = () => {
     // Tear down all listeners before signing out
     if (_unsubUserDoc) { _unsubUserDoc(); _unsubUserDoc = null; }
     if (_unsubIdeas)   { _unsubIdeas();   _unsubIdeas = null; }
-    if (_unsubPlanner) { _unsubPlanner(); _unsubPlanner = null; }
     _hubInitialized = false;
     signOut(auth);
 };
@@ -754,8 +738,7 @@ onAuthStateChanged(auth, (user) => {
         hdrUsername.textContent = '';
         if (_unsubUserDoc) { _unsubUserDoc(); _unsubUserDoc = null; }
         if (_unsubIdeas)   { _unsubIdeas();   _unsubIdeas = null; }
-        if (_unsubPlanner) { _unsubPlanner(); _unsubPlanner = null; }
-        _hubInitialized = false;
+            _hubInitialized = false;
         document.getElementById('auth-overlay').style.display = 'flex';
     }
 });
@@ -870,7 +853,6 @@ document.getElementById('modal-save-btn').onclick = (e) => {
         quarter: document.getElementById('f-quarter').value,
         status: newStatus,
         linkedIdeaId: linkedIdeaId || null,
-        nationalEventId: oldEv?.nationalEventId || null,
         photoLink: document.getElementById('f-photo-link').value.trim() || null
     };
     
@@ -906,27 +888,6 @@ document.getElementById('modal-save-btn').onclick = (e) => {
     (async () => {
         try {
             const displayName = DB.displayName || currentUser?.email || 'Ambassador';
-
-            if (newStatus === 'planned') {
-                const natData = {
-                    ambassadorName: displayName,
-                    ambassadorEmail: currentUser?.email || '',
-                    eventName: ev.name,
-                    date: ev.date,
-                    type: ev.type,
-                    location: ev.location || '',
-                    uid: currentUser?.uid
-                };
-                if (ev.nationalEventId) {
-                    await updateDoc(doc(db, 'national_events', ev.nationalEventId), natData);
-                } else {
-                    const natRef = await addDoc(collection(db, 'national_events'), natData);
-                    DB.events[savedIdx].nationalEventId = natRef.id;
-                    saveToCache(currentUser?.uid, DB);
-                }
-            } else if (ev.nationalEventId && newStatus !== 'planned') {
-                await updateDoc(doc(db, 'national_events', ev.nationalEventId), { status: 'completed' });
-            }
 
             const justCompleted = newStatus === 'done' && oldEv && oldEv.status !== 'done';
             const wasAlreadyDone = !oldEv && newStatus === 'done';
@@ -1321,7 +1282,7 @@ function applyFilters() {
                 <td>${e.quarter}</td>
                 <td>${isValid(e) ? '<span class="valid-yes">✓</span>' : '<span class="valid-no">✗</span>'}</td>
                 <td style="display:flex;gap:4px;align-items:center;">
-                    ${e.photoLink ? `<a href="${e.photoLink}" target="_blank" title="View photos" style="font-size:16px;text-decoration:none;line-height:1;">📷</a>` : ''}
+                    ${e.photoLink ? `<a href="${e.photoLink.startsWith('http') ? e.photoLink : 'https://' + e.photoLink}" target="_blank" rel="noopener" title="View photos" style="font-size:16px;text-decoration:none;line-height:1;">📷</a>` : ''}
                     <button class="btn btn-xs" onclick="window.editEvent(${DB.events.indexOf(e)})">Edit</button>
                     <button class="btn btn-xs btn-red" onclick="window.deleteEvent(${DB.events.indexOf(e)})">Delete</button>
                 </td>
@@ -1377,16 +1338,7 @@ function initNationalHub() {
         showIdeaError('Error: <strong>' + (err.code || err.message) + '</strong>');
     });
 
-    // ── Planner: onSnapshot for real-time updates ──
-    const plannerQ = query(collection(db, 'national_events'), orderBy('date', 'asc'));
-    _unsubPlanner = onSnapshot(plannerQ, (snap) => {
-        const events = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(e => e.status !== 'completed');
-        renderPlanner(events);
-    }, (err) => {
-        console.error('Planner listener error:', err);
-        const el = document.getElementById('pln-loading');
-        if (el) el.innerHTML = '<span style="color:var(--red);font-size:13px;">Could not load — <strong>' + (err.code || err.message) + '</strong></span>';
-    });
+
 }
 
 function populateIdeaDropdown(ideas) {
@@ -1451,33 +1403,6 @@ function escHtml(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function renderPlanner(events) {
-    document.getElementById('pln-loading').style.display = 'none';
-    const wrap = document.getElementById('pln-wrap');
-    const tbody = document.getElementById('pln-tbody');
-    const empty = document.getElementById('pln-empty');
-
-    wrap.style.display = 'block';
-    if (!events.length) {
-        tbody.innerHTML = '';
-        empty.style.display = 'block';
-        return;
-    }
-    empty.style.display = 'none';
-    const today = new Date().toISOString().slice(0,10);
-    tbody.innerHTML = events.map(ev => {
-        const isPast = ev.date < today;
-        return `
-            <tr style="${isPast ? 'opacity:0.5;' : ''}">
-                <td><div class="td-main">${escHtml(ev.ambassadorName || ev.ambassadorEmail || '—')}</div></td>
-                <td class="td-main">${escHtml(ev.eventName)}</td>
-                <td class="td-sm">${ev.date}</td>
-                <td><span class="tag tag-${ev.type || 'other'}">${ev.type || '—'}</span></td>
-                <td class="td-sm">${escHtml(ev.location || '—')}</td>
-            </tr>
-        `;
-    }).join('');
-}
 
 // ── Log Run: opens the Add Event modal pre-filled with the idea ──
 window.openLogRun = (ideaId, ideaTitle) => {
