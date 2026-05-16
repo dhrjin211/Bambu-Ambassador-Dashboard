@@ -587,6 +587,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
             <div class="field"><label>Attendees *</label><input type="number" id="f-attendees" placeholder="15"/></div>
             <div class="field"><label>Linked Idea (optional)</label><select id="f-idea-link"><option value="">— None —</option></select><div class="field-hint">Links this event to an Idea Marketplace idea for impact tracking.</div></div>
           </div>
+          <div class="field"><label>Photo Link (optional)</label><input type="text" id="f-photo-link" placeholder="Google Drive folder or Imgur link"/></div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:8px;">
             <button class="btn" id="modal-cancel-btn">Cancel</button>
@@ -811,6 +812,7 @@ window.editEvent = (i) => {
     document.getElementById('f-quarter').value = e.quarter;
     document.getElementById('f-status').value = e.status || 'done';
     document.getElementById('f-idea-link').value = e.linkedIdeaId || '';
+    document.getElementById('f-photo-link').value = e.photoLink || '';
     document.getElementById('modal-title').textContent = 'Edit Event';
     document.getElementById('event-modal').style.display = '';
     document.getElementById('event-modal').classList.add('open');
@@ -868,7 +870,8 @@ document.getElementById('modal-save-btn').onclick = (e) => {
         quarter: document.getElementById('f-quarter').value,
         status: newStatus,
         linkedIdeaId: linkedIdeaId || null,
-        nationalEventId: oldEv?.nationalEventId || null
+        nationalEventId: oldEv?.nationalEventId || null,
+        photoLink: document.getElementById('f-photo-link').value.trim() || null
     };
     
     // ── 1. Update in-memory DB ──
@@ -1034,8 +1037,10 @@ document.getElementById('copy-email-btn').onclick = async () => {
         const location = e.location || 'Location not specified';
         const attendees = e.attendees || 0;
         const duration = e.duration ? e.duration + ' min' : 'Duration not recorded';
-        return `  ${i + 1}. ${e.name}\n     Date: ${date}\n     Type: ${type}\n     Location: ${location}\n     Attendees: ${attendees}\n     Duration: ${duration}`;
+        const photoLine = e.photoLink ? `\n     Photos: ${e.photoLink}` : '';
+        return `  ${i + 1}. ${e.name}\n     Date: ${date}\n     Type: ${type}\n     Location: ${location}\n     Attendees: ${attendees}\n     Duration: ${duration}${photoLine}`;
     }).join('\n\n');
+    const anyPhotos = monthEvents.some(e => e.photoLink);
 
     const summary = monthEvents.length === 1
         ? `This month I ran 1 event, reaching ${totalAttendees} student${totalAttendees !== 1 ? 's' : ''} in total.`
@@ -1052,7 +1057,7 @@ Here's a summary of this month's activity:
 
 ${eventLines}
 
-Please note that photos from each event are attached separately. Let me know if you need any additional information or documentation.
+${anyPhotos ? 'Photo links for each event are included above.' : 'Please note that photos from each event are attached separately.'} Let me know if you need any additional information or documentation.
 
 Best,
 ${displayName}`;
@@ -1081,6 +1086,7 @@ function clearEventForm() {
     document.getElementById('f-quarter').value = currentQ();
     document.getElementById('f-status').value = 'planned';
     document.getElementById('f-idea-link').value = '';
+    document.getElementById('f-photo-link').value = '';
     document.getElementById('modal-title').textContent = 'Add New Event';
 }
 
@@ -1314,7 +1320,8 @@ function applyFilters() {
                 <td>${e.duration}m</td>
                 <td>${e.quarter}</td>
                 <td>${isValid(e) ? '<span class="valid-yes">✓</span>' : '<span class="valid-no">✗</span>'}</td>
-                <td style="display:flex;gap:4px;">
+                <td style="display:flex;gap:4px;align-items:center;">
+                    ${e.photoLink ? `<a href="${e.photoLink}" target="_blank" title="View photos" style="font-size:16px;text-decoration:none;line-height:1;">📷</a>` : ''}
                     <button class="btn btn-xs" onclick="window.editEvent(${DB.events.indexOf(e)})">Edit</button>
                     <button class="btn btn-xs btn-red" onclick="window.deleteEvent(${DB.events.indexOf(e)})">Delete</button>
                 </td>
