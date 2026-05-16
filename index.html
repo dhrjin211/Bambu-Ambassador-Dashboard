@@ -731,9 +731,9 @@ onAuthStateChanged(auth, (user) => {
                 hdrUsername.textContent = DB.displayName
                     ? `Signed in as ${user.email} · ${DB.displayName}`
                     : 'Signed in as ' + user.email;
-                renderOverview();
+                renderOverview();  // calls renderReport, renderRecent, renderBadges, renderQtrBars, renderAnnualBars
                 renderEventsTable();
-                        checkDisplayNameBanner();
+                checkDisplayNameBanner();
                 renderProfilePanel();
             },
             (err) => {
@@ -947,8 +947,11 @@ document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('panel-' + btn.dataset.panel).classList.add('show');
-        
-        if (btn.dataset.panel === 'report') renderReport();
+
+        // Always re-render data-driven panels on navigation so they stay in sync
+        if (btn.dataset.panel === 'overview') renderOverview();
+        if (btn.dataset.panel === 'report')   { renderReport(); }
+        if (btn.dataset.panel === 'events')   renderEventsTable();
     };
 });
 
