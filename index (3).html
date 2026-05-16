@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bambu Lab Ambassador Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4f3f0;--surface:#fff;--surface2:#f0efe9;--surface3:#e8e6de;
+  --border:#dddbd2;--border2:#c9c6bb;
+  --text:#19180f;--text2:#6b6a62;--text3:#9e9c93;
+  --green:#2d7a3a;--green-bg:#eaf4ec;--green-b:#b2d9b9;
+  --amber:#7a5010;--amber-bg:#fdf3e0;--amber-b:#e8c86a;
+  --blue:#1a4f9e;--blue-bg:#e8f0fb;--blue-b:#a8c0ed;
+  --red:#b83a1e;--red-bg:#fceee9;--red-b:#f0b09c;
+  --purple:#5b3ab5;--purple-bg:#f0ecfb;--purple-b:#c4b2ed;
+  --r:10px;--rs:6px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --shm:0 4px 16px rgba(0,0,0,.1),0 2px 4px rgba(0,0,0,.05);
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
+.hdr{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:var(--sh);}
+.hdr-logo{display:flex;align-items:center;gap:10px;}
+.hdr-mark{width:30px;height:30px;background:var(--text);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;}
+.hdr-title{font-size:14px;font-weight:600;}
+.hdr-sub{font-size:11px;color:var(--text3);}
+.hdr-btns{display:flex;gap:6px;align-items:center;}
+.layout{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);padding:16px 10px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+.nav-group{margin-bottom:18px;}
+.nav-group-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:0 8px;margin-bottom:4px;}
+.nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border:none;background:none;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;color:var(--text2);cursor:pointer;text-align:left;transition:all .12s;}
+.nav-btn:hover{background:var(--surface2);color:var(--text);}
+.nav-btn.active{background:var(--text);color:#fff;}
+.nav-icon{font-size:14px;width:18px;text-align:center;}
+.nav-div{height:1px;background:var(--border);margin:8px 2px;}
+.main{flex:1;padding:28px 32px;min-width:0;}
+.panel{display:none;}
+.panel.show{display:block;}
+.page-hd{margin-bottom:20px;}
+.page-hd h1{font-size:22px;font-weight:700;margin-bottom:3px;}
+.page-hd p{font-size:13px;color:var(--text2);}
+.page-hd-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.page-hd-row .page-hd{margin-bottom:0;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all .12s;white-space:nowrap;text-decoration:none;}
+.btn:hover{background:var(--surface2);}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--text);color:#fff;border-color:var(--text);}
+.btn-primary:hover{opacity:.85;background:var(--text);}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green);}
+.btn-green:hover{opacity:.85;background:var(--green);}
+.btn-red{background:var(--red);color:#fff;border-color:var(--red);}
+.btn-red:hover{opacity:.85;}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.btn-xs{padding:3px 8px;font-size:11px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh);}
+.card-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:14px;}
+.card-hd-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-hd-row .card-hd{margin-bottom:0;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.mt16{margin-top:16px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.metric::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.metric.c-blue::before{background:var(--blue);}
+.metric.c-green::before{background:var(--green);}
+.metric.c-amber::before{background:var(--amber);}
+.metric.c-purple::before{background:var(--purple);}
+.metric-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px;}
+.metric-val{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-.5px;}
+.metric-sub{font-size:12px;color:var(--text2);}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.prog-lbl{font-size:12px;color:var(--text2);width:205px;flex-shrink:0;}
+.prog-wrap{flex:1;background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.prog-count{font-size:12px;color:var(--text2);min-width:48px;text-align:right;}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+td{padding:11px 12px;vertical-align:middle;}
+.td-main{font-weight:500;font-size:13px;}
+.td-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.td-sm{font-size:12px;color:var(--text2);}
+.pill{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.pill-done{background:var(--green-bg);color:var(--green);}
+.pill-planned{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.pill-submitted{background:var(--blue-bg);color:var(--blue);}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.tag-workshop{background:var(--red-bg);color:var(--red);}
+.tag-demo{background:var(--blue-bg);color:var(--blue);}
+.tag-competition{background:var(--amber-bg);color:var(--amber);}
+.tag-class{background:var(--green-bg);color:var(--green);}
+.tag-club{background:var(--surface3);color:var(--text2);}
+.tag-fair{background:var(--purple-bg);color:var(--purple);}
+.tag-other{background:var(--surface2);color:var(--text2);}
+.tier-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.tb-none{background:var(--surface2);color:var(--text3);}
+.tb-active{background:var(--surface3);color:var(--text2);}
+.tb-silver{background:#eeede9;color:#4a4840;border:1px solid var(--border2);}
+.tb-gold{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b);}
+.tb-platinum{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b);}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);color:var(--text);transition:border .12s;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,79,158,.08);}
+.field textarea{resize:vertical;min-height:72px;}
+.field select[multiple]{height:88px;}
+.frow{display:grid;gap:12px;}
+.frow-2{grid-template-columns:1fr 1fr;}
+.frow-3{grid-template-columns:1fr 1fr 1fr;}
+.frow-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.fsec{background:var(--surface2);border-radius:var(--r);padding:18px 20px;margin-bottom:14px;}
+.fsec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:14px;}
+.field-hint{font-size:11px;color:var(--text3);margin-top:4px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r);width:700px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shm);}
+.modal-hdr{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;}
+.modal-hdr h2{font-size:17px;font-weight:700;}
+.modal-body{padding:20px 24px 24px;}
+.alert{border-radius:var(--rs);padding:11px 14px;font-size:13px;margin-bottom:12px;line-height:1.5;}
+.alert strong{font-weight:600;}
+.alert-blue{background:var(--blue-bg);border-left:3px solid var(--blue);}
+.alert-green{background:var(--green-bg);border-left:3px solid var(--green);}
+.alert-amber{background:var(--amber-bg);border-left:3px solid var(--amber);}
+.alert-red{background:var(--red-bg);border-left:3px solid var(--red);}
+hr{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.tier-card{border:2px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .15s;background:var(--surface);}
+.tier-card:hover{border-color:var(--border2);box-shadow:var(--shm);}
+.tier-card.sel-silver{border-color:var(--border2);background:#f5f4f0;}
+.tier-card.sel-gold{border-color:var(--amber-b);background:var(--amber-bg);}
+.tier-card.sel-platinum{border-color:var(--blue-b);background:var(--blue-bg);}
+.tc-name{font-size:16px;font-weight:700;margin:8px 0 2px;}
+.tc-req{font-size:12px;color:var(--text2);margin-bottom:10px;}
+.tc-row{display:flex;justify-content:space-between;padding:5px 0;border-top:1px solid var(--border);font-size:12px;}
+.tc-val{font-weight:700;}
+.sched-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);user-select:none;}
+.sched-item:last-child{border-bottom:none;}
+.sched-day{font-size:11px;font-weight:700;color:var(--text2);width:62px;flex-shrink:0;padding-top:1px;cursor:pointer;}
+.sched-cb{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s;margin-top:1px;cursor:pointer;}
+.sched-cb.on{background:var(--green);border-color:var(--green);}
+.sched-text-input { font-size:13px; flex:1; border:none; background:transparent; font-family:inherit; outline:none; color:var(--text); }
+.sched-text-input.on { text-decoration:line-through; color:var(--text3); }
+.sched-tag{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:700;flex-shrink:0;}
+.empty{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-ico{font-size:36px;margin-bottom:10px;}
+.empty-txt{font-size:13px;}
+.report-cover{background:var(--text);color:#fff;border-radius:var(--r) var(--r) 0 0;padding:28px 32px;}
+.report-cover h1{font-size:22px;font-weight:700;margin-bottom:4px;}
+.report-cover p{font-size:13px;opacity:.6;}
+.report-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:28px 32px;}
+.report-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.rs-box{background:var(--surface2);border-radius:var(--rs);padding:14px;text-align:center;}
+.rs-val{font-size:26px;font-weight:700;letter-spacing:-.5px;}
+.rs-lbl{font-size:11px;color:var(--text2);font-weight:500;margin-top:3px;}
+.badge-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.badge-item:last-child{border-bottom:none;}
+.badge-toggle{cursor:pointer;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;border:none;font-family:'Inter',sans-serif;transition:all .12s;}
+.badge-toggle.earned{background:var(--green-bg);color:var(--green);}
+.badge-toggle.not-earned{background:var(--surface2);color:var(--text3);}
+.valid-yes{color:var(--green);font-weight:700;}
+.valid-no{color:var(--red);font-size:11px;}
+select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);color:var(--text);}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+@media print{
+  .sidebar,.hdr,.no-print{display:none!important;}
+  .layout{display:block;}
+  .main{padding:0;}
+  .panel{display:none!important;}
+  #panel-report{display:block!important;}
+}
+
+/* ── NATIONAL HUB STYLES ── */
+.idea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px;}
+.idea-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:8px;position:relative;transition:box-shadow .15s;}
+.idea-card:hover{box-shadow:var(--shm);}
+.idea-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.idea-card-title{font-size:14px;font-weight:700;flex:1;}
+.proven-badge{display:inline-flex;align-items:center;gap:4px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);border-radius:20px;font-size:10px;font-weight:700;padding:2px 8px;white-space:nowrap;flex-shrink:0;}
+.idea-card-desc{font-size:12px;color:var(--text2);line-height:1.5;}
+.idea-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-wrap:wrap;gap:6px;}
+.idea-impact{font-size:12px;font-weight:600;color:var(--blue);}
+.idea-submitter{font-size:11px;color:var(--text3);}
+.idea-link{font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;}
+.idea-link:hover{text-decoration:underline;}
+.planner-table-wrap{margin-top:16px;}
+.planner-empty{text-align:center;padding:48px 20px;color:var(--text3);}
+.hub-alert{background:var(--blue-bg);border-left:3px solid var(--blue);border-radius:var(--rs);padding:11px 14px;font-size:13px;margin-bottom:16px;line-height:1.5;}
+.profile-banner{background:var(--amber-bg);border:1px solid var(--amber-b);border-radius:var(--r);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;}
+.profile-banner strong{color:var(--amber);}
+
+/* ── SKELETON LOADERS ── */
+@keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+.skeleton{background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);background-size:600px 100%;animation:shimmer 1.4s infinite;border-radius:var(--rs);}
+.skel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px;}
+.skel-line{height:12px;border-radius:4px;}
+.skel-line.w60{width:60%;}
+.skel-line.w80{width:80%;}
+.skel-line.w40{width:40%;}
+.skel-line.w100{width:100%;}
+.skel-line.tall{height:36px;}
+
+/* ── LOG RUN BUTTON ON IDEA CARDS ── */
+.idea-card-actions{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.btn-log-run{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;}
+.btn-log-run:hover{background:var(--green);color:#fff;}
+.btn-log-run:disabled{opacity:.5;cursor:not-allowed;}
+.btn-delete-idea{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b,#fca5a5);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;}
+.btn-delete-idea:hover{background:var(--red);color:#fff;}
+
+/* ── PROFILE PANEL ── */
+.profile-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh);margin-bottom:16px;}
+.profile-section h3{font-size:13px;font-weight:700;margin-bottom:16px;color:var(--text);}
+.profile-avatar{width:56px;height:56px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;}
+.profile-info-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.profile-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.profile-stat{background:var(--surface2);border-radius:var(--rs);padding:12px 14px;text-align:center;}
+.profile-stat-val{font-size:22px;font-weight:700;letter-spacing:-.5px;}
+.profile-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
+.my-idea-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);gap:10px;}
+.my-idea-row:last-child{border-bottom:none;}
+.my-idea-title{font-size:13px;font-weight:600;flex:1;}
+.my-idea-impact{font-size:12px;color:var(--blue);font-weight:600;white-space:nowrap;}
+
+/* Auth Overlay Styles */
+#auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.auth-card {
+    width: 350px;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 30px;
+    box-shadow: var(--shm);
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="hdr-mark" style="margin: 0 auto 15px;">BL</div>
+    <h2 style="margin-bottom: 20px;">Ambassador Hub</h2>
+    <div class="field"><input type="email" id="auth-email" placeholder="Email"></div>
+    <div class="field"><input type="password" id="auth-pass" placeholder="Password"></div>
+    <button class="btn btn-primary" id="btn-login" style="width:100%; margin-bottom:10px;">Login</button>
+    <button class="btn" id="btn-signup" style="width:100%;">Create Account</button>
+    <p id="auth-error" style="color:var(--red); font-size:12px; margin-top:10px;"></p>
+  </div>
+</div>
+
+<header class="hdr">
+  <div class="hdr-logo">
+    <div class="hdr-mark">BL</div>
+    <div>
+      <div class="hdr-title">Bambu Lab · School Ambassador</div>
+      <div class="hdr-sub">May 2026 – May 2027 · Global Hub</div>
+      <div id="hdr-username" style="font-size:12px;color:var(--text2);margin-top:3px;"></div>
+    </div>
+  </div>
+  <div class="hdr-btns no-print">
+    <button class="btn btn-sm" id="btn-logout">Logout</button>
+    <button class="btn btn-green btn-sm" id="btn-goto-report">📋 Activity Report</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar no-print">
+    <div class="nav-group">
+      <div class="nav-group-label">Overview</div>
+      <button class="nav-btn active" data-panel="overview"><span class="nav-icon">📊</span>Dashboard</button>
+      <button class="nav-btn" data-panel="report"><span class="nav-icon">📋</span>Activity Report</button>
+    </div>
+    <div class="nav-div"></div>
+    <div class="nav-group">
+      <div class="nav-group-label">Events</div>
+      <button class="nav-btn" data-panel="events"><span class="nav-icon">📅</span>All Events</button>
+      <button class="nav-btn" id="nav-add-event"><span class="nav-icon">＋</span>Add Event</button>
+    </div>
+    <div class="nav-div"></div>
+    <div class="nav-group">
+      <div class="nav-group-label">Tools</div>
+      <button class="nav-btn" data-panel="livecheck"><span class="nav-icon">📡</span>Live Check-In</button>
+    </div>
+    <div class="nav-div"></div>
+    <div class="nav-group">
+      <div class="nav-group-label">National Hub</div>
+      <button class="nav-btn" data-panel="marketplace"><span class="nav-icon">💡</span>Idea Board</button>
+      <button class="nav-btn" data-panel="profile"><span class="nav-icon">👤</span>My Profile</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div id="panel-overview" class="panel show">
+      <div class="page-hd"><h1>Dashboard</h1><p>Your ambassador program at a glance.</p></div>
+      <div class="g4" id="ov-metrics"></div>
+      <div class="g2 mt16">
+        <div class="card">
+          <div class="card-hd-row"><span class="card-hd">Quarterly progress</span><span id="ov-qtr-lbl" style="font-size:12px;color:var(--text2);font-weight:600;"></span></div>
+          <div id="ov-qtr-bars"></div>
+          <hr>
+          <div class="card-hd" style="margin-bottom:12px;">Annual goals</div>
+          <div id="ov-annual-bars"></div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-hd-row">
+              <span class="card-hd">Recent events</span>
+              <button class="btn btn-primary btn-sm no-print" id="ov-add-btn">+ Add Event</button>
+            </div>
+            <div id="ov-recent"></div>
+          </div>
+          <div class="card">
+            <div class="card-hd">Badges &amp; awards</div>
+            <div id="ov-badges"></div>
+            <hr>
+            <div style="font-size:12px;color:var(--text2);">
+              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);"><span>Distinguished Ambassador</span><span style="font-weight:700;color:var(--green);">12 events + 2 badges</span></div>
+              <div style="display:flex;justify-content:space-between;padding:5px 0;"><span>Legendary Ambassador</span><span style="font-weight:700;color:var(--blue);">20 events + 4 badges</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-events" class="panel">
+      <div class="page-hd-row">
+        <div class="page-hd"><h1>All Events</h1><p>Full log — attendance, location, validity, submission status.</p></div>
+        <button class="btn btn-primary no-print" id="ev-add-btn">+ Add Event</button>
+      </div>
+      <div class="card mt16" style="padding:14px 20px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <select class="filter-sel" id="filter-status"><option value="">All statuses</option><option value="planned">Planned</option><option value="done">Completed</option><option value="submitted">Submitted</option></select>
+          <select class="filter-sel" id="filter-quarter"><option value="">All quarters</option><option value="Q1">Q1 · Jan–Mar</option><option value="Q2">Q2 · Apr–Jun</option><option value="Q3">Q3 · Jul–Sep</option><option value="Q4">Q4 · Oct–Dec</option></select>
+          <select class="filter-sel" id="filter-valid"><option value="">All events</option><option value="yes">Valid only</option><option value="no">Invalid only</option></select>
+          <span id="ev-count" style="font-size:12px;color:var(--text3);margin-left:auto;"></span>
+        </div>
+      </div>
+      <div class="card mt16" style="padding:0;overflow:hidden;">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Event name</th><th>Date</th><th>Location</th><th>Type</th><th>Attendees</th><th>Duration</th><th>Quarter</th><th>Valid?</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="ev-tbody"></tbody>
+          </table>
+          <div id="ev-empty" class="empty"><div class="empty-ico">📅</div><div class="empty-txt">No events yet. Click "+ Add Event" to log your first one.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-report" class="panel">
+      <div class="page-hd-row">
+        <div class="page-hd"><h1>Activity Report</h1><p>A clean summary of your ambassador activity.</p></div>
+        <div style="display:flex;gap:8px;" class="no-print">
+          <button class="btn btn-sm" id="print-btn">🖨 Print / Save PDF</button>
+          <button class="btn btn-green btn-sm" id="copy-email-btn">✉ Copy email draft</button>
+        </div>
+      </div>
+      <div id="rpt-wrap" class="mt16">
+        <div class="report-cover">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div><h1>Ambassador Activity Report</h1><p>Bambu Lab Program · Generated <span id="rpt-date"></span></p></div>
+            <div id="rpt-tier" style="margin-top:4px;"></div>
+          </div>
+        </div>
+        <div class="report-body">
+          <div class="report-stats" id="rpt-stats"></div>
+          <div id="rpt-monthly"></div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:14px;">Event log</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Event name</th><th>Date</th><th>Location</th><th>Type</th><th>Attendees</th><th>Duration</th><th>Valid?</th></tr></thead>
+              <tbody id="rpt-tbody"></tbody>
+            </table>
+            <div id="rpt-empty" class="empty" style="display:none;"><div class="empty-ico">📋</div><div class="empty-txt">No completed events yet.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="panel-marketplace" class="panel">
+      <div class="page-hd-row">
+        <div class="page-hd"><h1>💡 Idea Board</h1><p>Event ideas shared by ambassadors nationwide. Add what's worked at your school.</p></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm" id="mkt-refresh-btn">↺ Refresh</button>
+          <button class="btn btn-primary no-print" id="mkt-share-btn">+ Share an Idea</button>
+        </div>
+      </div>
+      <div class="hub-alert">Ideas are shared across all ambassadors. <strong>Proven Ideas</strong> are flagged when any ambassador logs attendees against them — the more ambassadors run it, the higher the impact score.</div>
+      <div id="mkt-profile-banner" class="profile-banner" style="display:none;">
+        <span>⚠️ <strong>Set your display name</strong> so your submitted ideas show your name.</span>
+        <button class="btn btn-sm" id="mkt-set-name-btn">Set Name</button>
+      </div>
+      <div id="mkt-loading" class="idea-grid">
+        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div><div class="skel-line w40 skeleton"></div></div>
+        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div><div class="skel-line w40 skeleton"></div></div>
+        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div><div class="skel-line w40 skeleton"></div></div>
+      </div>
+      <div id="mkt-grid" class="idea-grid" style="display:none;"></div>
+      <div id="mkt-empty" class="empty" style="display:none;"><div class="empty-ico">💡</div><div class="empty-txt">No ideas yet. Be the first to share one!</div></div>
+
+      <!-- National Planner: upcoming planned events from all ambassadors -->
+      <div style="margin-top:32px;">
+        <div class="card-hd-row" style="margin-bottom:12px;">
+          <span class="card-hd">🗺 National Planner — Upcoming events across all ambassadors</span>
+        </div>
+        <div id="pln-loading" style="color:var(--text3);font-size:13px;padding:8px 0;">Loading planned events…</div>
+        <div id="pln-wrap" class="card" style="display:none;padding:0;overflow:hidden;">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Ambassador</th><th>Event</th><th>Date</th><th>Type</th><th>Location</th></tr></thead>
+              <tbody id="pln-tbody"></tbody>
+            </table>
+            <div id="pln-empty" class="empty" style="display:none;"><div class="empty-ico">🗺</div><div class="empty-txt">No upcoming events planned yet. Add a Planned event to appear here!</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="panel-profile" class="panel">
+      <div class="page-hd"><h1>👤 My Profile</h1><p>Your hub identity and personal impact stats.</p></div>
+      <div class="g2 mt16">
+        <div>
+          <div class="profile-section">
+            <h3>Identity</h3>
+            <div class="profile-info-row">
+              <div class="profile-avatar" id="prof-avatar">?</div>
+              <div>
+                <div style="font-size:16px;font-weight:700;" id="prof-name">—</div>
+                <div style="font-size:12px;color:var(--text2);" id="prof-email">—</div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Display Name</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="prof-name-input" placeholder="e.g. Alex - UW Madison" style="flex:1;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;"/>
+                <button class="btn btn-primary" id="prof-save-name-btn">Save</button>
+              </div>
+              <div class="field-hint">Shown in the Idea Marketplace and National Planner.</div>
+            </div>
+          </div>
+          <div class="profile-section">
+            <h3>My Impact Stats</h3>
+            <div class="profile-stat-grid">
+              <div class="profile-stat"><div class="profile-stat-val" id="prof-stat-events">—</div><div class="profile-stat-lbl">Events logged</div></div>
+              <div class="profile-stat"><div class="profile-stat-val" id="prof-stat-attendees">—</div><div class="profile-stat-lbl">Total reached</div></div>
+              <div class="profile-stat"><div class="profile-stat-val" id="prof-stat-ideas">—</div><div class="profile-stat-lbl">Ideas shared</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="profile-section">
+          <h3>My Submitted Ideas</h3>
+          <div id="prof-ideas-list"><div style="color:var(--text3);font-size:13px;">Loading your ideas...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-livecheck" class="panel">
+      <div class="page-hd-row">
+        <div class="page-hd"><h1>📡 Live Check-In</h1><p>Generate a QR code for your event and track attendance in real time.</p></div>
+      </div>
+
+      <div id="lc-setup" class="card" style="max-width:560px;">
+        <div class="card-hd" style="margin-bottom:16px;">Start a Live Session</div>
+        <div class="field">
+          <label>Select an event</label>
+          <select id="lc-event-select" style="width:100%;padding:9px 11px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);">
+            <option value="">— Choose an upcoming or planned event —</option>
+          </select>
+          <div class="field-hint">Only planned/upcoming events are shown. <span id="lc-or-add">You can also <a href="#" id="lc-add-event-link" style="color:var(--green);">add a new event first</a>.</span></div>
+        </div>
+        <button class="btn btn-primary" id="lc-start-btn" style="width:100%;margin-top:4px;">Generate QR Code →</button>
+      </div>
+
+      <div id="lc-session" style="display:none;">
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start;max-width:760px;">
+          <div class="card" style="text-align:center;min-width:220px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;">Scan to Check In</div>
+            <div id="lc-qr" style="width:180px;height:180px;margin:0 auto 12px;"></div>
+            <div style="font-size:11px;color:var(--text3);word-break:break-all;" id="lc-url-display"></div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:6px;" id="lc-event-name-display">Event</div>
+              <div style="font-size:48px;font-weight:800;color:var(--green);line-height:1;" id="lc-count">0</div>
+              <div style="font-size:13px;color:var(--text2);margin-top:4px;">attendees checked in</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:8px;" id="lc-last-scan"></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-green" id="lc-end-btn" style="flex:1;">✓ End Session &amp; Save</button>
+              <button class="btn" id="lc-cancel-btn">Cancel</button>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:8px;">Ending the session saves the live count to the event's attendee field.</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;max-width:760px;">
+          <div class="card-hd" style="margin-bottom:12px;">Live Scan Log</div>
+          <div id="lc-scan-list" style="max-height:220px;overflow-y:auto;font-size:12px;color:var(--text2);">
+            <div style="color:var(--text3);">No scans yet — waiting for attendees...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+
+<div class="overlay" id="idea-modal">
+  <div class="modal" style="width:540px;">
+    <div class="modal-hdr">
+      <h2>💡 Share an Idea</h2>
+      <button class="btn btn-sm" id="idea-modal-close-btn">✕ Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="fsec">
+        <div class="fsec-title">Idea details</div>
+        <div class="field"><label>Title *</label><input type="text" id="fi-title" placeholder="e.g. Library 3D Printing Workshop"/></div>
+        <div class="field"><label>Description *</label><textarea id="fi-desc" placeholder="What's the format? What makes it work? Any tips..."></textarea></div>
+        <div class="field"><label>Resource Link (optional)</label><input type="url" id="fi-link" placeholder="https://..."/><div class="field-hint">Slide deck, guide, or useful URL.</div></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn" id="idea-modal-cancel-btn">Cancel</button>
+        <button class="btn btn-primary" id="idea-modal-save-btn">Submit Idea</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="event-modal">
+    <div class="modal">
+      <div class="modal-hdr">
+        <h2 id="modal-title">Add New Event</h2>
+        <button class="btn btn-sm" id="modal-close-btn">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="fsec">
+          <div class="fsec-title">Event details</div>
+          <div class="frow frow-2">
+            <div class="field"><label>Event name *</label><input type="text" id="f-name" placeholder="e.g. STEM Workshop"/></div>
+            <div class="field"><label>Event type</label><select id="f-type"><option value="workshop">Workshop</option><option value="demo">Demo</option><option value="competition">Competition</option><option value="class">Class</option><option value="club">Club</option><option value="fair">Fair</option><option value="other">Other</option></select></div>
+          </div>
+          <div class="field"><label>Location</label><input type="text" id="f-location" placeholder="e.g. School gymnasium"/></div>
+          <div class="frow frow-4">
+            <div class="field"><label>Date *</label><input type="date" id="f-date"/></div>
+            <div class="field"><label>Duration (min) *</label><input type="number" id="f-duration" placeholder="60"/></div>
+            <div class="field"><label>Quarter</label><select id="f-quarter"><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option></select></div>
+            <div class="field"><label>Status</label><select id="f-status"><option value="planned">Planned</option><option value="done">Completed</option><option value="submitted">Submitted</option></select></div>
+          </div>
+          <div class="frow frow-2">
+            <div class="field"><label>Attendees *</label><input type="number" id="f-attendees" placeholder="15"/></div>
+            <div class="field"><label>Linked Idea (optional)</label><select id="f-idea-link"><option value="">— None —</option></select><div class="field-hint">Links this event to an Idea Marketplace idea for impact tracking.</div></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <button class="btn" id="modal-cancel-btn">Cancel</button>
+            <button class="btn btn-primary" id="modal-save-btn">Save event</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script type="module">
+// ── FIREBASE SETUP ──
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, increment, getDocs, where } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC3ZA_XQyhcOZpEK8WbP5UbuxQnnKwFGW8",
+  authDomain: "bambu-ambassador-hub.firebaseapp.com",
+  projectId: "bambu-ambassador-hub",
+  storageBucket: "bambu-ambassador-hub.firebasestorage.app",
+  messagingSenderId: "54146763962",
+  appId: "1:54146763962:web:06c74942d25b008e8c0683",
+  measurementId: "G-2VHL7TJGCS"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let currentUser = null;
+
+// ── GLOBAL DATA ──
+var DB = { events:[], badges:{workshop:false,creative:false,community:false}, schedChecks:{}, schedTasks:{} };
+var editIdx = null;
+
+// Track active Firestore listeners so we can tear them down on logout
+let _unsubUserDoc = null;
+let _unsubIdeas = null;
+let _unsubPlanner = null;
+let _hubInitialized = false;
+
+// ── AUTH LOGIC ──
+const authEmail = document.getElementById('auth-email');
+const authPass = document.getElementById('auth-pass');
+const authError = document.getElementById('auth-error');
+const hdrUsername = document.getElementById('hdr-username');
+
+document.getElementById('btn-login').onclick = async () => {
+    authError.innerText = '';
+    try {
+        await signInWithEmailAndPassword(auth, authEmail.value, authPass.value);
+    } catch (e) { authError.innerText = e.message; }
+};
+
+document.getElementById('btn-signup').onclick = async () => {
+    authError.innerText = '';
+    try {
+        await createUserWithEmailAndPassword(auth, authEmail.value, authPass.value);
+    } catch (e) { authError.innerText = e.message; }
+};
+
+document.getElementById('btn-logout').onclick = () => {
+    // Tear down all listeners before signing out
+    if (_unsubUserDoc) { _unsubUserDoc(); _unsubUserDoc = null; }
+    if (_unsubIdeas)   { _unsubIdeas();   _unsubIdeas = null; }
+    if (_unsubPlanner) { _unsubPlanner(); _unsubPlanner = null; }
+    _hubInitialized = false;
+    signOut(auth);
+};
+
+// ── STORAGE LAYER ──
+function lsKey(uid) { return 'bambu_db_' + uid; }
+
+function loadFromCache(uid) {
+    try {
+        const raw = localStorage.getItem(lsKey(uid));
+        if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    return null;
+}
+
+function saveToCache(uid, data) {
+    try { localStorage.setItem(lsKey(uid), JSON.stringify(data)); } catch(e) {}
+}
+
+// saveDB: write to localStorage instantly AND await Firestore so callers know if it failed
+async function saveDB() {
+    if (!currentUser) return;
+    saveToCache(currentUser.uid, DB);
+    try {
+        await setDoc(doc(db, 'users', currentUser.uid), DB);
+    } catch (err) {
+        console.error('Firestore write failed:', err);
+        // Surface the error visibly — silent failures cause the "disappearing data" bug
+        const msg = 'Warning: could not save to cloud (' + err.code + '). Data is safe locally.';
+        console.warn(msg);
+    }
+}
+
+function applyDBSnapshot(data) {
+    DB = data;
+    if (!DB.events)      DB.events = [];
+    if (!DB.badges)      DB.badges = { workshop:false, creative:false, community:false };
+    if (!DB.schedChecks) DB.schedChecks = {};
+    if (!DB.schedTasks)  DB.schedTasks = {};
+}
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUser = user;
+        document.getElementById('auth-overlay').style.display = 'none';
+
+        // ── Step 1: Paint UI immediately from localStorage (instant) ──
+        const cached = loadFromCache(user.uid);
+        if (cached) {
+            applyDBSnapshot(cached);
+        }
+        hdrUsername.textContent = DB.displayName
+            ? `Signed in as ${user.email} · ${DB.displayName}`
+            : 'Signed in as ' + user.email;
+        renderOverview();
+        renderEventsTable();
+        checkDisplayNameBanner();
+        renderProfilePanel();
+
+        // ── Step 2: Live listener on this user's Firestore doc ──
+        // This is the SOURCE OF TRUTH. onSnapshot fires immediately with server data,
+        // then again whenever another device makes a change. No polling needed.
+        if (_unsubUserDoc) _unsubUserDoc(); // safety: clear any stale listener
+        _unsubUserDoc = onSnapshot(
+            doc(db, 'users', user.uid),
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    applyDBSnapshot(docSnap.data());
+                    saveToCache(user.uid, DB); // keep localStorage in sync
+                } else {
+                    // Brand-new account — write the empty skeleton
+                    setDoc(doc(db, 'users', user.uid), DB);
+                }
+                // Re-render everything from the authoritative snapshot
+                hdrUsername.textContent = DB.displayName
+                    ? `Signed in as ${user.email} · ${DB.displayName}`
+                    : 'Signed in as ' + user.email;
+                renderOverview();
+                renderEventsTable();
+                        checkDisplayNameBanner();
+                renderProfilePanel();
+            },
+            (err) => {
+                console.error('User doc listener error:', err);
+            }
+        );
+
+        // ── Step 3: National Hub listeners (only once per session) ──
+        if (!_hubInitialized) {
+            _hubInitialized = true;
+            initNationalHub();
+        }
+
+    } else {
+        // Logged out — tear down everything
+        currentUser = null;
+        hdrUsername.textContent = '';
+        if (_unsubUserDoc) { _unsubUserDoc(); _unsubUserDoc = null; }
+        if (_unsubIdeas)   { _unsubIdeas();   _unsubIdeas = null; }
+        if (_unsubPlanner) { _unsubPlanner(); _unsubPlanner = null; }
+        _hubInitialized = false;
+        document.getElementById('auth-overlay').style.display = 'flex';
+    }
+});
+
+
+// ── CORE DASHBOARD LOGIC ──
+function currentQ(){ var m=new Date().getMonth(); return m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4'; }
+function tierFromN(n){ return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
+function isValid(e){ return (e.attendees>=5)&&(e.duration>=30); } // Brand requirement removed
+function doneEvs(){ return DB.events.filter(e => e.status !== 'planned'); }
+
+function renderOverviewCore(){
+  var done=doneEvs(), q=currentQ();
+  var qc=done.filter(e => e.quarter === q).length;
+  var tier=tierFromN(qc);
+  
+  document.getElementById('ov-metrics').innerHTML=
+    '<div class="metric c-blue"><div class="metric-lbl">Total events</div><div class="metric-val">'+done.length+'</div></div>'+
+    '<div class="metric c-green"><div class="metric-lbl">This quarter</div><div class="metric-val">'+qc+'</div></div>'+
+    '<div class="metric c-amber"><div class="metric-lbl">Current tier</div><div class="metric-val">'+tier+'</div></div>';
+}
+
+function renderOverview(){
+  renderOverviewCore();
+  renderRecent();
+  renderBadges();
+  renderQtrBars();
+  renderAnnualBars();
+  renderReport();
+}
+
+function renderEventsTable(){
+    // Delegate to applyFilters — single source of truth for the events table
+    const empty = document.getElementById('ev-empty');
+    if (DB.events.length === 0) {
+        document.getElementById('ev-tbody').innerHTML = '';
+        empty.style.display = 'flex';
+        document.getElementById('ev-count').textContent = '0 events';
+    } else {
+        empty.style.display = 'none';
+        applyFilters();
+    }
+}
+
+window.editEvent = (i) => {
+    editIdx = i;
+    const e = DB.events[i];
+    document.getElementById('f-name').value = e.name;
+    document.getElementById('f-date').value = e.date;
+    document.getElementById('f-location').value = e.location || '';
+    document.getElementById('f-duration').value = e.duration;
+    document.getElementById('f-attendees').value = e.attendees;
+    document.getElementById('f-type').value = e.type;
+    document.getElementById('f-quarter').value = e.quarter;
+    document.getElementById('f-status').value = e.status || 'done';
+    document.getElementById('f-idea-link').value = e.linkedIdeaId || '';
+    document.getElementById('modal-title').textContent = 'Edit Event';
+    document.getElementById('event-modal').classList.add('open');
+};
+
+window.deleteIdea = async (ideaId, ideaTitle) => {
+    if (!confirm('Delete "' + ideaTitle + '"? This cannot be undone.')) return;
+    const card = document.getElementById('idea-card-' + ideaId);
+    if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+    try {
+        await deleteDoc(doc(db, 'ideas', ideaId));
+        // onSnapshot will remove it from the grid automatically
+    } catch(err) {
+        console.error('Delete idea failed:', err);
+        if (card) { card.style.opacity = ''; card.style.pointerEvents = ''; }
+        alert('Could not delete idea: ' + err.message);
+    }
+};
+
+window.deleteEvent = (i) => {
+    const ev = DB.events[i];
+    if (!ev) return;
+    if (!confirm('Delete "' + ev.name + '"? This cannot be undone.')) return;
+    DB.events.splice(i, 1);
+    renderOverview();
+    applyFilters();
+    saveDB();
+};
+
+document.getElementById('modal-save-btn').onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const nameVal = document.getElementById('f-name').value.trim();
+    const dateVal = document.getElementById('f-date').value.trim();
+    const durationVal = document.getElementById('f-duration').value.trim();
+    const attendeesVal = document.getElementById('f-attendees').value.trim();
+    
+    if (!nameVal) { alert('Event name is required'); return; }
+    if (!dateVal) { alert('Date is required'); return; }
+    if (!durationVal) { alert('Duration is required'); return; }
+    if (!attendeesVal) { alert('Attendees is required'); return; }
+
+    const newStatus = document.getElementById('f-status').value;
+    const linkedIdeaId = document.getElementById('f-idea-link').value;
+    const oldEv = editIdx !== null ? { ...DB.events[editIdx] } : null;
+    
+    const ev = {
+        name: nameVal,
+        date: dateVal,
+        location: document.getElementById('f-location').value.trim(),
+        duration: parseInt(durationVal),
+        attendees: parseInt(attendeesVal),
+        type: document.getElementById('f-type').value,
+        quarter: document.getElementById('f-quarter').value,
+        status: newStatus,
+        linkedIdeaId: linkedIdeaId || null,
+        nationalEventId: oldEv?.nationalEventId || null
+    };
+    
+    // ── 1. Update in-memory DB ──
+    if (editIdx !== null) {
+        DB.events[editIdx] = ev;
+    } else {
+        DB.events.push(ev);
+    }
+    const savedIdx = editIdx !== null ? editIdx : DB.events.length - 1;
+    editIdx = null;
+
+    // ── 2. Close modal and update UI instantly ──
+    const modal = document.getElementById('event-modal');
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+    clearEventForm();
+
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-panel="events"]').classList.add('active');
+    document.getElementById('panel-events').classList.add('show');
+
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-quarter').value = '';
+    document.getElementById('filter-valid').value = '';
+
+    renderOverview();
+    renderReport();
+    applyFilters();
+
+    // ── 3. All Firestore ops fire-and-forget in background ──
+    (async () => {
+        try {
+            const displayName = DB.displayName || currentUser?.email || 'Ambassador';
+
+            if (newStatus === 'planned') {
+                const natData = {
+                    ambassadorName: displayName,
+                    ambassadorEmail: currentUser?.email || '',
+                    eventName: ev.name,
+                    date: ev.date,
+                    type: ev.type,
+                    location: ev.location || '',
+                    uid: currentUser?.uid
+                };
+                if (ev.nationalEventId) {
+                    await updateDoc(doc(db, 'national_events', ev.nationalEventId), natData);
+                } else {
+                    const natRef = await addDoc(collection(db, 'national_events'), natData);
+                    DB.events[savedIdx].nationalEventId = natRef.id;
+                    saveToCache(currentUser?.uid, DB);
+                }
+            } else if (ev.nationalEventId && newStatus !== 'planned') {
+                await updateDoc(doc(db, 'national_events', ev.nationalEventId), { status: 'completed' });
+            }
+
+            const justCompleted = newStatus === 'done' && oldEv && oldEv.status !== 'done';
+            const wasAlreadyDone = !oldEv && newStatus === 'done';
+            if ((justCompleted || wasAlreadyDone) && linkedIdeaId) {
+                await updateDoc(doc(db, 'ideas', linkedIdeaId), { totalImpact: increment(ev.attendees) });
+            }
+
+            // Single authoritative write of full DB to Firestore
+            // The onSnapshot listener on the user doc will pick this up and re-render
+            await saveDB();
+        } catch (err) {
+            console.error('Background sync error:', err);
+        }
+    })();
+};
+
+// ── NAVIGATION HELPERS ──
+document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.panel).classList.add('show');
+        
+        if (btn.dataset.panel === 'report') renderReport();
+    };
+});
+
+document.getElementById('nav-add-event').onclick = () => {
+    editIdx = null;
+    clearEventForm();
+    document.getElementById('event-modal').style.display = '';
+    document.getElementById('event-modal').classList.add('open');
+};
+
+document.getElementById('modal-close-btn').onclick = () => {
+    document.getElementById('event-modal').style.display = 'none';
+    document.getElementById('event-modal').classList.remove('open');
+};
+document.getElementById('modal-cancel-btn').onclick = () => {
+    document.getElementById('event-modal').style.display = 'none';
+    document.getElementById('event-modal').classList.remove('open');
+};
+
+document.getElementById('ov-add-btn').onclick = () => {
+    editIdx = null;
+    clearEventForm();
+    document.getElementById('event-modal').style.display = '';
+    document.getElementById('event-modal').classList.add('open');
+};
+
+if (document.getElementById('ev-add-btn')) {
+    document.getElementById('ev-add-btn').onclick = () => {
+        editIdx = null;
+        clearEventForm();
+        document.getElementById('event-modal').style.display = '';
+        document.getElementById('event-modal').classList.add('open');
+    };
+}
+
+document.getElementById('btn-goto-report').onclick = () => {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-panel="report"]').classList.add('active');
+    document.getElementById('panel-report').classList.add('show');
+    renderReport();
+};
+
+document.getElementById('print-btn').onclick = () => window.print();
+
+document.getElementById('copy-email-btn').onclick = () => {
+    const doneEvs = DB.events.filter(e => e.status !== 'planned');
+    const tier = tierFromN(doneEvs.length);
+    const lines = [
+        'Bambu Lab Ambassador Activity Report',
+        `Generated: ${new Date().toLocaleDateString()}`,
+        `Total Events: ${doneEvs.length}`,
+        `Current Tier: ${tier}`,
+        '',
+        'Event Details:'
+    ];
+    doneEvs.forEach((e, i) => {
+        lines.push(`${i+1}. ${e.name} (${e.date}) - ${e.attendees} attendees, ${e.duration}min, ${e.status}`);
+    });
+    const text = lines.join('\n');
+    navigator.clipboard.writeText(text);
+    alert('Report copied to clipboard!');
+};
+
+function clearEventForm() {
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-date').value = '';
+    document.getElementById('f-location').value = '';
+    document.getElementById('f-duration').value = '';
+    document.getElementById('f-attendees').value = '';
+    document.getElementById('f-type').value = 'workshop';
+    document.getElementById('f-quarter').value = currentQ();
+    document.getElementById('f-status').value = 'planned';
+    document.getElementById('f-idea-link').value = '';
+    document.getElementById('modal-title').textContent = 'Add New Event';
+}
+
+function renderRecent() {
+    const done = DB.events.filter(e => e.status !== 'planned');
+    const recent = done.slice(-3).reverse();
+    const html = recent.length ? recent.map(e => 
+        `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
+            <div style="font-weight:600;font-size:13px;">${e.name}</div>
+            <div style="font-size:11px;color:var(--text2);">${e.date} · ${e.attendees} attendees</div>
+        </div>`
+    ).join('') : '<div style="color:var(--text3);font-size:12px;">No events yet</div>';
+    document.getElementById('ov-recent').innerHTML = html;
+}
+
+function renderBadges() {
+    const done = DB.events.filter(e => e.status !== 'planned');
+    const workshops = done.filter(e => e.type === 'workshop').length;
+    const hasBadge1 = workshops >= 3;
+    const hasBadge2 = done.length >= 5;
+    
+    const html = `
+        <div class="badge-item">
+            <span>🎓 Workshop Leader</span>
+            <button class="badge-toggle ${hasBadge1 ? 'earned' : 'not-earned'}" disabled>
+                ${hasBadge1 ? '✓ Earned' : 'Locked'}
+            </button>
+        </div>
+        <div class="badge-item">
+            <span>🌟 Event Master</span>
+            <button class="badge-toggle ${hasBadge2 ? 'earned' : 'not-earned'}" disabled>
+                ${hasBadge2 ? '✓ Earned' : 'Locked'}
+            </button>
+        </div>
+    `;
+    document.getElementById('ov-badges').innerHTML = html;
+}
+
+function renderQtrBars() {
+    const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+    const done = DB.events.filter(e => e.status !== 'planned');
+    const q = currentQ();
+    const html = quarters.map(qtr => {
+        const count = done.filter(e => e.quarter === qtr).length;
+        const isActive = qtr === q;
+        return `
+            <div class="prog-row">
+                <div class="prog-lbl" style="width:45px;">${qtr}</div>
+                <div class="prog-wrap">
+                    <div class="prog-fill" style="width:${Math.min(count * 20, 100)}%;background:${isActive ? 'var(--blue)' : 'var(--green)'}"></div>
+                </div>
+                <div class="prog-count">${count}</div>
+            </div>
+        `;
+    }).join('');
+    document.getElementById('ov-qtr-bars').innerHTML = html;
+    document.getElementById('ov-qtr-lbl').textContent = `${done.filter(e => e.quarter === q).length} this quarter`;
+}
+
+function renderAnnualBars() {
+    const done = DB.events.filter(e => e.status !== 'planned');
+    const validEvents = done.filter(e => isValid(e)).length;
+    const html = `
+        <div class="prog-row">
+            <div class="prog-lbl">Valid events recorded</div>
+            <div class="prog-wrap">
+                <div class="prog-fill" style="width:${Math.min(validEvents * 10, 100)}%;background:var(--amber)"></div>
+            </div>
+            <div class="prog-count">${validEvents}/10</div>
+        </div>
+    `;
+    document.getElementById('ov-annual-bars').innerHTML = html;
+}
+
+function renderSchedule() {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const today = new Date().toDateString();
+    
+    if(!DB.schedTasks) DB.schedTasks = {};
+    
+    const html = days.map((day, i) => {
+        const key = `${today}-${day}`;
+        const checked = DB.schedChecks[key] || false;
+        const taskText = DB.schedTasks[key] || '';
+        
+        return `
+            <div class="sched-item">
+                <div class="sched-day" onclick="toggleSchedItem('${key}', this.parentElement)">${day.slice(0, 3)}</div>
+                <div class="sched-cb ${checked ? 'on' : ''}" onclick="toggleSchedItem('${key}', this.parentElement)">
+                    ${checked ? '✓' : ''}
+                </div>
+                <input type="text" class="sched-text-input ${checked ? 'on' : ''}" value="${taskText}" placeholder="Click to add task..." onchange="updateSchedTask('${key}', this.value)" />
+            </div>
+        `;
+    }).join('');
+    const container = document.getElementById('sched-list');
+    if (container) container.innerHTML = html;
+}
+
+window.updateSchedTask = (key, val) => {
+    if(!DB.schedTasks) DB.schedTasks = {};
+    DB.schedTasks[key] = val;
+    saveDB();
+};
+
+window.toggleSchedItem = (key, element) => {
+    DB.schedChecks[key] = !DB.schedChecks[key];
+    const cb = element.querySelector('.sched-cb');
+    const text = element.querySelector('.sched-text-input');
+    cb.classList.toggle('on');
+    text.classList.toggle('on');
+    cb.textContent = DB.schedChecks[key] ? '✓' : '';
+    saveDB();
+};
+
+function renderReport() {
+    const done = DB.events.filter(e => e.status !== 'planned');
+    const tier = tierFromN(done.length);
+    const valid = done.filter(e => isValid(e));
+    const totalAttendees = done.reduce((sum, e) => sum + parseInt(e.attendees || 0), 0);
+    
+    const rptDate = document.getElementById('rpt-date');
+    if (rptDate) rptDate.textContent = new Date().toLocaleDateString();
+    
+    const tierClasses = { Platinum: 'tb-platinum', Gold: 'tb-gold', Silver: 'tb-silver', Active: 'tb-active', None: 'tb-none' };
+    const rptTier = document.getElementById('rpt-tier');
+    if (rptTier) rptTier.innerHTML = `<span class="tier-badge ${tierClasses[tier]}">${tier}</span>`;
+    
+    const rptStats = document.getElementById('rpt-stats');
+    if (rptStats) rptStats.innerHTML = `
+        <div class="rs-box">
+            <div class="rs-val">${done.length}</div>
+            <div class="rs-lbl">Total Events</div>
+        </div>
+        <div class="rs-box">
+            <div class="rs-val">${totalAttendees}</div>
+            <div class="rs-lbl">Total Reached</div>
+        </div>
+        <div class="rs-box">
+            <div class="rs-val">${valid.length}</div>
+            <div class="rs-lbl">Valid Events</div>
+        </div>
+        <div class="rs-box">
+            <div class="rs-val">${tier}</div>
+            <div class="rs-lbl">Tier</div>
+        </div>
+    `;
+    
+    // Monthly Chart Builder
+    const monthCounts = {};
+    done.forEach(e => {
+        if(!e.date) return;
+        const m = e.date.substring(0,7);
+        if(!monthCounts[m]) monthCounts[m] = { events: 0, attendees: 0 };
+        monthCounts[m].events++;
+        monthCounts[m].attendees += parseInt(e.attendees) || 0;
+    });
+    
+    let chartHtml = '';
+    if(Object.keys(monthCounts).length > 0) {
+        chartHtml += '<div style="font-weight:700;font-size:15px;margin-bottom:14px;">Monthly Analysis</div>';
+        chartHtml += '<div style="display:flex; gap:12px; align-items:flex-end; height: 140px; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 24px;">';
+        
+        const maxAttendees = Math.max(...Object.values(monthCounts).map(m => m.attendees), 1);
+        
+        Object.keys(monthCounts).sort().forEach(m => {
+            const data = monthCounts[m];
+            const heightPct = Math.max((data.attendees / maxAttendees) * 100, 5);
+            const monthLabel = new Date(m + '-02').toLocaleString('default', { month: 'short' });
+            
+            chartHtml += `
+                <div style="flex:1; max-width:60px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px;">
+                    <div style="font-size:11px; color:var(--text2); font-weight:600;">${data.attendees}</div>
+                    <div style="width: 100%; background: var(--blue); height: ${heightPct}%; border-radius: 4px 4px 0 0; transition: height 0.3s;"></div>
+                    <div style="font-size:11px; font-weight:600; color:var(--text3);">${monthLabel}</div>
+                </div>
+            `;
+        });
+        chartHtml += '</div>';
+    }
+    const rptMonthly = document.getElementById('rpt-monthly');
+    if(rptMonthly) rptMonthly.innerHTML = chartHtml;
+    
+    const tbody = document.getElementById('rpt-tbody');
+    if (tbody) tbody.innerHTML = done.map((e, i) => `
+        <tr>
+            <td>${i+1}</td>
+            <td>${e.name}</td>
+            <td>${e.date}</td>
+            <td>${e.location || '—'}</td>
+            <td>${e.type}</td>
+            <td>${e.attendees}</td>
+            <td>${e.duration}m</td>
+            <td>${isValid(e) ? '✓' : '✗'}</td>
+        </tr>
+    `).join('');
+}
+
+// renderOverview already calls all sub-renders (defined above)
+
+function applyFilters() {
+    const status = document.getElementById('filter-status').value;
+    const quarter = document.getElementById('filter-quarter').value;
+    const valid = document.getElementById('filter-valid').value;
+    
+    let filtered = DB.events;
+    if (status) filtered = filtered.filter(e => e.status === status);
+    if (quarter) filtered = filtered.filter(e => e.quarter === quarter);
+    if (valid === 'yes') filtered = filtered.filter(e => isValid(e));
+    if (valid === 'no') filtered = filtered.filter(e => !isValid(e));
+
+    const tbody = document.getElementById('ev-tbody');
+    const empty = document.getElementById('ev-empty');
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        empty.style.display = 'flex';
+        empty.querySelector('.empty-txt').textContent = DB.events.length === 0
+            ? 'No events yet. Click "+ Add Event" to log your first one.'
+            : 'No events match the current filters.';
+    } else {
+        empty.style.display = 'none';
+        tbody.innerHTML = filtered.map((e, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td>${e.name}</td>
+                <td>${e.date}</td>
+                <td>${e.location || '—'}</td>
+                <td>${e.type}</td>
+                <td>${e.attendees}</td>
+                <td>${e.duration}m</td>
+                <td>${e.quarter}</td>
+                <td>${isValid(e) ? '<span class="valid-yes">✓</span>' : '<span class="valid-no">✗</span>'}</td>
+                <td style="display:flex;gap:4px;">
+                    <button class="btn btn-xs" onclick="window.editEvent(${DB.events.indexOf(e)})">Edit</button>
+                    <button class="btn btn-xs btn-red" onclick="window.deleteEvent(${DB.events.indexOf(e)})">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    document.getElementById('ev-count').textContent = `${filtered.length} event${filtered.length !== 1 ? 's' : ''}`;
+}
+
+document.getElementById('filter-status').onchange = applyFilters;
+document.getElementById('filter-quarter').onchange = applyFilters;
+document.getElementById('filter-valid').onchange = applyFilters;
+
+
+// ── NATIONAL HUB ──
+
+let ideasCache = [];
+let logRunIdeaId = null;
+
+function showIdeaError(msg) {
+    const loading = document.getElementById('mkt-loading');
+    loading.innerHTML = '<div style="grid-column:1/-1;background:var(--red-bg);border-left:3px solid var(--red);border-radius:var(--rs);padding:14px 18px;font-size:13px;line-height:1.6;">⚠️ <strong>Could not load ideas.</strong> ' + msg + '<br><span style="color:var(--text3);font-size:11px;">Open DevTools (F12 → Console) for details. Check Firestore Rules.</span></div>';
+    loading.style.display = 'block';
+    document.getElementById('mkt-grid').style.display = 'none';
+    document.getElementById('mkt-empty').style.display = 'none';
+}
+
+// Called after writes to re-fetch ideas (used by idea save & refresh btn)
+async function fetchAndRenderIdeas() {
+    try {
+        const snap = await getDocs(query(collection(db, 'ideas'), orderBy('totalImpact', 'desc')));
+        ideasCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderMarketplace(ideasCache);
+        populateIdeaDropdown(ideasCache);
+        renderProfileIdeas(ideasCache);
+    } catch(err) {
+        console.error('Ideas fetch error:', err);
+        showIdeaError('Error: <strong>' + (err.code || err.message) + '</strong>');
+    }
+}
+
+function initNationalHub() {
+    // ── Ideas: onSnapshot for real-time instant updates ──
+    const ideasQ = query(collection(db, 'ideas'), orderBy('totalImpact', 'desc'));
+    _unsubIdeas = onSnapshot(ideasQ, (snap) => {
+        ideasCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderMarketplace(ideasCache);
+        populateIdeaDropdown(ideasCache);
+        renderProfileIdeas(ideasCache);
+    }, (err) => {
+        console.error('Ideas listener error:', err);
+        showIdeaError('Error: <strong>' + (err.code || err.message) + '</strong>');
+    });
+
+    // ── Planner: onSnapshot for real-time updates ──
+    const plannerQ = query(collection(db, 'national_events'), orderBy('date', 'asc'));
+    _unsubPlanner = onSnapshot(plannerQ, (snap) => {
+        const events = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(e => e.status !== 'completed');
+        renderPlanner(events);
+    }, (err) => {
+        console.error('Planner listener error:', err);
+        const el = document.getElementById('pln-loading');
+        if (el) el.innerHTML = '<span style="color:var(--red);font-size:13px;">Could not load — <strong>' + (err.code || err.message) + '</strong></span>';
+    });
+}
+
+function populateIdeaDropdown(ideas) {
+    const sel = document.getElementById('f-idea-link');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— None —</option>';
+    ideas.forEach(idea => {
+        const opt = document.createElement('option');
+        opt.value = idea.id;
+        opt.textContent = idea.title;
+        sel.appendChild(opt);
+    });
+    if (current) sel.value = current;
+}
+
+function renderMarketplace(ideas) {
+    const loading = document.getElementById('mkt-loading');
+    const grid = document.getElementById('mkt-grid');
+    const empty = document.getElementById('mkt-empty');
+
+    loading.style.display = 'none';
+
+    if (!ideas.length) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+    grid.style.display = 'grid';
+
+    grid.innerHTML = ideas.map(idea => {
+        const isProven = (idea.totalImpact || 0) > 0;
+        const isOwn = idea.uid === currentUser?.uid;
+        const provenBadge = isProven ? `<span class="proven-badge">✅ Proven Idea</span>` : '';
+        const linkHtml = idea.resourceLink
+            ? `<a class="idea-link" href="${idea.resourceLink}" target="_blank" rel="noopener noreferrer">🔗 Resource</a>`
+            : '';
+        return `
+            <div class="idea-card" id="idea-card-${idea.id}">
+                <div class="idea-card-top">
+                    <div class="idea-card-title">${escHtml(idea.title)}</div>
+                    ${provenBadge}
+                </div>
+                <div class="idea-card-desc">${escHtml(idea.description)}</div>
+                <div class="idea-card-foot">
+                    <span class="idea-impact" id="impact-${idea.id}">👥 ${idea.totalImpact || 0} total reached</span>
+                    ${linkHtml}
+                </div>
+                <div class="idea-card-actions">
+                    ${!isOwn
+                        ? `<button class="btn-log-run" onclick="window.openLogRun('${idea.id}','${escHtml(idea.title).replace(/'/g,"\'")}')">+ Log my run</button>`
+                        : `<button class="btn-delete-idea" onclick="window.deleteIdea('${idea.id}','${escHtml(idea.title).replace(/'/g,"\'")}')">🗑 Delete</button>`
+                    }
+                </div>
+                <div class="idea-submitter">Shared by ${escHtml(idea.submittedBy || 'Anonymous')}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderPlanner(events) {
+    document.getElementById('pln-loading').style.display = 'none';
+    const wrap = document.getElementById('pln-wrap');
+    const tbody = document.getElementById('pln-tbody');
+    const empty = document.getElementById('pln-empty');
+
+    wrap.style.display = 'block';
+    if (!events.length) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+    const today = new Date().toISOString().slice(0,10);
+    tbody.innerHTML = events.map(ev => {
+        const isPast = ev.date < today;
+        return `
+            <tr style="${isPast ? 'opacity:0.5;' : ''}">
+                <td><div class="td-main">${escHtml(ev.ambassadorName || ev.ambassadorEmail || '—')}</div></td>
+                <td class="td-main">${escHtml(ev.eventName)}</td>
+                <td class="td-sm">${ev.date}</td>
+                <td><span class="tag tag-${ev.type || 'other'}">${ev.type || '—'}</span></td>
+                <td class="td-sm">${escHtml(ev.location || '—')}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ── Log Run: opens the Add Event modal pre-filled with the idea ──
+window.openLogRun = (ideaId, ideaTitle) => {
+    logRunIdeaId = ideaId;
+    editIdx = null;
+    clearEventForm();
+
+    // Pre-fill name and link the idea
+    document.getElementById('f-name').value = ideaTitle;
+    document.getElementById('f-status').value = 'done';
+    // Pre-select the linked idea in the dropdown
+    const sel = document.getElementById('f-idea-link');
+    for (let opt of sel.options) { if (opt.value === ideaId) { sel.value = ideaId; break; } }
+
+    document.getElementById('modal-title').textContent = 'Log Run: ' + ideaTitle;
+    document.getElementById('event-modal').style.display = '';
+    document.getElementById('event-modal').classList.add('open');
+};
+
+// ── Share Idea Modal — now OPTIMISTIC ──
+document.getElementById('mkt-refresh-btn').onclick = () => {
+    document.getElementById('mkt-loading').style.display = 'grid';
+    document.getElementById('mkt-grid').style.display = 'none';
+    document.getElementById('mkt-empty').style.display = 'none';
+    renderMarketplace(ideasCache); document.getElementById('mkt-loading').style.display='none';
+};
+document.getElementById('mkt-share-btn').onclick = () => document.getElementById('idea-modal').classList.add('open');
+document.getElementById('idea-modal-close-btn').onclick = () => document.getElementById('idea-modal').classList.remove('open');
+document.getElementById('idea-modal-cancel-btn').onclick = () => document.getElementById('idea-modal').classList.remove('open');
+
+document.getElementById('idea-modal-save-btn').onclick = async () => {
+    const title = document.getElementById('fi-title').value.trim();
+    const desc = document.getElementById('fi-desc').value.trim();
+    const link = document.getElementById('fi-link').value.trim();
+    if (!title) { alert('Title is required'); return; }
+    if (!desc) { alert('Description is required'); return; }
+
+    const btn = document.getElementById('idea-modal-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+        await addDoc(collection(db, 'ideas'), {
+            title,
+            description: desc,
+            resourceLink: link || null,
+            totalImpact: 0,
+            submittedBy: DB.displayName || currentUser?.email || 'Anonymous',
+            submittedAt: new Date().toISOString(),
+            uid: currentUser?.uid
+        });
+        // Clear form and close modal only on success
+        document.getElementById('idea-modal').classList.remove('open');
+        document.getElementById('fi-title').value = '';
+        document.getElementById('fi-desc').value = '';
+        document.getElementById('fi-link').value = '';
+        // Reload ideas from Firestore
+        await fetchAndRenderIdeas();
+    } catch(err) {
+        alert('Failed to save idea: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Idea';
+    }
+};
+
+// ── Display Name Banner (Marketplace) ──
+function checkDisplayNameBanner() {
+    document.getElementById('mkt-profile-banner').style.display = DB.displayName ? 'none' : 'flex';
+}
+document.getElementById('mkt-set-name-btn').onclick = () => {
+    const name = prompt('Enter your display name (e.g. "Alex - UW Madison"):');
+    if (name && name.trim()) {
+        DB.displayName = name.trim();
+        checkDisplayNameBanner();
+        renderProfilePanel();
+        document.getElementById('hdr-username').textContent = `Signed in as ${currentUser.email} · ${DB.displayName}`;
+        saveDB();
+    }
+};
+
+// ── Profile Panel ──
+function renderProfilePanel() {
+    const name = DB.displayName || '';
+    const email = currentUser?.email || '';
+    const initials = name ? name.slice(0,2).toUpperCase() : email.slice(0,2).toUpperCase();
+
+    document.getElementById('prof-avatar').textContent = initials;
+    document.getElementById('prof-name').textContent = name || '(no display name set)';
+    document.getElementById('prof-email').textContent = email;
+    document.getElementById('prof-name-input').value = name;
+
+    // Stats from local DB
+    const done = DB.events.filter(e => e.status !== 'planned');
+    const totalAttendees = done.reduce((s, e) => s + (parseInt(e.attendees) || 0), 0);
+    document.getElementById('prof-stat-events').textContent = done.length;
+    document.getElementById('prof-stat-attendees').textContent = totalAttendees;
+
+    // Ideas count from cache
+    const myIdeas = ideasCache.filter(i => i.uid === currentUser?.uid);
+    document.getElementById('prof-stat-ideas').textContent = myIdeas.length;
+}
+
+function renderProfileIdeas(ideas) {
+    const myIdeas = ideas.filter(i => i.uid === currentUser?.uid);
+    const container = document.getElementById('prof-ideas-list');
+    if (!container) return;
+
+    if (!myIdeas.length) {
+        container.innerHTML = '<div style="color:var(--text3);font-size:13px;">You haven\'t shared any ideas yet. Head to the Idea Marketplace to share one!</div>';
+        return;
+    }
+    container.innerHTML = myIdeas.map(idea => `
+        <div class="my-idea-row">
+            <div class="my-idea-title">${escHtml(idea.title)}</div>
+            <div class="my-idea-impact">👥 ${idea.totalImpact || 0} total reached</div>
+            ${idea.totalImpact > 0 ? '<span class="proven-badge">✅ Proven</span>' : ''}
+        </div>
+    `).join('');
+
+    // Also update ideas stat
+    document.getElementById('prof-stat-ideas').textContent = myIdeas.length;
+}
+
+document.getElementById('prof-save-name-btn').onclick = () => {
+    const name = document.getElementById('prof-name-input').value.trim();
+    if (!name) { alert('Display name cannot be empty'); return; }
+    DB.displayName = name;
+    checkDisplayNameBanner();
+    renderProfilePanel();
+    document.getElementById('hdr-username').textContent = `Signed in as ${currentUser.email} · ${name}`;
+    saveDB();
+    const btn = document.getElementById('prof-save-name-btn');
+    btn.textContent = 'Saved ✓';
+    setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+};
+
+// Render profile when navigating to it
+document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
+    const orig = btn.onclick;
+    if (btn.dataset.panel === 'profile') {
+        btn.addEventListener('click', () => renderProfilePanel());
+    }
+});
+
+// ── LIVE CHECK-IN ──
+let _liveSessionId = null;
+let _liveEventIdx = null;
+let _unsubLive = null;
+
+function populateLiveEventSelect() {
+    const sel = document.getElementById('lc-event-select');
+    const planned = (DB.events || [])
+        .map((e, i) => ({ ...e, _idx: i }))
+        .filter(e => e.status === 'planned' || e.status === 'done');
+    sel.innerHTML = '<option value="">— Choose an event —</option>' +
+        planned.map(e => `<option value="${e._idx}">${e.name} (${e.date || 'no date'})</option>`).join('');
+}
+
+document.getElementById('lc-add-event-link').onclick = (ev) => {
+    ev.preventDefault();
+    document.getElementById('nav-add-event').click();
+};
+
+document.getElementById('lc-start-btn').onclick = async () => {
+    const sel = document.getElementById('lc-event-select');
+    const idx = sel.value;
+    if (idx === '') { alert('Please select an event first.'); return; }
+    const ev = DB.events[parseInt(idx)];
+    if (!ev) return;
+
+    // Create a session doc in Firestore
+    const sessionRef = await addDoc(collection(db, 'checkin_sessions'), {
+        eventName: ev.name,
+        eventIdx: parseInt(idx),
+        ownerUid: currentUser.uid,
+        count: 0,
+        scans: [],
+        createdAt: new Date().toISOString(),
+        active: true
+    });
+
+    _liveSessionId = sessionRef.id;
+    _liveEventIdx = parseInt(idx);
+    startLiveSession(sessionRef.id, ev.name);
+};
+
+function startLiveSession(sessionId, eventName) {
+    document.getElementById('lc-setup').style.display = 'none';
+    document.getElementById('lc-session').style.display = 'block';
+    document.getElementById('lc-event-name-display').textContent = eventName;
+    document.getElementById('lc-count').textContent = '0';
+    document.getElementById('lc-last-scan').textContent = '';
+    document.getElementById('lc-scan-list').innerHTML = '<div style="color:var(--text3);">No scans yet — waiting for attendees...</div>';
+
+    // Build check-in URL
+    const base = window.location.origin + window.location.pathname.replace('index.html','');
+    const url = base + 'checkin.html?session=' + sessionId;
+    document.getElementById('lc-url-display').textContent = url;
+
+    // Generate QR using Google Charts API
+    const qrEl = document.getElementById('lc-qr');
+    qrEl.innerHTML = '';
+    // Use qrcode.js loaded in <head>
+    new QRCode(qrEl, {
+        text: url,
+        width: 180,
+        height: 180,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Live listener on session doc
+    if (_unsubLive) _unsubLive();
+    _unsubLive = onSnapshot(doc(db, 'checkin_sessions', sessionId), (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        const count = data.count || 0;
+        document.getElementById('lc-count').textContent = count;
+
+        // Scan log
+        const scans = data.scans || [];
+        if (scans.length) {
+            const last = scans[scans.length - 1];
+            document.getElementById('lc-last-scan').textContent = 'Last scan: ' + new Date(last).toLocaleTimeString();
+            document.getElementById('lc-scan-list').innerHTML = scans.slice().reverse().map((t, i) =>
+                `<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+                    <span>#${scans.length - i}</span>
+                    <span>${new Date(t).toLocaleTimeString()}</span>
+                 </div>`
+            ).join('');
+        }
+    });
+}
+
+document.getElementById('lc-end-btn').onclick = async () => {
+    if (!_liveSessionId) return;
+    const snap = await getDocs(query(collection(db, 'checkin_sessions'), where('__name__', '==', _liveSessionId)));
+    // Get final count from Firestore
+    const sessionSnap = await getDocs(collection(db, 'checkin_sessions'));
+    const sessionDoc = sessionSnap.docs.find(d => d.id === _liveSessionId);
+    const finalCount = sessionDoc ? (sessionDoc.data().count || 0) : 0;
+
+    // Save count back to event
+    if (_liveEventIdx !== null && DB.events[_liveEventIdx]) {
+        DB.events[_liveEventIdx].attendees = finalCount;
+        DB.events[_liveEventIdx].status = 'done';
+        await saveDB();
+        renderOverview();
+        applyFilters();
+    }
+
+    // Mark session inactive
+    await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false });
+
+    if (_unsubLive) { _unsubLive(); _unsubLive = null; }
+    _liveSessionId = null;
+    _liveEventIdx = null;
+
+    document.getElementById('lc-session').style.display = 'none';
+    document.getElementById('lc-setup').style.display = 'block';
+    alert('Session ended! ' + finalCount + ' attendees saved to the event.');
+};
+
+document.getElementById('lc-cancel-btn').onclick = async () => {
+    if (!confirm('Cancel session? Attendance will not be saved.')) return;
+    if (_liveSessionId) {
+        await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false });
+    }
+    if (_unsubLive) { _unsubLive(); _unsubLive = null; }
+    _liveSessionId = null;
+    _liveEventIdx = null;
+    document.getElementById('lc-session').style.display = 'none';
+    document.getElementById('lc-setup').style.display = 'block';
+};
+
+// Populate event select when navigating to live check-in panel
+document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
+    if (btn.dataset.panel === 'livecheck') {
+        btn.addEventListener('click', () => populateLiveEventSelect());
+    }
+});
+
+</script>
+</html>

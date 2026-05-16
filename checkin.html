@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bambu Lab · Check In</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #f5f5f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 32px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .logo { font-size: 13px; font-weight: 700; color: #888; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 28px; }
+  .icon { font-size: 64px; margin-bottom: 16px; line-height: 1; }
+  h1 { font-size: 22px; font-weight: 800; color: #1a1a1a; margin-bottom: 8px; }
+  .sub { font-size: 14px; color: #666; line-height: 1.5; margin-bottom: 28px; }
+  .event-name { font-size: 16px; font-weight: 700; color: #1a1a1a; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin-bottom: 24px; }
+  .btn {
+    display: inline-block;
+    background: #16a34a;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px 32px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  .btn:hover { background: #15803d; }
+  .btn:disabled { background: #86efac; cursor: not-allowed; }
+  .status { margin-top: 20px; font-size: 13px; color: #666; min-height: 20px; }
+  .success-icon { font-size: 80px; margin-bottom: 16px; animation: pop .4s cubic-bezier(.175,.885,.32,1.275); }
+  @keyframes pop { from { transform: scale(0); opacity:0; } to { transform: scale(1); opacity:1; } }
+  .count-badge { display:inline-block; background:#f0fdf4; border:1px solid #bbf7d0; color:#16a34a; font-size:13px; font-weight:700; border-radius:999px; padding:4px 14px; margin-top:12px; }
+  .error-card { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 20px; margin-top: 16px; color: #b91c1c; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="card" id="main-card">
+  <div class="logo">Bambu Lab · Ambassador Program</div>
+  <div class="icon">📡</div>
+  <h1>Live Check-In</h1>
+  <div class="sub" id="sub-text">Loading event details...</div>
+  <div class="event-name" id="event-name-el" style="display:none;"></div>
+  <button class="btn" id="checkin-btn" style="display:none;" onclick="doCheckin()">✓ Check Me In</button>
+  <div class="status" id="status-el"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC3ZA_XQyhcOZpEK8WbP5UbuxQnnKwFGW8",
+  authDomain: "bambu-ambassador-hub.firebaseapp.com",
+  projectId: "bambu-ambassador-hub",
+  storageBucket: "bambu-ambassador-hub.firebasestorage.app",
+  messagingSenderId: "54146763962",
+  appId: "1:54146763962:web:06c74942d25b008e8c0683",
+  measurementId: "G-2VHL7TJGCS"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const sessionId = params.get('session');
+
+const subEl = document.getElementById('sub-text');
+const eventNameEl = document.getElementById('event-name-el');
+const checkinBtn = document.getElementById('checkin-btn');
+const statusEl = document.getElementById('status-el');
+
+// Check for duplicate scan this session (using sessionStorage per browser tab)
+const SCANNED_KEY = 'bambu_scanned_' + sessionId;
+const alreadyScanned = sessionStorage.getItem(SCANNED_KEY);
+
+async function init() {
+    if (!sessionId) {
+        subEl.textContent = 'Invalid QR code — no session ID found.';
+        return;
+    }
+
+    try {
+        const snap = await getDoc(doc(db, 'checkin_sessions', sessionId));
+        if (!snap.exists()) {
+            subEl.textContent = 'Session not found. Ask your ambassador to regenerate the QR code.';
+            return;
+        }
+        const data = snap.data();
+
+        if (!data.active) {
+            subEl.innerHTML = '<strong>This event has ended.</strong><br>Check-in is no longer available.';
+            return;
+        }
+
+        eventNameEl.textContent = data.eventName;
+        eventNameEl.style.display = 'block';
+
+        if (alreadyScanned) {
+            showSuccess(data.count, true);
+            return;
+        }
+
+        subEl.textContent = 'Tap below to confirm your attendance.';
+        checkinBtn.style.display = 'block';
+
+    } catch(err) {
+        subEl.textContent = 'Error loading session: ' + err.message;
+    }
+}
+
+window.doCheckin = async () => {
+    checkinBtn.disabled = true;
+    checkinBtn.textContent = 'Checking in...';
+    statusEl.textContent = '';
+
+    try {
+        const sessionRef = doc(db, 'checkin_sessions', sessionId);
+        await updateDoc(sessionRef, {
+            count: increment(1),
+            scans: arrayUnion(new Date().toISOString())
+        });
+
+        // Get updated count to show user
+        const updated = await getDoc(sessionRef);
+        const newCount = updated.data()?.count || 1;
+
+        sessionStorage.setItem(SCANNED_KEY, '1');
+        showSuccess(newCount, false);
+
+    } catch(err) {
+        checkinBtn.disabled = false;
+        checkinBtn.textContent = '✓ Check Me In';
+        statusEl.textContent = 'Error: ' + err.message + '. Please try again.';
+    }
+};
+
+function showSuccess(count, wasDuplicate) {
+    document.getElementById('main-card').innerHTML = `
+        <div class="logo">Bambu Lab · Ambassador Program</div>
+        <div class="success-icon">✅</div>
+        <h1>${wasDuplicate ? 'Already Checked In!' : 'You\'re In!'}</h1>
+        <p class="sub">${wasDuplicate
+            ? 'Looks like you already checked in for this event.'
+            : 'Your attendance has been recorded. Thanks for coming!'
+        }</p>
+        <div class="event-name" id="event-name-el">${document.getElementById('event-name-el')?.textContent || ''}</div>
+        <div class="count-badge">👥 ${count} attendee${count !== 1 ? 's' : ''} so far</div>
+    `;
+}
+
+init();
+</script>
+</body>
+</html>
