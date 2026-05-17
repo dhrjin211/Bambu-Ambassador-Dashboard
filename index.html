@@ -548,18 +548,22 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-          <div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Events Run</div><canvas id="gi-chart-events" height="160"></canvas></div>
-          <div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">People Reached</div><canvas id="gi-chart-reached" height="160"></canvas></div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Events Run</div><div style="position:relative;height:200px;"><canvas id="gi-chart-events"></canvas></div></div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">People Reached</div><div style="position:relative;height:200px;"><canvas id="gi-chart-reached"></canvas></div></div>
         </div>
       </div>
 
       <!-- Live feed -->
-      <div class="card mt16">
-        <div class="card-hd" style="margin-bottom:12px;">🔴 Live Activity Feed <span style="font-size:11px;font-weight:400;color:var(--text3);">— 20 most recent completed events</span></div>
+      <div class="card mt16" style="margin-bottom:32px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <span class="card-hd">Live Activity Feed</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#dc2626;background:#fff1f2;border:1px solid #fecdd3;border-radius:999px;padding:2px 8px;">● LIVE</span>
+          <span style="font-size:11px;color:var(--text3);margin-left:2px;">20 most recent events across all ambassadors</span>
+        </div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Ambassador</th><th>Event</th><th>Type</th><th>Location</th><th>Date</th><th>Attendees</th></tr></thead>
-            <tbody id="gi-feed-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">Loading...</td></tr></tbody>
+            <thead><tr><th>Ambassador</th><th>Event</th><th>Type</th><th>Location</th><th>Date</th><th style="text-align:right;">Attendees</th></tr></thead>
+            <tbody id="gi-feed-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:24px;">Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1884,13 +1888,14 @@ function renderGlobalImpact(data) {
         const name = e.displayName ? e.displayName : 'An ambassador';
         const date = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
         const type = e.type ? e.type.charAt(0).toUpperCase() + e.type.slice(1) : '—';
+        const attendees = parseInt(e.attendees) || 0;
         return `<tr>
-            <td style="font-weight:600;">${escHtml(name)}</td>
-            <td>${escHtml(e.name || '—')}</td>
-            <td><span class="badge">${escHtml(type)}</span></td>
-            <td>${escHtml(e.location || '—')}</td>
-            <td>${date}</td>
-            <td>${(parseInt(e.attendees) || 0).toLocaleString()}</td>
+            <td style="font-weight:600;font-size:13px;">${escHtml(name)}</td>
+            <td style="font-size:13px;">${escHtml(e.name || '—')}</td>
+            <td><span style="font-size:11px;background:var(--surface2);color:var(--text2);border-radius:4px;padding:2px 7px;font-weight:600;">${escHtml(type)}</span></td>
+            <td style="font-size:12px;color:var(--text2);">${escHtml(e.location || '—')}</td>
+            <td style="font-size:12px;color:var(--text2);white-space:nowrap;">${date}</td>
+            <td style="text-align:right;font-weight:700;font-size:13px;">${attendees.toLocaleString()}</td>
         </tr>`;
     }).join('');
 }
@@ -1935,10 +1940,11 @@ function renderGiCharts(data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: { duration: 300 },
             plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-                y: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 }, precision: 0 }, beginAtZero: true }
+                x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 45 } },
+                y: { grid: { color: '#f0f0ee' }, ticks: { font: { size: 11 }, precision: 0 }, beginAtZero: true }
             }
         }
     };
