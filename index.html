@@ -251,6 +251,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -302,6 +303,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
     <div class="nav-div"></div>
     <div class="nav-group">
       <div class="nav-group-label">National Hub</div>
+      <button class="nav-btn" data-panel="globalimpact"><span class="nav-icon">🌍</span>Global Impact</button>
       <button class="nav-btn" data-panel="marketplace"><span class="nav-icon">💡</span>Idea Board</button>
       <button class="nav-btn" data-panel="profile"><span class="nav-icon">👤</span>My Profile</button>
     </div>
@@ -519,6 +521,46 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
           <div id="lc-scan-list" style="max-height:220px;overflow-y:auto;font-size:12px;color:var(--text2);">
             <div style="color:var(--text3);">No scans yet — waiting for attendees...</div>
           </div>
+        </div>
+      </div>
+    </div>
+    <div id="panel-globalimpact" class="panel">
+      <div class="page-hd-row">
+        <div class="page-hd"><h1>🌍 Global Impact</h1><p>Live stats across all Bambu Lab ambassadors worldwide.</p></div>
+        <div id="gi-last-updated" style="font-size:11px;color:var(--text3);align-self:flex-end;"></div>
+      </div>
+
+      <!-- Top stats -->
+      <div class="g4" id="gi-stats">
+        <div class="metric c-blue"><div class="metric-lbl">Total Events Run</div><div class="metric-val" id="gi-total-events">—</div></div>
+        <div class="metric c-green"><div class="metric-lbl">Total People Reached</div><div class="metric-val" id="gi-total-reached">—</div></div>
+        <div class="metric c-amber"><div class="metric-lbl">Total Hours Delivered</div><div class="metric-val" id="gi-total-hours">—</div></div>
+        <div class="metric c-blue"><div class="metric-lbl">Active Ambassadors</div><div class="metric-val" id="gi-total-ambassadors">—</div></div>
+      </div>
+
+      <!-- Chart toggle + charts -->
+      <div class="card mt16">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <span class="card-hd">Activity Over Time</span>
+          <div style="display:flex;gap:0;border:1px solid var(--border2);border-radius:6px;overflow:hidden;">
+            <button id="gi-toggle-monthly" onclick="window.setGiView('monthly')" style="padding:5px 14px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--green);color:#fff;font-family:'Inter',sans-serif;">Monthly</button>
+            <button id="gi-toggle-quarterly" onclick="window.setGiView('quarterly')" style="padding:5px 14px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--surface);color:var(--text2);font-family:'Inter',sans-serif;">Quarterly</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Events Run</div><canvas id="gi-chart-events" height="160"></canvas></div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">People Reached</div><canvas id="gi-chart-reached" height="160"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Live feed -->
+      <div class="card mt16">
+        <div class="card-hd" style="margin-bottom:12px;">🔴 Live Activity Feed <span style="font-size:11px;font-weight:400;color:var(--text3);">— 20 most recent completed events</span></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Ambassador</th><th>Event</th><th>Type</th><th>Location</th><th>Date</th><th>Attendees</th></tr></thead>
+            <tbody id="gi-feed-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">Loading...</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -895,8 +937,30 @@ document.getElementById('modal-save-btn').onclick = (e) => {
                 await updateDoc(doc(db, 'ideas', linkedIdeaId), { totalImpact: increment(ev.attendees) });
             }
 
+            // Write to global_events for Global Impact page
+            if (newStatus === 'done') {
+                const globalPayload = {
+                    uid: currentUser.uid,
+                    displayName: DB.displayName || null,
+                    name: ev.name,
+                    type: ev.type || 'other',
+                    location: ev.location || '',
+                    date: ev.date || '',
+                    attendees: parseInt(ev.attendees) || 0,
+                    duration: parseInt(ev.duration) || 0,
+                    quarter: ev.quarter || '',
+                    savedAt: new Date().toISOString()
+                };
+                // Upsert: use uid+date+name as deterministic doc ID to avoid duplicates on re-save
+                const globalId = currentUser.uid + '_' + (ev.date || 'nodate') + '_' + ev.name.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
+                await setDoc(doc(db, 'global_events', globalId), globalPayload);
+            } else if (oldEv && oldEv.status === 'done' && newStatus !== 'done') {
+                // If un-completing an event, remove from global_events
+                const globalId = currentUser.uid + '_' + (ev.date || 'nodate') + '_' + ev.name.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
+                try { await deleteDoc(doc(db, 'global_events', globalId)); } catch(e) {}
+            }
+
             // Single authoritative write of full DB to Firestore
-            // The onSnapshot listener on the user doc will pick this up and re-render
             await saveDB();
         } catch (err) {
             console.error('Background sync error:', err);
@@ -916,6 +980,7 @@ document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
         if (btn.dataset.panel === 'overview') renderOverview();
         if (btn.dataset.panel === 'report')   { renderReport(); }
         if (btn.dataset.panel === 'events')   renderEventsTable();
+        if (btn.dataset.panel === 'globalimpact') initGlobalImpact();
     };
 });
 
@@ -1708,6 +1773,25 @@ document.getElementById('lc-end-btn').onclick = async () => {
     renderOverview();
     applyFilters();
 
+    // Write to global_events
+    const liveEv = DB.events[_liveEventIdx] || _liveNewEvent;
+    if (liveEv) {
+        const globalPayload = {
+            uid: currentUser.uid,
+            displayName: DB.displayName || null,
+            name: liveEv.name,
+            type: liveEv.type || 'other',
+            location: liveEv.location || '',
+            date: liveEv.date || new Date().toISOString().split('T')[0],
+            attendees: finalCount,
+            duration: durationMins,
+            quarter: liveEv.quarter || '',
+            savedAt: new Date().toISOString()
+        };
+        const globalId = currentUser.uid + '_' + (liveEv.date || 'nodate') + '_' + liveEv.name.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
+        try { await setDoc(doc(db, 'global_events', globalId), globalPayload); } catch(e) { console.error('global_events live write failed:', e); }
+    }
+
     await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false });
     if (_unsubLive) { _unsubLive(); _unsubLive = null; }
     _liveSessionId = null;
@@ -1744,6 +1828,138 @@ document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
         btn.addEventListener('click', () => populateLiveEventSelect());
     }
 });
+
+// ── GLOBAL IMPACT ──
+let _unsubGlobal = null;
+let _giView = 'monthly';
+let _giData = [];
+let _giChartEvents = null;
+let _giChartReached = null;
+
+window.setGiView = (view) => {
+    _giView = view;
+    document.getElementById('gi-toggle-monthly').style.background = view === 'monthly' ? 'var(--green)' : 'var(--surface)';
+    document.getElementById('gi-toggle-monthly').style.color = view === 'monthly' ? '#fff' : 'var(--text2)';
+    document.getElementById('gi-toggle-quarterly').style.background = view === 'quarterly' ? 'var(--green)' : 'var(--surface)';
+    document.getElementById('gi-toggle-quarterly').style.color = view === 'quarterly' ? '#fff' : 'var(--text2)';
+    renderGiCharts(_giData);
+};
+
+function initGlobalImpact() {
+    if (_unsubGlobal) return; // already listening
+    const q = query(collection(db, 'global_events'), orderBy('savedAt', 'desc'));
+    _unsubGlobal = onSnapshot(q, (snap) => {
+        _giData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderGlobalImpact(_giData);
+    }, (err) => {
+        console.error('Global impact listener error:', err);
+    });
+}
+
+function renderGlobalImpact(data) {
+    // ── Stats ──
+    const totalEvents = data.length;
+    const totalReached = data.reduce((s, e) => s + (parseInt(e.attendees) || 0), 0);
+    const totalMins = data.reduce((s, e) => s + (parseInt(e.duration) || 0), 0);
+    const totalHours = (totalMins / 60).toFixed(1);
+    const ambassadors = new Set(data.map(e => e.uid)).size;
+
+    document.getElementById('gi-total-events').textContent = totalEvents.toLocaleString();
+    document.getElementById('gi-total-reached').textContent = totalReached.toLocaleString();
+    document.getElementById('gi-total-hours').textContent = totalHours;
+    document.getElementById('gi-total-ambassadors').textContent = ambassadors;
+    document.getElementById('gi-last-updated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+
+    // ── Charts ──
+    renderGiCharts(data);
+
+    // ── Feed ──
+    const tbody = document.getElementById('gi-feed-tbody');
+    const recent = data.slice(0, 20);
+    if (!recent.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">No events yet.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = recent.map(e => {
+        const name = e.displayName ? e.displayName : 'An ambassador';
+        const date = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+        const type = e.type ? e.type.charAt(0).toUpperCase() + e.type.slice(1) : '—';
+        return `<tr>
+            <td style="font-weight:600;">${escHtml(name)}</td>
+            <td>${escHtml(e.name || '—')}</td>
+            <td><span class="badge">${escHtml(type)}</span></td>
+            <td>${escHtml(e.location || '—')}</td>
+            <td>${date}</td>
+            <td>${(parseInt(e.attendees) || 0).toLocaleString()}</td>
+        </tr>`;
+    }).join('');
+}
+
+function renderGiCharts(data) {
+    // Build labels + datasets based on view
+    const buckets = {};
+    data.forEach(e => {
+        if (!e.date) return;
+        let key;
+        if (_giView === 'monthly') {
+            const d = new Date(e.date + 'T12:00:00');
+            key = d.toLocaleString('default', { month: 'short', year: 'numeric' });
+        } else {
+            // Quarterly: map month to Q1-Q4
+            const d = new Date(e.date + 'T12:00:00');
+            const q = Math.floor(d.getMonth() / 3) + 1;
+            key = 'Q' + q + ' ' + d.getFullYear();
+        }
+        if (!buckets[key]) buckets[key] = { events: 0, reached: 0 };
+        buckets[key].events++;
+        buckets[key].reached += parseInt(e.attendees) || 0;
+    });
+
+    // Sort keys chronologically
+    const sortedKeys = Object.keys(buckets).sort((a, b) => {
+        if (_giView === 'monthly') {
+            return new Date('1 ' + a) - new Date('1 ' + b);
+        } else {
+            const [qa, ya] = [a[1], parseInt(a.split(' ')[1])];
+            const [qb, yb] = [b[1], parseInt(b.split(' ')[1])];
+            return ya !== yb ? ya - yb : qa - qb;
+        }
+    });
+
+    const labels = sortedKeys;
+    const eventsData = sortedKeys.map(k => buckets[k].events);
+    const reachedData = sortedKeys.map(k => buckets[k].reached);
+
+    const chartDefaults = {
+        type: 'bar',
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                y: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 }, precision: 0 }, beginAtZero: true }
+            }
+        }
+    };
+
+    // Destroy and recreate to avoid stale data
+    if (_giChartEvents) _giChartEvents.destroy();
+    if (_giChartReached) _giChartReached.destroy();
+
+    const ctxE = document.getElementById('gi-chart-events');
+    const ctxR = document.getElementById('gi-chart-reached');
+    if (!ctxE || !ctxR) return;
+
+    _giChartEvents = new Chart(ctxE, {
+        ...chartDefaults,
+        data: { labels, datasets: [{ data: eventsData, backgroundColor: '#16a34a', borderRadius: 4 }] }
+    });
+    _giChartReached = new Chart(ctxR, {
+        ...chartDefaults,
+        data: { labels, datasets: [{ data: reachedData, backgroundColor: '#2563eb', borderRadius: 4 }] }
+    });
+}
 
 </script>
 </html>
