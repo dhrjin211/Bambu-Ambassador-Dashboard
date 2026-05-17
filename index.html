@@ -861,14 +861,19 @@ window.deleteIdea = async (ideaId, ideaTitle) => {
     }
 };
 
-window.deleteEvent = (i) => {
+window.deleteEvent = async (i) => {
     const ev = DB.events[i];
     if (!ev) return;
     if (!confirm('Delete "' + ev.name + '"? This cannot be undone.')) return;
     DB.events.splice(i, 1);
     renderOverview();
     applyFilters();
-    saveDB();
+    await saveDB();
+    // Remove from global_events so Global Impact stats update
+    if (ev.status === 'done') {
+        const globalId = currentUser.uid + '_' + (ev.date || 'nodate') + '_' + ev.name.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
+        try { await deleteDoc(doc(db, 'global_events', globalId)); } catch(e) {}
+    }
 };
 
 document.getElementById('modal-save-btn').onclick = (e) => {
