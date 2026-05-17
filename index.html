@@ -1959,11 +1959,11 @@ function renderGiCharts(data) {
 
     _giChartEvents = new Chart(ctxE, {
         ...chartDefaults,
-        data: { labels, datasets: [{ data: eventsData, backgroundColor: '#16a34a', borderRadius: 4 }] }
+        data: { labels, datasets: [{ data: eventsData, backgroundColor: '#16a34a', borderRadius: 4, maxBarThickness: 48, barPercentage: 0.6 }] }
     });
     _giChartReached = new Chart(ctxR, {
         ...chartDefaults,
-        data: { labels, datasets: [{ data: reachedData, backgroundColor: '#2563eb', borderRadius: 4 }] }
+        data: { labels, datasets: [{ data: reachedData, backgroundColor: '#2563eb', borderRadius: 4, maxBarThickness: 48, barPercentage: 0.6 }] }
     });
 }
 
