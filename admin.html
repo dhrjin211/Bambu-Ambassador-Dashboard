@@ -454,28 +454,48 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('hdr-email').textContent = user.email;
   setSyncStatus('Connecting…', false);
 
-  // ── REAL-TIME LISTENER on all user docs ──
-  // This fires immediately with current data, then again on every change.
-  // No more stale data — every ambassador update is pushed here automatically.
+  // ── REAL-TIME LISTENER on global_events ──
+  // We read from `global_events` (not `users`) because Firestore rules only
+  // allow each user to read their own doc. `global_events` is written by every
+  // ambassador when they save a completed event and is readable by all
+  // authenticated users — same collection used by the Global Impact feed.
+  // We group by uid to reconstruct per-ambassador profiles on the fly.
   if (_unsubUsers) _unsubUsers();
   _unsubUsers = onSnapshot(
-    collection(db, 'users'),
+    query(collection(db, 'global_events'), orderBy('savedAt', 'desc')),
     (querySnap) => {
-      allUsers = [];
+      // Group events by ambassador uid
+      const byUid = {};
       querySnap.forEach(d => {
-        const data = d.data();
-        if (data.isAdmin) return; // skip admin accounts
-        const events = (data.events || []).filter(e => e.status === 'done');
-        allUsers.push({
-          uid:         d.id,
-          email:       data.email || data.displayName || d.id.slice(0,12),
-          displayName: data.displayName || '',
-          events,
-          badges:      data.badges || {},
+        const e = { id: d.id, ...d.data() };
+        if (!e.uid) return;
+        if (!byUid[e.uid]) {
+          byUid[e.uid] = {
+            uid:         e.uid,
+            displayName: e.displayName || '',
+            email:       e.displayName || e.uid.slice(0, 10) + '…',
+            events:      [],
+            badges:      {},
+          };
+        }
+        // Normalise the event shape to match index.html's DB.events format
+        byUid[e.uid].events.push({
+          name:      e.name      || '—',
+          date:      e.date      || '',
+          location:  e.location  || '',
+          type:      e.type      || 'other',
+          attendees: parseInt(e.attendees) || 0,
+          duration:  parseInt(e.duration)  || 0,
+          quarter:   e.quarter   || '',
+          status:    'done',
+          summary:   e.summary   || '',
+          notes:     e.notes     || '',
+          photos:    e.photos    || null,
+          photoLink: e.photoLink || null,
         });
       });
+      allUsers = Object.values(byUid);
       setSyncStatus('Live · ' + new Date().toLocaleTimeString(), true);
-      // Re-render whichever panels are visible
       renderOverview();
       renderAmbassadors();
       renderAllEvents();
@@ -483,7 +503,7 @@ onAuthStateChanged(auth, async (user) => {
       renderPhotos();
     },
     (err) => {
-      console.error('Users listener error:', err);
+      console.error('global_events listener error:', err);
       setSyncStatus('Error: ' + err.code, false);
     }
   );
