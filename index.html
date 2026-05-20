@@ -2,15 +2,28 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Bambu Lab Ambassador Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Bambu Lab · Ambassador Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* ═══════════════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#f4f3f0;--surface:#fff;--surface2:#f0efe9;--surface3:#e8e6de;
-  --border:#dddbd2;--border2:#c9c6bb;
-  --text:#19180f;--text2:#6b6a62;--text3:#9e9c93;
+  --bg:#f5f4f0;
+  --surface:#ffffff;
+  --surface2:#f0efe9;
+  --surface3:#e8e6de;
+  --border:#dddbd2;
+  --border2:#c9c6bb;
+  --text:#19180f;
+  --text2:#6b6a62;
+  --text3:#9e9c93;
   --green:#2d7a3a;--green-bg:#eaf4ec;--green-b:#b2d9b9;
   --amber:#7a5010;--amber-bg:#fdf3e0;--amber-b:#e8c86a;
   --blue:#1a4f9e;--blue-bg:#e8f0fb;--blue-b:#a8c0ed;
@@ -18,35 +31,133 @@
   --purple:#5b3ab5;--purple-bg:#f0ecfb;--purple-b:#c4b2ed;
   --r:10px;--rs:6px;
   --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
-  --shm:0 4px 16px rgba(0,0,0,.1),0 2px 4px rgba(0,0,0,.05);
+  --shm:0 4px 24px rgba(0,0,0,.11),0 2px 6px rgba(0,0,0,.06);
+  --sidebar-w:218px;
+  --hdr-h:56px;
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
 }
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
-.hdr{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:var(--sh);}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+
+/* ═══════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════ */
+#auth-overlay{
+  position:fixed;inset:0;background:var(--bg);z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.auth-card{
+  width:100%;max-width:360px;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;
+  padding:32px 28px;box-shadow:var(--shm);
+}
+.auth-logo{
+  width:42px;height:42px;background:var(--text);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:13px;font-weight:700;margin:0 auto 18px;
+}
+.auth-card h2{font-size:20px;font-weight:700;text-align:center;margin-bottom:4px;}
+.auth-card > p{font-size:12px;color:var(--text3);text-align:center;margin-bottom:24px;}
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+.hdr{
+  height:var(--hdr-h);background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;position:sticky;top:0;z-index:200;
+  box-shadow:var(--sh);
+}
 .hdr-logo{display:flex;align-items:center;gap:10px;}
-.hdr-mark{width:30px;height:30px;background:var(--text);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;}
-.hdr-title{font-size:14px;font-weight:600;}
+.hdr-mark{
+  width:30px;height:30px;background:var(--text);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:11px;font-weight:700;flex-shrink:0;
+}
+.hdr-title{font-size:14px;font-weight:600;line-height:1.3;}
 .hdr-sub{font-size:11px;color:var(--text3);}
 .hdr-btns{display:flex;gap:6px;align-items:center;}
-.layout{display:flex;min-height:calc(100vh - 56px);}
-.sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);padding:16px 10px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
-.nav-group{margin-bottom:18px;}
-.nav-group-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:0 8px;margin-bottom:4px;}
-.nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border:none;background:none;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;color:var(--text2);cursor:pointer;text-align:left;transition:all .12s;}
+
+/* Mobile hamburger */
+.hdr-menu-btn{
+  display:none;background:none;border:1px solid var(--border);
+  border-radius:var(--rs);padding:6px 9px;cursor:pointer;font-size:16px;
+  color:var(--text2);line-height:1;
+}
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
+.layout{display:flex;min-height:calc(100vh - var(--hdr-h));}
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar-w);background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:14px 10px;flex-shrink:0;
+  position:sticky;top:var(--hdr-h);
+  height:calc(100vh - var(--hdr-h));overflow-y:auto;
+}
+/* Mobile sidebar overlay */
+.sidebar-backdrop{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.4);z-index:300;
+}
+.nav-group{margin-bottom:16px;}
+.nav-group-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--text3);
+  padding:0 8px;margin-bottom:4px;
+}
+.nav-btn{
+  display:flex;align-items:center;gap:9px;width:100%;
+  padding:7px 10px;border:none;background:none;
+  border-radius:var(--rs);font-family:var(--font);
+  font-size:13px;font-weight:500;color:var(--text2);
+  cursor:pointer;text-align:left;transition:all .12s;
+}
 .nav-btn:hover{background:var(--surface2);color:var(--text);}
 .nav-btn.active{background:var(--text);color:#fff;}
-.nav-icon{font-size:14px;width:18px;text-align:center;}
+.nav-btn.active:hover{background:var(--text);}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
 .nav-div{height:1px;background:var(--border);margin:8px 2px;}
-.main{flex:1;padding:28px 32px;min-width:0;}
+
+/* ═══════════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════════ */
+.main{flex:1;padding:24px 28px;min-width:0;}
 .panel{display:none;}
 .panel.show{display:block;}
+
+/* ═══════════════════════════════════════════════
+   TYPOGRAPHY / PAGE HEADERS
+═══════════════════════════════════════════════ */
 .page-hd{margin-bottom:20px;}
-.page-hd h1{font-size:22px;font-weight:700;margin-bottom:3px;}
+.page-hd h1{font-size:22px;font-weight:700;margin-bottom:3px;letter-spacing:-.3px;}
 .page-hd p{font-size:13px;color:var(--text2);}
-.page-hd-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.page-hd-row{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:20px;flex-wrap:wrap;gap:12px;
+}
 .page-hd-row .page-hd{margin-bottom:0;}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all .12s;white-space:nowrap;text-decoration:none;}
+
+/* ═══════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 14px;border-radius:var(--rs);
+  font-family:var(--font);font-size:13px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:all .12s;white-space:nowrap;text-decoration:none;
+  -webkit-tap-highlight-color:transparent;
+}
 .btn:hover{background:var(--surface2);}
-.btn:active{transform:scale(.98);}
+.btn:active{transform:scale(.97);}
 .btn-primary{background:var(--text);color:#fff;border-color:var(--text);}
 .btn-primary:hover{opacity:.85;background:var(--text);}
 .btn-green{background:var(--green);color:#fff;border-color:var(--green);}
@@ -55,42 +166,60 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .btn-red:hover{opacity:.85;}
 .btn-sm{padding:5px 11px;font-size:12px;}
 .btn-xs{padding:3px 8px;font-size:11px;}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh);}
-.card-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:14px;}
-.card-hd-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none;}
+
+/* ═══════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════ */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh);
+}
+.card-hd{
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--text3);margin-bottom:14px;
+}
+.card-hd-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
 .card-hd-row .card-hd{margin-bottom:0;}
+
+/* ═══════════════════════════════════════════════
+   GRIDS
+═══════════════════════════════════════════════ */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
 .mt16{margin-top:16px;}
-.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
-.metric::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+
+/* ═══════════════════════════════════════════════
+   METRICS
+═══════════════════════════════════════════════ */
+.metric{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+  box-shadow:var(--sh);position:relative;overflow:hidden;
+}
+.metric::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+}
 .metric.c-blue::before{background:var(--blue);}
 .metric.c-green::before{background:var(--green);}
 .metric.c-amber::before{background:var(--amber);}
 .metric.c-purple::before{background:var(--purple);}
-.metric-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px;}
-.metric-val{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-.5px;}
-.metric-sub{font-size:12px;color:var(--text2);}
-.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
-.prog-lbl{font-size:12px;color:var(--text2);width:205px;flex-shrink:0;}
-.prog-wrap{flex:1;background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;}
-.prog-fill{height:100%;border-radius:4px;transition:width .5s ease;}
-.prog-count{font-size:12px;color:var(--text2);min-width:48px;text-align:right;}
-.tbl-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;}
-thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap;}
-tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
-tbody tr:last-child{border-bottom:none;}
-tbody tr:hover{background:var(--surface2);}
-td{padding:11px 12px;vertical-align:middle;}
-.td-main{font-weight:500;font-size:13px;}
-.td-sub{font-size:11px;color:var(--text2);margin-top:2px;}
-.td-sm{font-size:12px;color:var(--text2);}
+.metric-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:5px;}
+.metric-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:3px;letter-spacing:-.5px;}
+.metric-sub{font-size:11px;color:var(--text2);}
+
+/* ═══════════════════════════════════════════════
+   PILLS / TAGS / BADGES
+═══════════════════════════════════════════════ */
 .pill{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
 .pill-done{background:var(--green-bg);color:var(--green);}
 .pill-planned{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
 .pill-submitted{background:var(--blue-bg);color:var(--blue);}
+
 .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
 .tag-workshop{background:var(--red-bg);color:var(--red);}
 .tag-demo{background:var(--blue-bg);color:var(--blue);}
@@ -99,77 +228,366 @@ td{padding:11px 12px;vertical-align:middle;}
 .tag-club{background:var(--surface3);color:var(--text2);}
 .tag-fair{background:var(--purple-bg);color:var(--purple);}
 .tag-other{background:var(--surface2);color:var(--text2);}
+
 .tier-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
 .tb-none{background:var(--surface2);color:var(--text3);}
 .tb-active{background:var(--surface3);color:var(--text2);}
 .tb-silver{background:#eeede9;color:#4a4840;border:1px solid var(--border2);}
 .tb-gold{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b);}
 .tb-platinum{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b);}
-.field{margin-bottom:12px;}
-.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:5px;}
-.field input,.field select,.field textarea{width:100%;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);color:var(--text);transition:border .12s;}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,79,158,.08);}
-.field textarea{resize:vertical;min-height:72px;}
-.field select[multiple]{height:88px;}
+
+/* ═══════════════════════════════════════════════
+   PROGRESS BARS
+═══════════════════════════════════════════════ */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.prog-lbl{font-size:12px;color:var(--text2);width:180px;flex-shrink:0;}
+.prog-wrap{flex:1;background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.prog-count{font-size:12px;color:var(--text2);min-width:40px;text-align:right;}
+
+/* ═══════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════ */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;}
+thead th{
+  padding:9px 12px;text-align:left;
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--text3);
+  background:var(--surface2);border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+td{padding:10px 12px;vertical-align:middle;}
+.td-main{font-weight:500;font-size:13px;}
+.td-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.td-sm{font-size:12px;color:var(--text2);}
+
+/* ═══════════════════════════════════════════════
+   FORM FIELDS
+═══════════════════════════════════════════════ */
+.field{margin-bottom:13px;}
+.field:last-child{margin-bottom:0;}
+.field label{
+  display:block;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text2);margin-bottom:5px;
+}
+.field label .req{color:var(--red);margin-left:2px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:9px 12px;
+  border:1px solid var(--border2);border-radius:var(--rs);
+  font-family:var(--font);font-size:13px;
+  background:var(--surface);color:var(--text);
+  transition:border .12s;
+  /* prevent zoom on iOS */
+  font-size:max(16px, 13px);
+}
+@media(min-width:600px){
+  .field input,.field select,.field textarea{font-size:13px;}
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(26,79,158,.08);
+}
+.field textarea{resize:vertical;min-height:76px;line-height:1.5;}
+.field-hint{font-size:11px;color:var(--text3);margin-top:4px;}
 .frow{display:grid;gap:12px;}
 .frow-2{grid-template-columns:1fr 1fr;}
 .frow-3{grid-template-columns:1fr 1fr 1fr;}
 .frow-4{grid-template-columns:1fr 1fr 1fr 1fr;}
 .fsec{background:var(--surface2);border-radius:var(--r);padding:18px 20px;margin-bottom:14px;}
 .fsec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:14px;}
-.field-hint{font-size:11px;color:var(--text3);margin-top:4px;}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;padding:20px;}
-.overlay.open{display:flex;}
-.modal{background:var(--surface);border-radius:var(--r);width:700px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shm);}
-.modal-hdr{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;}
-.modal-hdr h2{font-size:17px;font-weight:700;}
-.modal-body{padding:20px 24px 24px;}
+select.filter-sel{
+  padding:6px 10px;border:1px solid var(--border2);
+  border-radius:var(--rs);font-family:var(--font);
+  font-size:13px;background:var(--surface);color:var(--text);
+}
+
+/* ═══════════════════════════════════════════════
+   ALERTS
+═══════════════════════════════════════════════ */
 .alert{border-radius:var(--rs);padding:11px 14px;font-size:13px;margin-bottom:12px;line-height:1.5;}
 .alert strong{font-weight:600;}
 .alert-blue{background:var(--blue-bg);border-left:3px solid var(--blue);}
 .alert-green{background:var(--green-bg);border-left:3px solid var(--green);}
 .alert-amber{background:var(--amber-bg);border-left:3px solid var(--amber);}
 .alert-red{background:var(--red-bg);border-left:3px solid var(--red);}
-hr{border:none;border-top:1px solid var(--border);margin:16px 0;}
-.tier-card{border:2px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .15s;background:var(--surface);}
-.tier-card:hover{border-color:var(--border2);box-shadow:var(--shm);}
-.tier-card.sel-silver{border-color:var(--border2);background:#f5f4f0;}
-.tier-card.sel-gold{border-color:var(--amber-b);background:var(--amber-bg);}
-.tier-card.sel-platinum{border-color:var(--blue-b);background:var(--blue-bg);}
-.tc-name{font-size:16px;font-weight:700;margin:8px 0 2px;}
-.tc-req{font-size:12px;color:var(--text2);margin-bottom:10px;}
-.tc-row{display:flex;justify-content:space-between;padding:5px 0;border-top:1px solid var(--border);font-size:12px;}
-.tc-val{font-weight:700;}
-.sched-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);user-select:none;}
-.sched-item:last-child{border-bottom:none;}
-.sched-day{font-size:11px;font-weight:700;color:var(--text2);width:62px;flex-shrink:0;padding-top:1px;cursor:pointer;}
-.sched-cb{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s;margin-top:1px;cursor:pointer;}
-.sched-cb.on{background:var(--green);border-color:var(--green);}
-.sched-text-input { font-size:13px; flex:1; border:none; background:transparent; font-family:inherit; outline:none; color:var(--text); }
-.sched-text-input.on { text-decoration:line-through; color:var(--text3); }
-.sched-tag{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:700;flex-shrink:0;}
+
+/* ═══════════════════════════════════════════════
+   MODAL / OVERLAY
+═══════════════════════════════════════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.45);z-index:400;
+  align-items:flex-start;justify-content:center;
+  padding:16px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--surface);border-radius:var(--r);
+  width:680px;max-width:100%;box-shadow:var(--shm);
+  margin:auto;position:relative;
+}
+.modal-hdr{
+  padding:18px 22px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--surface);z-index:1;
+  border-radius:var(--r) var(--r) 0 0;
+}
+.modal-hdr h2{font-size:16px;font-weight:700;}
+.modal-body{padding:20px 22px 28px;}
+
+/* ═══════════════════════════════════════════════
+   PHOTO UPLOAD WIDGET
+═══════════════════════════════════════════════ */
+.photo-upload-area{
+  border:2px dashed var(--border2);border-radius:var(--r);
+  padding:20px;text-align:center;cursor:pointer;
+  transition:all .15s;background:var(--surface2);
+  position:relative;
+}
+.photo-upload-area:hover,.photo-upload-area.drag-over{
+  border-color:var(--blue);background:var(--blue-bg);
+}
+.photo-upload-area input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.photo-upload-icon{font-size:28px;margin-bottom:8px;}
+.photo-upload-txt{font-size:13px;color:var(--text2);font-weight:500;}
+.photo-upload-hint{font-size:11px;color:var(--text3);margin-top:4px;}
+.photo-preview-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+  gap:8px;margin-top:10px;
+}
+.photo-preview-item{position:relative;}
+.photo-preview-img{
+  width:100%;aspect-ratio:1;object-fit:cover;
+  border-radius:var(--rs);border:1px solid var(--border);
+}
+.photo-preview-remove{
+  position:absolute;top:3px;right:3px;
+  background:rgba(0,0,0,.65);color:#fff;
+  border:none;border-radius:50%;
+  width:20px;height:20px;font-size:11px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  line-height:1;font-family:var(--font);
+}
+.photo-preview-remove:hover{background:var(--red);}
+.photo-count-label{font-size:11px;color:var(--text2);margin-top:6px;}
+.photo-compress-indicator{
+  display:none;font-size:11px;color:var(--blue);
+  margin-top:6px;font-style:italic;
+}
+
+/* ═══════════════════════════════════════════════
+   EVENTS TABLE — photo thumbnails
+═══════════════════════════════════════════════ */
+.ev-photo-thumbs{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+.ev-photo-thumb{
+  width:32px;height:32px;object-fit:cover;
+  border-radius:4px;border:1px solid var(--border);
+  cursor:pointer;transition:opacity .12s;
+}
+.ev-photo-thumb:hover{opacity:.8;}
+
+/* ═══════════════════════════════════════════════
+   LIGHTBOX
+═══════════════════════════════════════════════ */
+#lightbox{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.88);z-index:600;
+  align-items:center;justify-content:center;
+  cursor:zoom-out;padding:20px;
+}
+#lightbox.open{display:flex;}
+#lightbox img{
+  max-width:90vw;max-height:88vh;
+  border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.5);
+  object-fit:contain;
+}
+
+/* ═══════════════════════════════════════════════
+   EMPTY STATES
+═══════════════════════════════════════════════ */
 .empty{text-align:center;padding:48px 20px;color:var(--text3);}
-.empty-ico{font-size:36px;margin-bottom:10px;}
-.empty-txt{font-size:13px;}
-.report-cover{background:var(--text);color:#fff;border-radius:var(--r) var(--r) 0 0;padding:28px 32px;}
+.empty-ico{font-size:40px;margin-bottom:12px;}
+.empty-txt{font-size:13px;line-height:1.5;}
+
+/* ═══════════════════════════════════════════════
+   REPORT
+═══════════════════════════════════════════════ */
+.report-cover{
+  background:var(--text);color:#fff;
+  border-radius:var(--r) var(--r) 0 0;padding:28px 32px;
+}
 .report-cover h1{font-size:22px;font-weight:700;margin-bottom:4px;}
 .report-cover p{font-size:13px;opacity:.6;}
-.report-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:28px 32px;}
+.report-body{
+  background:var(--surface);border:1px solid var(--border);
+  border-top:none;border-radius:0 0 var(--r) var(--r);
+  padding:28px 32px;
+}
 .report-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
 .rs-box{background:var(--surface2);border-radius:var(--rs);padding:14px;text-align:center;}
 .rs-val{font-size:26px;font-weight:700;letter-spacing:-.5px;}
 .rs-lbl{font-size:11px;color:var(--text2);font-weight:500;margin-top:3px;}
-.badge-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
-.badge-item:last-child{border-bottom:none;}
-.badge-toggle{cursor:pointer;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;border:none;font-family:'Inter',sans-serif;transition:all .12s;}
-.badge-toggle.earned{background:var(--green-bg);color:var(--green);}
-.badge-toggle.not-earned{background:var(--surface2);color:var(--text3);}
+
+/* ═══════════════════════════════════════════════
+   LIVE CHECK-IN
+═══════════════════════════════════════════════ */
+.sched-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.sched-item:last-child{border-bottom:none;}
+.sched-day{font-size:11px;font-weight:700;color:var(--text2);width:48px;flex-shrink:0;padding-top:1px;cursor:pointer;}
+.sched-cb{
+  width:17px;height:17px;border:1.5px solid var(--border2);
+  border-radius:4px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;transition:all .12s;margin-top:1px;cursor:pointer;
+}
+.sched-cb.on{background:var(--green);border-color:var(--green);color:#fff;font-size:10px;}
+.sched-text-input{font-size:13px;flex:1;border:none;background:transparent;font-family:var(--font);outline:none;color:var(--text);}
+.sched-text-input.on{text-decoration:line-through;color:var(--text3);}
+
+/* ═══════════════════════════════════════════════
+   NATIONAL HUB
+═══════════════════════════════════════════════ */
+.idea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-top:16px;}
+.idea-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px 20px;
+  box-shadow:var(--sh);display:flex;flex-direction:column;
+  gap:8px;transition:box-shadow .15s;
+}
+.idea-card:hover{box-shadow:var(--shm);}
+.idea-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.idea-card-title{font-size:14px;font-weight:700;flex:1;}
+.proven-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--green-bg);color:var(--green);
+  border:1px solid var(--green-b);border-radius:20px;
+  font-size:10px;font-weight:700;padding:2px 8px;
+  white-space:nowrap;flex-shrink:0;
+}
+.idea-card-desc{font-size:12px;color:var(--text2);line-height:1.5;}
+.idea-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-wrap:wrap;gap:6px;}
+.idea-impact{font-size:12px;font-weight:600;color:var(--blue);}
+.idea-submitter{font-size:11px;color:var(--text3);}
+.idea-link{font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;}
+.idea-link:hover{text-decoration:underline;}
+.hub-alert{background:var(--blue-bg);border-left:3px solid var(--blue);border-radius:var(--rs);padding:11px 14px;font-size:13px;margin-bottom:16px;line-height:1.5;}
+.idea-card-actions{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
+.btn-log-run{
+  background:var(--green-bg);color:var(--green);
+  border:1px solid var(--green-b);font-size:11px;
+  padding:4px 10px;border-radius:20px;font-weight:700;
+  cursor:pointer;font-family:var(--font);transition:all .12s;
+}
+.btn-log-run:hover{background:var(--green);color:#fff;}
+.btn-delete-idea{
+  background:var(--red-bg);color:var(--red);
+  border:1px solid var(--red-b);font-size:11px;
+  padding:4px 10px;border-radius:20px;font-weight:700;
+  cursor:pointer;font-family:var(--font);transition:all .12s;
+}
+.btn-delete-idea:hover{background:var(--red);color:#fff;}
+
+/* ═══════════════════════════════════════════════
+   SKELETON LOADERS
+═══════════════════════════════════════════════ */
+@keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+.skeleton{
+  background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);
+  background-size:600px 100%;animation:shimmer 1.4s infinite;border-radius:var(--rs);
+}
+.skel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px;}
+.skel-line{height:12px;border-radius:4px;}
+.skel-line.w60{width:60%;}.skel-line.w80{width:80%;}.skel-line.w40{width:40%;}.skel-line.tall{height:36px;}
+
+/* ═══════════════════════════════════════════════
+   PROFILE
+═══════════════════════════════════════════════ */
+.profile-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh);margin-bottom:16px;}
+.profile-section h3{font-size:13px;font-weight:700;margin-bottom:16px;}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;}
+.profile-info-row{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.profile-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.profile-stat{background:var(--surface2);border-radius:var(--rs);padding:12px 14px;text-align:center;}
+.profile-stat-val{font-size:22px;font-weight:700;letter-spacing:-.5px;}
+.profile-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
+.my-idea-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);gap:10px;}
+.my-idea-row:last-child{border-bottom:none;}
+.my-idea-title{font-size:13px;font-weight:600;flex:1;}
+
+/* Valid indicators */
 .valid-yes{color:var(--green);font-weight:700;}
 .valid-no{color:var(--red);font-size:11px;}
-select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);color:var(--text);}
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-::-webkit-scrollbar-track{background:transparent;}
+
+hr{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+/* ═══════════════════════════════════════════════
+   MOBILE RESPONSIVE — ≤ 768px
+═══════════════════════════════════════════════ */
+@media(max-width:768px){
+  /* Show hamburger */
+  .hdr-menu-btn{display:flex;}
+  .hdr-btns .btn:not(#btn-logout){display:none;}
+
+  /* Sidebar: off-canvas drawer */
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;
+    height:100vh;z-index:350;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    padding-top:calc(var(--hdr-h) + 12px);
+    box-shadow:none;
+  }
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.18);}
+  .sidebar-backdrop.open{display:block;}
+
+  /* Main paddings */
+  .main{padding:16px 14px;}
+
+  /* Grids collapse */
+  .g4{grid-template-columns:1fr 1fr;}
+  .g3{grid-template-columns:1fr 1fr;}
+  .g2{grid-template-columns:1fr;}
+  .frow-4{grid-template-columns:1fr 1fr;}
+  .frow-3{grid-template-columns:1fr 1fr;}
+  .frow-2{grid-template-columns:1fr 1fr;}
+  .report-stats{grid-template-columns:1fr 1fr;}
+  .page-hd-row{flex-direction:column;align-items:stretch;}
+  .page-hd-row > .btn,.page-hd-row > div{width:100%;}
+
+  /* Modal full-screen on mobile */
+  .overlay{padding:0;align-items:flex-end;}
+  .modal{border-radius:var(--r) var(--r) 0 0;max-height:92vh;overflow-y:auto;}
+
+  /* Tables get horizontal scroll */
+  .tbl-wrap table{min-width:560px;}
+
+  /* Metric values slightly smaller */
+  .metric-val{font-size:22px;}
+
+  /* Header */
+  .hdr{padding:0 14px;}
+  .hdr-title{font-size:13px;}
+
+  /* Photo grid larger on mobile */
+  .photo-preview-grid{grid-template-columns:repeat(3,1fr);}
+}
+
+@media(max-width:420px){
+  .g4{grid-template-columns:1fr 1fr;}
+  .frow-2{grid-template-columns:1fr;}
+  .frow-4{grid-template-columns:1fr 1fr;}
+}
+
+/* ═══════════════════════════════════════════════
+   PRINT
+═══════════════════════════════════════════════ */
 @media print{
   .sidebar,.hdr,.no-print{display:none!important;}
   .layout{display:block;}
@@ -178,112 +596,74 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
   #panel-report{display:block!important;}
 }
 
-/* ── NATIONAL HUB STYLES ── */
-.idea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px;}
-.idea-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:8px;position:relative;transition:box-shadow .15s;}
-.idea-card:hover{box-shadow:var(--shm);}
-.idea-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-.idea-card-title{font-size:14px;font-weight:700;flex:1;}
-.proven-badge{display:inline-flex;align-items:center;gap:4px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);border-radius:20px;font-size:10px;font-weight:700;padding:2px 8px;white-space:nowrap;flex-shrink:0;}
-.idea-card-desc{font-size:12px;color:var(--text2);line-height:1.5;}
-.idea-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-wrap:wrap;gap:6px;}
-.idea-impact{font-size:12px;font-weight:600;color:var(--blue);}
-.idea-submitter{font-size:11px;color:var(--text3);}
-.idea-link{font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;}
-.idea-link:hover{text-decoration:underline;}
-.planner-table-wrap{margin-top:16px;}
-.planner-empty{text-align:center;padding:48px 20px;color:var(--text3);}
-.hub-alert{background:var(--blue-bg);border-left:3px solid var(--blue);border-radius:var(--rs);padding:11px 14px;font-size:13px;margin-bottom:16px;line-height:1.5;}
-.profile-banner{background:var(--amber-bg);border:1px solid var(--amber-b);border-radius:var(--r);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;}
-.profile-banner strong{color:var(--amber);}
-
-/* ── SKELETON LOADERS ── */
-@keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
-.skeleton{background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);background-size:600px 100%;animation:shimmer 1.4s infinite;border-radius:var(--rs);}
-.skel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px;}
-.skel-line{height:12px;border-radius:4px;}
-.skel-line.w60{width:60%;}
-.skel-line.w80{width:80%;}
-.skel-line.w40{width:40%;}
-.skel-line.w100{width:100%;}
-.skel-line.tall{height:36px;}
-
-/* ── LOG RUN BUTTON ON IDEA CARDS ── */
-.idea-card-actions{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;}
-.btn-log-run{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;}
-.btn-log-run:hover{background:var(--green);color:#fff;}
-.btn-log-run:disabled{opacity:.5;cursor:not-allowed;}
-.btn-delete-idea{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b,#fca5a5);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;}
-.btn-delete-idea:hover{background:var(--red);color:#fff;}
-
-/* ── PROFILE PANEL ── */
-.profile-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh);margin-bottom:16px;}
-.profile-section h3{font-size:13px;font-weight:700;margin-bottom:16px;color:var(--text);}
-.profile-avatar{width:56px;height:56px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;}
-.profile-info-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-.profile-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-.profile-stat{background:var(--surface2);border-radius:var(--rs);padding:12px 14px;text-align:center;}
-.profile-stat-val{font-size:22px;font-weight:700;letter-spacing:-.5px;}
-.profile-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
-.my-idea-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);gap:10px;}
-.my-idea-row:last-child{border-bottom:none;}
-.my-idea-title{font-size:13px;font-weight:600;flex:1;}
-.my-idea-impact{font-size:12px;color:var(--blue);font-weight:600;white-space:nowrap;}
-
-/* Auth Overlay Styles */
-#auth-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.auth-card {
-    width: 350px;
-    text-align: center;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 30px;
-    box-shadow: var(--shm);
-}
+/* ═══════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════ */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::-webkit-scrollbar-track{background:transparent;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════
+     AUTH OVERLAY
+══════════════════════════════════════════ -->
 <div id="auth-overlay">
   <div class="auth-card">
-    <div class="hdr-mark" style="margin: 0 auto 15px;">BL</div>
-    <h2 style="margin-bottom: 20px;">Ambassador Hub</h2>
-    <div class="field"><input type="email" id="auth-email" placeholder="Email"></div>
-    <div class="field"><input type="password" id="auth-pass" placeholder="Password"></div>
-    <button class="btn btn-primary" id="btn-login" style="width:100%; margin-bottom:10px;">Login</button>
-    <button class="btn" id="btn-signup" style="width:100%;">Create Account</button>
-    <p id="auth-error" style="color:var(--red); font-size:12px; margin-top:10px;"></p>
+    <div class="auth-logo">BL</div>
+    <h2>Ambassador Hub</h2>
+    <p>Bambu Lab School Ambassador Program</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@university.edu" autocomplete="email"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="auth-pass" placeholder="Password" autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-primary" id="btn-login" style="width:100%;justify-content:center;margin-bottom:8px;">
+      Sign In
+    </button>
+    <button class="btn" id="btn-signup" style="width:100%;justify-content:center;">
+      Create Account
+    </button>
+    <p id="auth-error" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px;text-align:center;"></p>
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
 <header class="hdr">
-  <div class="hdr-logo">
-    <div class="hdr-mark">BL</div>
-    <div>
-      <div class="hdr-title">Bambu Lab · School Ambassador</div>
-      <div class="hdr-sub">May 2026 – May 2027 · Global Hub</div>
-      <div id="hdr-username" style="font-size:12px;color:var(--text2);margin-top:3px;"></div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="hdr-menu-btn no-print" id="btn-mobile-menu" aria-label="Open menu">☰</button>
+    <div class="hdr-logo">
+      <div class="hdr-mark">BL</div>
+      <div>
+        <div class="hdr-title">Bambu Lab · School Ambassador</div>
+        <div class="hdr-sub" id="hdr-username">May 2026 – May 2027</div>
+      </div>
     </div>
   </div>
   <div class="hdr-btns no-print">
+    <button class="btn btn-green btn-sm" id="btn-goto-report">📋 Report</button>
     <button class="btn btn-sm" id="btn-logout">Logout</button>
-    <button class="btn btn-green btn-sm" id="btn-goto-report">📋 Activity Report</button>
   </div>
 </header>
 
+<!-- ══════════════════════════════════════════
+     SIDEBAR BACKDROP (mobile)
+══════════════════════════════════════════ -->
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+<!-- ══════════════════════════════════════════
+     LAYOUT
+══════════════════════════════════════════ -->
 <div class="layout">
-  <nav class="sidebar no-print">
+
+  <!-- SIDEBAR NAV -->
+  <nav class="sidebar no-print" id="sidebar">
     <div class="nav-group">
       <div class="nav-group-label">Overview</div>
       <button class="nav-btn active" data-panel="overview"><span class="nav-icon">📊</span>Dashboard</button>
@@ -293,7 +673,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
     <div class="nav-group">
       <div class="nav-group-label">Events</div>
       <button class="nav-btn" data-panel="events"><span class="nav-icon">📅</span>All Events</button>
-      <button class="nav-btn" id="nav-add-event"><span class="nav-icon">＋</span>Add Event</button>
+      <button class="nav-btn" id="nav-add-event"><span class="nav-icon">＋</span>Log Event</button>
     </div>
     <div class="nav-div"></div>
     <div class="nav-group">
@@ -302,20 +682,26 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
     </div>
     <div class="nav-div"></div>
     <div class="nav-group">
-      <div class="nav-group-label">National Hub</div>
+      <div class="nav-group-label">Community</div>
       <button class="nav-btn" data-panel="globalimpact"><span class="nav-icon">🌍</span>Global Impact</button>
       <button class="nav-btn" data-panel="marketplace"><span class="nav-icon">💡</span>Idea Board</button>
       <button class="nav-btn" data-panel="profile"><span class="nav-icon">👤</span>My Profile</button>
     </div>
   </nav>
 
+  <!-- MAIN -->
   <main class="main">
+
+    <!-- ─── OVERVIEW ─── -->
     <div id="panel-overview" class="panel show">
       <div class="page-hd"><h1>Dashboard</h1><p>Your ambassador program at a glance.</p></div>
-      <div class="g4" id="ov-metrics"></div>
-      <div class="g2 mt16">
+      <div class="g4" id="ov-metrics" style="margin-bottom:16px;"></div>
+      <div class="g2">
         <div class="card">
-          <div class="card-hd-row"><span class="card-hd">Quarterly progress</span><span id="ov-qtr-lbl" style="font-size:12px;color:var(--text2);font-weight:600;"></span></div>
+          <div class="card-hd-row">
+            <span class="card-hd">Quarterly progress</span>
+            <span id="ov-qtr-lbl" style="font-size:12px;color:var(--text2);font-weight:600;"></span>
+          </div>
           <div id="ov-qtr-bars"></div>
           <hr>
           <div class="card-hd" style="margin-bottom:12px;">Annual goals</div>
@@ -325,7 +711,7 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
           <div class="card" style="margin-bottom:16px;">
             <div class="card-hd-row">
               <span class="card-hd">Recent events</span>
-              <button class="btn btn-primary btn-sm no-print" id="ov-add-btn">+ Add Event</button>
+              <button class="btn btn-primary btn-sm no-print" id="ov-add-btn">+ Log Event</button>
             </div>
             <div id="ov-recent"></div>
           </div>
@@ -334,48 +720,75 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
             <div id="ov-badges"></div>
             <hr>
             <div style="font-size:12px;color:var(--text2);">
-              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);"><span>Distinguished Ambassador</span><span style="font-weight:700;color:var(--green);">12 events + 2 badges</span></div>
-              <div style="display:flex;justify-content:space-between;padding:5px 0;"><span>Legendary Ambassador</span><span style="font-weight:700;color:var(--blue);">20 events + 4 badges</span></div>
+              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+                <span>Distinguished Ambassador</span><span style="font-weight:700;color:var(--green);">12 events + 2 badges</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:5px 0;">
+                <span>Legendary Ambassador</span><span style="font-weight:700;color:var(--blue);">20 events + 4 badges</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- ─── ALL EVENTS ─── -->
     <div id="panel-events" class="panel">
       <div class="page-hd-row">
-        <div class="page-hd"><h1>All Events</h1><p>Full log — attendance, location, validity, submission status.</p></div>
-        <button class="btn btn-primary no-print" id="ev-add-btn">+ Add Event</button>
+        <div class="page-hd"><h1>All Events</h1><p>Full log — attendance, location, validity, status.</p></div>
+        <button class="btn btn-primary no-print" id="ev-add-btn">+ Log Event</button>
       </div>
-      <div class="card mt16" style="padding:14px 20px;">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-          <select class="filter-sel" id="filter-status"><option value="">All statuses</option><option value="planned">Planned</option><option value="done">Completed</option></select>
-          <select class="filter-sel" id="filter-quarter"><option value="">All quarters</option><option value="Q1">Q1 · Jan–Mar</option><option value="Q2">Q2 · Apr–Jun</option><option value="Q3">Q3 · Jul–Sep</option><option value="Q4">Q4 · Oct–Dec</option></select>
-          <select class="filter-sel" id="filter-valid"><option value="">All events</option><option value="yes">Valid only</option><option value="no">Invalid only</option></select>
+      <div class="card mt16" style="padding:14px 18px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <select class="filter-sel" id="filter-status">
+            <option value="">All statuses</option>
+            <option value="planned">Planned</option>
+            <option value="done">Completed</option>
+          </select>
+          <select class="filter-sel" id="filter-quarter">
+            <option value="">All quarters</option>
+            <option value="Q1">Q1 · Jan–Mar</option>
+            <option value="Q2">Q2 · Apr–Jun</option>
+            <option value="Q3">Q3 · Jul–Sep</option>
+            <option value="Q4">Q4 · Oct–Dec</option>
+          </select>
+          <select class="filter-sel" id="filter-valid">
+            <option value="">All events</option>
+            <option value="yes">Valid only</option>
+            <option value="no">Invalid only</option>
+          </select>
           <span id="ev-count" style="font-size:12px;color:var(--text3);margin-left:auto;"></span>
         </div>
       </div>
       <div class="card mt16" style="padding:0;overflow:hidden;">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>#</th><th>Event name</th><th>Date</th><th>Location</th><th>Type</th><th>Attendees</th><th>Duration</th><th>Quarter</th><th>Valid?</th><th class="no-print">Actions</th></tr></thead>
+            <thead>
+              <tr>
+                <th>#</th><th>Event name</th><th>Date</th><th>Location</th>
+                <th>Type</th><th>Attendees</th><th>Duration</th>
+                <th>Quarter</th><th>Valid?</th><th>Photos</th>
+                <th class="no-print">Actions</th>
+              </tr>
+            </thead>
             <tbody id="ev-tbody"></tbody>
           </table>
           <div id="ev-empty" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:64px 24px;text-align:center;">
-            <div style="font-size:48px;margin-bottom:16px;">📅</div>
-            <div style="font-size:16px;font-weight:700;color:var(--text1);margin-bottom:8px;">No events yet</div>
-            <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Log your first event to start tracking your ambassador activity.</div>
-            <button class="btn btn-primary" onclick="document.getElementById('nav-add-event').click()">+ Add Your First Event</button>
+            <div style="font-size:48px;margin-bottom:14px;">📅</div>
+            <div style="font-size:16px;font-weight:700;margin-bottom:6px;">No events yet</div>
+            <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Log your first event to start tracking your impact.</div>
+            <button class="btn btn-primary" id="ev-empty-add-btn">+ Log Your First Event</button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- ─── ACTIVITY REPORT ─── -->
     <div id="panel-report" class="panel">
       <div class="page-hd-row">
         <div class="page-hd"><h1>Activity Report</h1><p>A clean summary of your ambassador activity.</p></div>
-        <div style="display:flex;gap:8px;" class="no-print">
-          <button class="btn btn-sm" id="print-btn">🖨 Print / Save PDF</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" class="no-print">
+          <button class="btn btn-sm" id="print-btn">🖨 Print / PDF</button>
           <button class="btn btn-green btn-sm" id="copy-email-btn">✉ Copy email draft</button>
         </div>
       </div>
@@ -395,36 +808,40 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
               <thead><tr><th>#</th><th>Event name</th><th>Date</th><th>Location</th><th>Type</th><th>Attendees</th><th>Duration</th><th>Valid?</th></tr></thead>
               <tbody id="rpt-tbody"></tbody>
             </table>
-            <div id="rpt-empty" class="empty" style="display:none;"><div class="empty-ico">📋</div><div class="empty-txt">No completed events yet.</div></div>
+            <div id="rpt-empty" class="empty" style="display:none;">
+              <div class="empty-ico">📋</div><div class="empty-txt">No completed events yet.</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- ─── IDEA BOARD ─── -->
     <div id="panel-marketplace" class="panel">
       <div class="page-hd-row">
-        <div class="page-hd"><h1>💡 Idea Board</h1><p>Event ideas shared by ambassadors nationwide. Add what's worked at your school.</p></div>
-        <div style="display:flex;gap:8px;">
+        <div class="page-hd"><h1>💡 Idea Board</h1><p>Event ideas shared by ambassadors nationwide.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-sm" id="mkt-refresh-btn">↺ Refresh</button>
-          <button class="btn btn-primary no-print" id="mkt-share-btn">+ Share an Idea</button>
+          <button class="btn btn-primary no-print" id="mkt-share-btn">+ Share Idea</button>
         </div>
       </div>
-      <div class="hub-alert">Ideas are shared across all ambassadors. <strong>Proven Ideas</strong> are flagged when any ambassador logs attendees against them — the more ambassadors run it, the higher the impact score.</div>
-      <div id="mkt-profile-banner" class="profile-banner" style="display:none;">
-        <span>⚠️ <strong>Set your display name</strong> so your submitted ideas show your name.</span>
+      <div class="hub-alert">Ideas are shared across all ambassadors. <strong>Proven Ideas</strong> are flagged when any ambassador logs attendees against them.</div>
+      <div id="mkt-profile-banner" style="display:none;background:var(--amber-bg);border:1px solid var(--amber-b);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;display:none;align-items:center;justify-content:space-between;gap:10px;font-size:13px;">
+        <span>⚠️ <strong>Set your display name</strong> so submitted ideas show your name.</span>
         <button class="btn btn-sm" id="mkt-set-name-btn">Set Name</button>
       </div>
       <div id="mkt-loading" class="idea-grid">
-        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div><div class="skel-line w40 skeleton"></div></div>
-        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div><div class="skel-line w40 skeleton"></div></div>
-        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div><div class="skel-line w40 skeleton"></div></div>
+        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div></div>
+        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div></div>
+        <div class="skel-card"><div class="skel-line tall skeleton"></div><div class="skel-line w80 skeleton"></div><div class="skel-line w60 skeleton"></div></div>
       </div>
       <div id="mkt-grid" class="idea-grid" style="display:none;"></div>
-      <div id="mkt-empty" class="empty" style="display:none;"><div class="empty-ico">💡</div><div class="empty-txt">No ideas yet. Be the first to share one!</div></div>
-
-
+      <div id="mkt-empty" class="empty" style="display:none;"><div class="empty-ico">💡</div><div class="empty-txt">No ideas yet. Be the first!</div></div>
     </div>
+
+    <!-- ─── PROFILE ─── -->
     <div id="panel-profile" class="panel">
-      <div class="page-hd"><h1>👤 My Profile</h1><p>Your hub identity and personal impact stats.</p></div>
+      <div class="page-hd"><h1>👤 My Profile</h1><p>Your identity and personal impact stats.</p></div>
       <div class="g2 mt16">
         <div>
           <div class="profile-section">
@@ -439,10 +856,9 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
             <div class="field">
               <label>Display Name</label>
               <div style="display:flex;gap:8px;">
-                <input type="text" id="prof-name-input" placeholder="e.g. Alex - UW Madison" style="flex:1;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;"/>
+                <input type="text" id="prof-name-input" placeholder="e.g. Alex · UW Madison" style="flex:1;"/>
                 <button class="btn btn-primary" id="prof-save-name-btn">Save</button>
               </div>
-              
             </div>
           </div>
           <div class="profile-section">
@@ -456,114 +872,104 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
         </div>
         <div class="profile-section">
           <h3>My Submitted Ideas</h3>
-          <div id="prof-ideas-list"><div style="color:var(--text3);font-size:13px;">Loading your ideas...</div></div>
+          <div id="prof-ideas-list"><div style="color:var(--text3);font-size:13px;">Loading...</div></div>
         </div>
       </div>
     </div>
 
+    <!-- ─── LIVE CHECK-IN ─── -->
     <div id="panel-livecheck" class="panel">
-      <div class="page-hd-row">
-        <div class="page-hd"><h1>📡 Live Check-In</h1><p>Generate a QR code for your event and track attendance in real time.</p></div>
-      </div>
-
-      <div id="lc-setup" class="card" style="max-width:560px;">
+      <div class="page-hd"><h1>📡 Live Check-In</h1><p>Generate a QR code and track attendance in real time.</p></div>
+      <div id="lc-setup" class="card" style="max-width:540px;">
         <div class="card-hd" style="margin-bottom:16px;">Start a Live Session</div>
         <div class="field">
           <label>Select an event</label>
-          <select id="lc-event-select" style="width:100%;padding:9px 11px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);">
+          <select id="lc-event-select" style="width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rs);font-family:var(--font);font-size:13px;background:var(--surface);">
             <option value="">— Choose a planned event —</option>
             <option value="__new__">＋ Start a new event now</option>
           </select>
         </div>
-        <!-- New event inline form — shown when "Start a new event" is selected -->
         <div id="lc-new-form" style="display:none;border-top:1px solid var(--border);margin-top:8px;padding-top:16px;">
           <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em;">New Event Details</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div class="field" style="margin:0;"><label>Event Name *</label><input type="text" id="lc-new-name" placeholder="e.g. STEM Workshop"/></div>
+          <div class="frow frow-2">
+            <div class="field" style="margin:0;"><label>Event Name <span class="req">*</span></label><input type="text" id="lc-new-name" placeholder="e.g. STEM Workshop"/></div>
             <div class="field" style="margin:0;"><label>Type</label>
-              <select id="lc-new-type" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);">
-                <option value="workshop">Workshop</option><option value="demo">Demo</option><option value="competition">Competition</option>
-                <option value="class">Class</option><option value="club">Club</option><option value="fair">Fair</option><option value="other">Other</option>
+              <select id="lc-new-type" style="width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rs);font-family:var(--font);font-size:13px;background:var(--surface);">
+                <option value="workshop">Workshop</option><option value="demo">Demo</option>
+                <option value="competition">Competition</option><option value="class">Class</option>
+                <option value="club">Club</option><option value="fair">Fair</option><option value="other">Other</option>
               </select>
             </div>
             <div class="field" style="margin:0;"><label>Location</label><input type="text" id="lc-new-location" placeholder="e.g. School gym"/></div>
             <div class="field" style="margin:0;"><label>Quarter</label>
-              <select id="lc-new-quarter" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);">
+              <select id="lc-new-quarter" style="width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rs);font-family:var(--font);font-size:13px;background:var(--surface);">
                 <option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option>
               </select>
             </div>
           </div>
         </div>
-        <button class="btn btn-primary" id="lc-start-btn" style="width:100%;margin-top:16px;">▶ Start Event &amp; Generate QR</button>
+        <button class="btn btn-primary" id="lc-start-btn" style="width:100%;justify-content:center;margin-top:16px;">▶ Start Event &amp; Generate QR</button>
       </div>
-
       <div id="lc-session" style="display:none;">
-        <div style="display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start;max-width:760px;">
-          <div class="card" style="text-align:center;min-width:220px;">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;">Scan to Check In</div>
-            <div id="lc-qr" style="width:180px;height:180px;margin:0 auto 12px;"></div>
-            <div style="font-size:11px;color:var(--text3);word-break:break-all;" id="lc-url-display"></div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;max-width:720px;">
+          <div class="card" style="text-align:center;min-width:210px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Scan to Check In</div>
+            <div id="lc-qr" style="width:176px;height:176px;margin:0 auto 10px;"></div>
+            <div style="font-size:10px;color:var(--text3);word-break:break-all;" id="lc-url-display"></div>
           </div>
           <div>
-            <div class="card" style="margin-bottom:16px;">
-              <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:6px;" id="lc-event-name-display">Event</div>
-              <div style="display:flex;align-items:flex-end;gap:24px;margin-bottom:4px;">
-                <div><div style="font-size:48px;font-weight:800;color:var(--green);line-height:1;" id="lc-count">0</div><div style="font-size:13px;color:var(--text2);margin-top:4px;">attendees checked in</div></div>
-                <div><div style="font-size:32px;font-weight:700;color:var(--text2);line-height:1;font-variant-numeric:tabular-nums;" id="lc-timer">00:00</div><div style="font-size:13px;color:var(--text3);margin-top:4px;">elapsed</div></div>
+            <div class="card" style="margin-bottom:14px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px;" id="lc-event-name-display">Event</div>
+              <div style="display:flex;align-items:flex-end;gap:20px;">
+                <div><div style="font-size:48px;font-weight:800;color:var(--green);line-height:1;" id="lc-count">0</div><div style="font-size:12px;color:var(--text2);margin-top:4px;">attendees</div></div>
+                <div><div style="font-size:30px;font-weight:700;color:var(--text2);font-variant-numeric:tabular-nums;" id="lc-timer">00:00</div><div style="font-size:12px;color:var(--text3);margin-top:4px;">elapsed</div></div>
               </div>
               <div style="font-size:11px;color:var(--text3);margin-top:8px;" id="lc-last-scan"></div>
             </div>
             <div style="display:flex;gap:8px;">
-              <button class="btn btn-green" id="lc-end-btn" style="flex:1;">✓ End Session &amp; Save</button>
+              <button class="btn btn-green" id="lc-end-btn" style="flex:1;justify-content:center;">✓ End &amp; Save</button>
               <button class="btn" id="lc-cancel-btn">Cancel</button>
             </div>
-            <div style="font-size:11px;color:var(--text3);margin-top:8px;">Ending the session saves the live count to the event's attendee field.</div>
           </div>
         </div>
-
-        <div class="card" style="margin-top:20px;max-width:760px;">
-          <div class="card-hd" style="margin-bottom:12px;">Live Scan Log</div>
-          <div id="lc-scan-list" style="max-height:220px;overflow-y:auto;font-size:12px;color:var(--text2);">
+        <div class="card" style="margin-top:18px;max-width:720px;">
+          <div class="card-hd" style="margin-bottom:10px;">Live Scan Log</div>
+          <div id="lc-scan-list" style="max-height:200px;overflow-y:auto;font-size:12px;color:var(--text2);">
             <div style="color:var(--text3);">No scans yet — waiting for attendees...</div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- ─── GLOBAL IMPACT ─── -->
     <div id="panel-globalimpact" class="panel">
       <div class="page-hd-row">
         <div class="page-hd"><h1>🌍 Global Impact</h1><p>Live stats across all Bambu Lab ambassadors worldwide.</p></div>
         <div id="gi-last-updated" style="font-size:11px;color:var(--text3);align-self:flex-end;"></div>
       </div>
-
-      <!-- Top stats -->
-      <div class="g4" id="gi-stats">
-        <div class="metric c-blue"><div class="metric-lbl">Total Events Run</div><div class="metric-val" id="gi-total-events">—</div></div>
-        <div class="metric c-green"><div class="metric-lbl">Total People Reached</div><div class="metric-val" id="gi-total-reached">—</div></div>
-        <div class="metric c-amber"><div class="metric-lbl">Total Hours Delivered</div><div class="metric-val" id="gi-total-hours">—</div></div>
+      <div class="g4" id="gi-stats" style="margin-bottom:16px;">
+        <div class="metric c-blue"><div class="metric-lbl">Total Events</div><div class="metric-val" id="gi-total-events">—</div></div>
+        <div class="metric c-green"><div class="metric-lbl">People Reached</div><div class="metric-val" id="gi-total-reached">—</div></div>
+        <div class="metric c-amber"><div class="metric-lbl">Hours Delivered</div><div class="metric-val" id="gi-total-hours">—</div></div>
         <div class="metric c-blue"><div class="metric-lbl">Active Ambassadors</div><div class="metric-val" id="gi-total-ambassadors">—</div></div>
       </div>
-
-      <!-- Chart toggle + charts -->
       <div class="card mt16">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <span class="card-hd">Activity Over Time</span>
           <div style="display:flex;gap:0;border:1px solid var(--border2);border-radius:6px;overflow:hidden;">
-            <button id="gi-toggle-monthly" onclick="window.setGiView('monthly')" style="padding:5px 14px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--green);color:#fff;font-family:'Inter',sans-serif;">Monthly</button>
-            <button id="gi-toggle-quarterly" onclick="window.setGiView('quarterly')" style="padding:5px 14px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--surface);color:var(--text2);font-family:'Inter',sans-serif;">Quarterly</button>
+            <button id="gi-toggle-monthly" onclick="window.setGiView('monthly')" style="padding:5px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--green);color:#fff;font-family:var(--font);">Monthly</button>
+            <button id="gi-toggle-quarterly" onclick="window.setGiView('quarterly')" style="padding:5px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--surface);color:var(--text2);font-family:var(--font);">Quarterly</button>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-          <div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Events Run</div><div style="position:relative;height:200px;"><canvas id="gi-chart-events"></canvas></div></div>
-          <div><div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">People Reached</div><div style="position:relative;height:200px;"><canvas id="gi-chart-reached"></canvas></div></div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Events Run</div><div style="position:relative;height:190px;"><canvas id="gi-chart-events"></canvas></div></div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">People Reached</div><div style="position:relative;height:190px;"><canvas id="gi-chart-reached"></canvas></div></div>
         </div>
       </div>
-
-      <!-- Live feed -->
       <div class="card mt16" style="margin-bottom:32px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
           <span class="card-hd">Live Activity Feed</span>
           <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#dc2626;background:#fff1f2;border:1px solid #fecdd3;border-radius:999px;padding:2px 8px;">● LIVE</span>
-          <span style="font-size:11px;color:var(--text3);margin-left:2px;">20 most recent events across all ambassadors</span>
         </div>
         <div class="tbl-wrap">
           <table>
@@ -573,23 +979,156 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
         </div>
       </div>
     </div>
+
   </main>
+</div><!-- .layout -->
+
+<!-- ══════════════════════════════════════════
+     EVENT MODAL — full Google Form-matching fields
+══════════════════════════════════════════ -->
+<div class="overlay" id="event-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="modal-title">Log Event</h2>
+      <button class="btn btn-sm" id="modal-close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Section 1: Basic Info -->
+      <div class="fsec">
+        <div class="fsec-title">Event Details</div>
+        <div class="frow frow-2">
+          <div class="field">
+            <label>Event Title <span class="req">*</span></label>
+            <input type="text" id="f-name" placeholder="e.g. STEM Workshop at Lincoln High"/>
+          </div>
+          <div class="field">
+            <label>Activity Type</label>
+            <select id="f-type">
+              <option value="workshop">Workshop</option>
+              <option value="demo">Demo / Showcase</option>
+              <option value="competition">Competition</option>
+              <option value="class">Classroom Visit</option>
+              <option value="club">Club Meeting</option>
+              <option value="fair">Science / Maker Fair</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Location / Venue</label>
+          <input type="text" id="f-location" placeholder="e.g. Lincoln High School, Room 201"/>
+        </div>
+        <div class="frow frow-4">
+          <div class="field">
+            <label>Event Date <span class="req">*</span></label>
+            <input type="date" id="f-date"/>
+          </div>
+          <div class="field">
+            <label>Duration (min) <span class="req">*</span></label>
+            <input type="number" id="f-duration" placeholder="60" min="1"/>
+          </div>
+          <div class="field">
+            <label>Quarter</label>
+            <select id="f-quarter">
+              <option value="Q1">Q1 · Jan–Mar</option>
+              <option value="Q2">Q2 · Apr–Jun</option>
+              <option value="Q3">Q3 · Jul–Sep</option>
+              <option value="Q4">Q4 · Oct–Dec</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <select id="f-status">
+              <option value="done" selected>Completed</option>
+              <option value="planned">Planned</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Participants -->
+      <div class="fsec">
+        <div class="fsec-title">Participants</div>
+        <div class="frow frow-2">
+          <div class="field">
+            <label>Number of Participants <span class="req">*</span></label>
+            <input type="number" id="f-attendees" placeholder="15" min="0"/>
+            <div class="field-hint">Total students/attendees at the event.</div>
+          </div>
+          <div class="field">
+            <label>Linked Idea (optional)</label>
+            <select id="f-idea-link">
+              <option value="">— None —</option>
+            </select>
+            <div class="field-hint">Link to an Idea Board idea for impact tracking.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Activity Summary -->
+      <div class="fsec">
+        <div class="fsec-title">Activity Summary</div>
+        <div class="field">
+          <label>Activity Summary <span class="req">*</span></label>
+          <textarea id="f-summary" placeholder="Briefly describe what happened at the event: key activities, demonstrations, what participants learned or made..."></textarea>
+          <div class="field-hint">Match what you'd write in the Google Form — what did you do, what Bambu Lab products were shown?</div>
+        </div>
+        <div class="field" style="margin-top:4px;">
+          <label>Notes / Feedback (optional)</label>
+          <textarea id="f-notes" placeholder="Any feedback from attendees, things that went well or could improve, follow-up actions..." style="min-height:60px;"></textarea>
+        </div>
+      </div>
+
+      <!-- Section 4: Photo Proof -->
+      <div class="fsec">
+        <div class="fsec-title">Photo Proof</div>
+        <div class="alert alert-blue" style="margin-bottom:14px;">
+          <strong>Upload up to 5 photos</strong> — compressed automatically on your device. Or paste a link (Google Drive, Imgur, etc.) below.
+        </div>
+
+        <!-- Upload widget -->
+        <div class="photo-upload-area" id="photo-upload-area">
+          <input type="file" id="f-photo-files" accept="image/*" multiple/>
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-txt">Tap to upload photos</div>
+          <div class="photo-upload-hint">JPG, PNG · up to 5 photos · compressed on-device</div>
+        </div>
+        <div class="photo-compress-indicator" id="photo-compress-indicator">⏳ Compressing photos…</div>
+        <div class="photo-preview-grid" id="photo-preview-grid"></div>
+        <div class="photo-count-label" id="photo-count-label"></div>
+
+        <!-- Fallback link -->
+        <div class="field" style="margin-top:12px;">
+          <label>Photo Link (fallback)</label>
+          <input type="text" id="f-photo-link" placeholder="https://drive.google.com/… or Imgur link"/>
+          <div class="field-hint">Optional — used only if you don't upload photos directly.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:4px;">
+        <button class="btn" id="modal-cancel-btn">Cancel</button>
+        <button class="btn btn-primary" id="modal-save-btn">💾 Save Event</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-
-
+<!-- ══════════════════════════════════════════
+     IDEA MODAL
+══════════════════════════════════════════ -->
 <div class="overlay" id="idea-modal">
-  <div class="modal" style="width:540px;">
+  <div class="modal" style="max-width:520px;">
     <div class="modal-hdr">
       <h2>💡 Share an Idea</h2>
-      <button class="btn btn-sm" id="idea-modal-close-btn">✕ Close</button>
+      <button class="btn btn-sm" id="idea-modal-close-btn">✕</button>
     </div>
     <div class="modal-body">
       <div class="fsec">
         <div class="fsec-title">Idea details</div>
-        <div class="field"><label>Title *</label><input type="text" id="fi-title" placeholder="e.g. Library 3D Printing Workshop"/></div>
-        <div class="field"><label>Description *</label><textarea id="fi-desc" placeholder="What's the format? What makes it work? Any tips..."></textarea></div>
-        <div class="field"><label>Resource Link (optional)</label><input type="url" id="fi-link" placeholder="https://..."/><div class="field-hint">Slide deck, guide, or useful URL.</div></div>
+        <div class="field"><label>Title <span class="req">*</span></label><input type="text" id="fi-title" placeholder="e.g. Library 3D Printing Workshop"/></div>
+        <div class="field"><label>Description <span class="req">*</span></label><textarea id="fi-desc" placeholder="What's the format? What makes it work? Any tips..."></textarea></div>
+        <div class="field"><label>Resource Link (optional)</label><input type="url" id="fi-link" placeholder="https://…"/></div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button class="btn" id="idea-modal-cancel-btn">Cancel</button>
@@ -599,47 +1138,28 @@ select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius
   </div>
 </div>
 
-<div class="overlay" id="event-modal">
-    <div class="modal">
-      <div class="modal-hdr">
-        <h2 id="modal-title">Add New Event</h2>
-        <button class="btn btn-sm" id="modal-close-btn">✕ Close</button>
-      </div>
-      <div class="modal-body">
-        <div class="fsec">
-          <div class="fsec-title">Event details</div>
-          <div class="frow frow-2">
-            <div class="field"><label>Event name *</label><input type="text" id="f-name" placeholder="e.g. STEM Workshop"/></div>
-            <div class="field"><label>Event type</label><select id="f-type"><option value="workshop">Workshop</option><option value="demo">Demo</option><option value="competition">Competition</option><option value="class">Class</option><option value="club">Club</option><option value="fair">Fair</option><option value="other">Other</option></select></div>
-          </div>
-          <div class="field"><label>Location</label><input type="text" id="f-location" placeholder="e.g. School gymnasium"/></div>
-          <div class="frow frow-4">
-            <div class="field"><label>Date *</label><input type="date" id="f-date"/></div>
-            <div class="field"><label>Duration (min) *</label><input type="number" id="f-duration" placeholder="60"/></div>
-            <div class="field"><label>Quarter</label><select id="f-quarter"><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option></select></div>
-            <div class="field"><label>Status</label><select id="f-status"><option value="done" selected>Completed</option><option value="planned">Planned</option></select></div>
-          </div>
-          <div class="frow frow-2">
-            <div class="field"><label>Attendees *</label><input type="number" id="f-attendees" placeholder="15"/></div>
-            <div class="field"><label>Linked Idea (optional)</label><select id="f-idea-link"><option value="">— None —</option></select><div class="field-hint">Links this event to an Idea Marketplace idea for impact tracking.</div></div>
-          </div>
-          <div class="field"><label>Photo Link (optional)</label><input type="text" id="f-photo-link" placeholder="Google Drive folder or Imgur link"/></div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:8px;">
-            <button class="btn" id="modal-cancel-btn">Cancel</button>
-            <button class="btn btn-primary" id="modal-save-btn">Save event</button>
-        </div>
-      </div>
-    </div>
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="this.classList.remove('open')">
+  <img id="lightbox-img" src="" alt=""/>
 </div>
 
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
 <script type="module">
-// ── FIREBASE SETUP ──
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, increment, getDocs, where } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { initializeApp }          from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAnalytics }           from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+import {
+  getAuth, onAuthStateChanged,
+  signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc,
+  collection, query, orderBy, onSnapshot,
+  addDoc, updateDoc, deleteDoc, increment, getDocs
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
+/* ── FIREBASE ── */
 const firebaseConfig = {
   apiKey: "AIzaSyC3ZA_XQyhcOZpEK8WbP5UbuxQnnKwFGW8",
   authDomain: "bambu-ambassador-hub.firebaseapp.com",
@@ -649,170 +1169,307 @@ const firebaseConfig = {
   appId: "1:54146763962:web:06c74942d25b008e8c0683",
   measurementId: "G-2VHL7TJGCS"
 };
-
-const app = initializeApp(firebaseConfig);
+const app       = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
-let currentUser = null;
+const auth      = getAuth(app);
+const db        = getFirestore(app);
 
-// ── GLOBAL DATA ──
-var DB = { events:[], badges:{workshop:false,creative:false,community:false}, schedChecks:{}, schedTasks:{} };
-var editIdx = null;
+/* ── STATE ── */
+let currentUser      = null;
+let editIdx          = null;
+let pendingPhotos    = []; // array of base64 strings currently staged in form
+let ideasCache       = [];
+let _unsubUserDoc    = null;
+let _unsubIdeas      = null;
+let _unsubGlobal     = null;
+let _hubInitialized  = false;
+let _liveSessionId   = null;
+let _liveEventIdx    = null;
+let _liveNewEvent    = null;
+let _unsubLive       = null;
+let _liveTimerInterval = null;
+let _liveStartTime   = null;
+let _giView          = 'monthly';
+let _giChartEvents   = null;
+let _giChartReached  = null;
+let _giData          = [];
 
-// Track active Firestore listeners so we can tear them down on logout
-let _unsubUserDoc = null;
-let _unsubIdeas = null;
-let _unsubPlanner = null;
-let _hubInitialized = false;
+var DB = {
+  events: [],
+  badges: { workshop: false, creative: false, community: false },
+  schedChecks: {},
+  schedTasks: {}
+};
 
-// ── AUTH LOGIC ──
-const authEmail = document.getElementById('auth-email');
-const authPass = document.getElementById('auth-pass');
-const authError = document.getElementById('auth-error');
-const hdrUsername = document.getElementById('hdr-username');
+/* ══════════════════════════════════════════════
+   MOBILE SIDEBAR TOGGLE
+══════════════════════════════════════════════ */
+const sidebar         = document.getElementById('sidebar');
+const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+const btnMobileMenu   = document.getElementById('btn-mobile-menu');
 
+function openSidebar()  { sidebar.classList.add('open'); sidebarBackdrop.classList.add('open'); }
+function closeSidebar() { sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('open'); }
+btnMobileMenu.onclick  = openSidebar;
+sidebarBackdrop.onclick = closeSidebar;
+
+/* ══════════════════════════════════════════════
+   PHOTO COMPRESSION UTILITIES
+══════════════════════════════════════════════ */
+/**
+ * Compress an image File to a base64 JPEG thumbnail.
+ * maxPx  — max width or height (default 800px for thumbnails)
+ * quality — JPEG quality 0–1 (default 0.72)
+ */
+function compressImage(file, maxPx = 800, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let { width: w, height: h } = img;
+        if (w > maxPx || h > maxPx) {
+          if (w >= h) { h = Math.round((h / w) * maxPx); w = maxPx; }
+          else        { w = Math.round((w / h) * maxPx); h = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ── Photo upload widget ── */
+const photoFilesInput  = document.getElementById('f-photo-files');
+const photoPreviewGrid = document.getElementById('photo-preview-grid');
+const photoCountLabel  = document.getElementById('photo-count-label');
+const photoCompressInd = document.getElementById('photo-compress-indicator');
+const photoUploadArea  = document.getElementById('photo-upload-area');
+const MAX_PHOTOS = 5;
+
+function updatePhotoCountLabel() {
+  if (!pendingPhotos.length) { photoCountLabel.textContent = ''; return; }
+  photoCountLabel.textContent = `${pendingPhotos.length} / ${MAX_PHOTOS} photo${pendingPhotos.length !== 1 ? 's' : ''} selected`;
+}
+
+function renderPhotoPreviews() {
+  photoPreviewGrid.innerHTML = pendingPhotos.map((b64, i) => `
+    <div class="photo-preview-item">
+      <img class="photo-preview-img" src="${b64}" alt="Photo ${i+1}" onclick="window.openLightbox('${b64}')"/>
+      <button class="photo-preview-remove" onclick="window._removePhoto(${i})" title="Remove">✕</button>
+    </div>
+  `).join('');
+  updatePhotoCountLabel();
+}
+
+window._removePhoto = (idx) => {
+  pendingPhotos.splice(idx, 1);
+  renderPhotoPreviews();
+};
+
+photoFilesInput.onchange = async (ev) => {
+  const files = Array.from(ev.target.files || []);
+  if (!files.length) return;
+
+  const slots = MAX_PHOTOS - pendingPhotos.length;
+  if (slots <= 0) {
+    alert(`You can upload up to ${MAX_PHOTOS} photos. Remove some to add more.`);
+    photoFilesInput.value = '';
+    return;
+  }
+  const toProcess = files.slice(0, slots);
+
+  photoCompressInd.style.display = 'block';
+  try {
+    const compressed = await Promise.all(toProcess.map(f => compressImage(f)));
+    pendingPhotos.push(...compressed);
+    renderPhotoPreviews();
+  } catch(e) {
+    console.error('Compression error:', e);
+    alert('Could not process one or more images. Please try again.');
+  } finally {
+    photoCompressInd.style.display = 'none';
+    photoFilesInput.value = '';
+  }
+};
+
+// Drag-and-drop on the upload area
+photoUploadArea.addEventListener('dragover', (e) => { e.preventDefault(); photoUploadArea.classList.add('drag-over'); });
+photoUploadArea.addEventListener('dragleave', () => photoUploadArea.classList.remove('drag-over'));
+photoUploadArea.addEventListener('drop', async (e) => {
+  e.preventDefault();
+  photoUploadArea.classList.remove('drag-over');
+  const files = Array.from(e.dataTransfer.files || []).filter(f => f.type.startsWith('image/'));
+  if (!files.length) return;
+  const slots = MAX_PHOTOS - pendingPhotos.length;
+  if (slots <= 0) { alert(`Max ${MAX_PHOTOS} photos allowed.`); return; }
+  photoCompressInd.style.display = 'block';
+  try {
+    const compressed = await Promise.all(files.slice(0, slots).map(f => compressImage(f)));
+    pendingPhotos.push(...compressed);
+    renderPhotoPreviews();
+  } catch(e) { console.error(e); }
+  finally { photoCompressInd.style.display = 'none'; }
+});
+
+window.openLightbox = (src) => {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+};
+
+/* ══════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════ */
 document.getElementById('btn-login').onclick = async () => {
-    authError.innerText = '';
-    try {
-        await signInWithEmailAndPassword(auth, authEmail.value, authPass.value);
-    } catch (e) { authError.innerText = e.message; }
+  document.getElementById('auth-error').textContent = '';
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    await signInWithEmailAndPassword(auth,
+      document.getElementById('auth-email').value,
+      document.getElementById('auth-pass').value);
+  } catch(e) {
+    document.getElementById('auth-error').textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
 };
 
 document.getElementById('btn-signup').onclick = async () => {
-    authError.innerText = '';
-    try {
-        await createUserWithEmailAndPassword(auth, authEmail.value, authPass.value);
-    } catch (e) { authError.innerText = e.message; }
+  document.getElementById('auth-error').textContent = '';
+  const btn = document.getElementById('btn-signup');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    await createUserWithEmailAndPassword(auth,
+      document.getElementById('auth-email').value,
+      document.getElementById('auth-pass').value);
+  } catch(e) {
+    document.getElementById('auth-error').textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
 };
 
 document.getElementById('btn-logout').onclick = () => {
-    // Tear down all listeners before signing out
-    if (_unsubUserDoc) { _unsubUserDoc(); _unsubUserDoc = null; }
-    if (_unsubIdeas)   { _unsubIdeas();   _unsubIdeas = null; }
-    _hubInitialized = false;
-    signOut(auth);
+  if (_unsubUserDoc) { _unsubUserDoc(); _unsubUserDoc = null; }
+  if (_unsubIdeas)   { _unsubIdeas();   _unsubIdeas   = null; }
+  if (_unsubGlobal)  { _unsubGlobal();  _unsubGlobal  = null; }
+  _hubInitialized = false;
+  signOut(auth);
 };
 
-// ── STORAGE LAYER ──
+/* ══════════════════════════════════════════════
+   FIRESTORE STORAGE LAYER
+══════════════════════════════════════════════ */
 function lsKey(uid) { return 'bambu_db_' + uid; }
-
 function loadFromCache(uid) {
-    try {
-        const raw = localStorage.getItem(lsKey(uid));
-        if (raw) return JSON.parse(raw);
-    } catch(e) {}
-    return null;
+  try { const r = localStorage.getItem(lsKey(uid)); return r ? JSON.parse(r) : null; } catch(e) { return null; }
 }
-
 function saveToCache(uid, data) {
-    try { localStorage.setItem(lsKey(uid), JSON.stringify(data)); } catch(e) {}
+  try { localStorage.setItem(lsKey(uid), JSON.stringify(data)); } catch(e) {}
 }
-
-// saveDB: write to localStorage instantly AND await Firestore so callers know if it failed
 async function saveDB() {
-    if (!currentUser) return;
-    saveToCache(currentUser.uid, DB);
-    try {
-        await setDoc(doc(db, 'users', currentUser.uid), DB);
-    } catch (err) {
-        console.error('Firestore write failed:', err);
-        // Surface the error visibly — silent failures cause the "disappearing data" bug
-        const msg = 'Warning: could not save to cloud (' + err.code + '). Data is safe locally.';
-        console.warn(msg);
-    }
+  if (!currentUser) return;
+  saveToCache(currentUser.uid, DB);
+  try { await setDoc(doc(db, 'users', currentUser.uid), DB); }
+  catch(err) { console.error('Firestore write failed:', err); }
 }
-
 function applyDBSnapshot(data) {
-    DB = data;
-    if (!DB.events)      DB.events = [];
-    if (!DB.badges)      DB.badges = { workshop:false, creative:false, community:false };
-    if (!DB.schedChecks) DB.schedChecks = {};
-    if (!DB.schedTasks)  DB.schedTasks = {};
+  DB = data;
+  if (!DB.events)      DB.events = [];
+  if (!DB.badges)      DB.badges = { workshop: false, creative: false, community: false };
+  if (!DB.schedChecks) DB.schedChecks = {};
+  if (!DB.schedTasks)  DB.schedTasks  = {};
 }
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        currentUser = user;
-        document.getElementById('auth-overlay').style.display = 'none';
+/* ══════════════════════════════════════════════
+   AUTH STATE CHANGED
+══════════════════════════════════════════════ */
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
 
-        // ── Step 1: Paint UI immediately from localStorage (instant) ──
-        const cached = loadFromCache(user.uid);
-        if (cached) {
-            applyDBSnapshot(cached);
+    // Check if this account is an admin → redirect
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists() && snap.data().isAdmin) {
+        window.location.href = 'admin.html';
+        return;
+      }
+    } catch(e) { /* not admin, continue */ }
+
+    document.getElementById('auth-overlay').style.display = 'none';
+
+    // Paint from cache immediately
+    const cached = loadFromCache(user.uid);
+    if (cached) applyDBSnapshot(cached);
+    updateHdrUsername();
+    renderOverview();
+    renderEventsTable();
+    checkDisplayNameBanner();
+    renderProfilePanel();
+
+    // Live Firestore listener
+    if (_unsubUserDoc) _unsubUserDoc();
+    _unsubUserDoc = onSnapshot(
+      doc(db, 'users', user.uid),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          applyDBSnapshot(docSnap.data());
+          saveToCache(user.uid, DB);
+        } else {
+          setDoc(doc(db, 'users', user.uid), DB);
         }
-        hdrUsername.textContent = DB.displayName
-            ? `Signed in as ${user.email} · ${DB.displayName}`
-            : 'Signed in as ' + user.email;
+        updateHdrUsername();
         renderOverview();
         renderEventsTable();
         checkDisplayNameBanner();
         renderProfilePanel();
+      },
+      (err) => console.error('User doc listener error:', err)
+    );
 
-        // ── Step 2: Live listener on this user's Firestore doc ──
-        // This is the SOURCE OF TRUTH. onSnapshot fires immediately with server data,
-        // then again whenever another device makes a change. No polling needed.
-        if (_unsubUserDoc) _unsubUserDoc(); // safety: clear any stale listener
-        _unsubUserDoc = onSnapshot(
-            doc(db, 'users', user.uid),
-            (docSnap) => {
-                if (docSnap.exists()) {
-                    applyDBSnapshot(docSnap.data());
-                    saveToCache(user.uid, DB); // keep localStorage in sync
-                } else {
-                    // Brand-new account — write the empty skeleton
-                    setDoc(doc(db, 'users', user.uid), DB);
-                }
-                // Re-render everything from the authoritative snapshot
-                hdrUsername.textContent = DB.displayName
-                    ? `Signed in as ${user.email} · ${DB.displayName}`
-                    : 'Signed in as ' + user.email;
-                renderOverview();  // calls renderReport, renderRecent, renderBadges, renderQtrBars, renderAnnualBars
-                renderEventsTable();
-                checkDisplayNameBanner();
-                renderProfilePanel();
-            },
-            (err) => {
-                console.error('User doc listener error:', err);
-            }
-        );
+    if (!_hubInitialized) { _hubInitialized = true; initNationalHub(); }
 
-        // ── Step 3: National Hub listeners (only once per session) ──
-        if (!_hubInitialized) {
-            _hubInitialized = true;
-            initNationalHub();
-        }
-
-    } else {
-        // Logged out — tear down everything
-        currentUser = null;
-        hdrUsername.textContent = '';
-        if (_unsubUserDoc) { _unsubUserDoc(); _unsubUserDoc = null; }
-        if (_unsubIdeas)   { _unsubIdeas();   _unsubIdeas = null; }
-            _hubInitialized = false;
-        document.getElementById('auth-overlay').style.display = 'flex';
-    }
+  } else {
+    currentUser = null;
+    if (_unsubUserDoc) { _unsubUserDoc(); _unsubUserDoc = null; }
+    if (_unsubIdeas)   { _unsubIdeas();   _unsubIdeas   = null; }
+    _hubInitialized = false;
+    document.getElementById('auth-overlay').style.display = 'flex';
+    document.getElementById('hdr-username').textContent   = '';
+  }
 });
 
-
-// ── CORE DASHBOARD LOGIC ──
-function currentQ(){ var m=new Date().getMonth(); return m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4'; }
-function tierFromN(n){ return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
-function isValid(e){ return (e.attendees>=5)&&(e.duration>=30); } // Brand requirement removed
-function doneEvs(){ return DB.events.filter(e => e.status !== 'planned'); }
-
-function renderOverviewCore(){
-  var done=doneEvs(), q=currentQ();
-  var qc=done.filter(e => e.quarter === q).length;
-  var tier=tierFromN(qc);
-  
-  document.getElementById('ov-metrics').innerHTML=
-    '<div class="metric c-blue"><div class="metric-lbl">Total events</div><div class="metric-val">'+done.length+'</div></div>'+
-    '<div class="metric c-green"><div class="metric-lbl">This quarter</div><div class="metric-val">'+qc+'</div></div>'+
-    '<div class="metric c-amber"><div class="metric-lbl">Current tier</div><div class="metric-val">'+tier+'</div></div>';
+function updateHdrUsername() {
+  if (!currentUser) return;
+  document.getElementById('hdr-username').textContent = DB.displayName
+    ? `${currentUser.email} · ${DB.displayName}`
+    : currentUser.email;
 }
 
-function renderOverview(){
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+function currentQ()   { const m = new Date().getMonth(); return m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4'; }
+function tierFromN(n) { return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
+function isValid(e)   { return (parseInt(e.attendees)||0) >= 5 && (parseInt(e.duration)||0) >= 30; }
+function doneEvs()    { return DB.events.filter(e => e.status !== 'planned'); }
+function escHtml(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+const TIER_CLASSES = { Platinum:'tb-platinum', Gold:'tb-gold', Silver:'tb-silver', Active:'tb-active', None:'tb-none' };
+
+/* ══════════════════════════════════════════════
+   OVERVIEW
+══════════════════════════════════════════════ */
+function renderOverview() {
   renderOverviewCore();
   renderRecent();
   renderBadges();
@@ -821,1161 +1478,820 @@ function renderOverview(){
   renderReport();
 }
 
-function renderEventsTable(){
-    // Delegate to applyFilters — single source of truth for the events table
-    const empty = document.getElementById('ev-empty');
-    if (DB.events.length === 0) {
-        document.getElementById('ev-tbody').innerHTML = '';
-        empty.style.display = 'flex';
-        document.getElementById('ev-count').textContent = '0 events';
-    } else {
-        empty.style.display = 'none';
-        applyFilters();
-    }
-}
-
-window.editEvent = (i) => {
-    editIdx = i;
-    const e = DB.events[i];
-    document.getElementById('f-name').value = e.name;
-    document.getElementById('f-date').value = e.date;
-    document.getElementById('f-location').value = e.location || '';
-    document.getElementById('f-duration').value = e.duration;
-    document.getElementById('f-attendees').value = e.attendees;
-    document.getElementById('f-type').value = e.type;
-    document.getElementById('f-quarter').value = e.quarter;
-    document.getElementById('f-status').value = e.status || 'done';
-    document.getElementById('f-idea-link').value = e.linkedIdeaId || '';
-    document.getElementById('f-photo-link').value = e.photoLink || '';
-    document.getElementById('modal-title').textContent = 'Edit Event';
-    document.getElementById('event-modal').style.display = '';
-    document.getElementById('event-modal').classList.add('open');
-};
-
-window.deleteIdea = async (ideaId, ideaTitle) => {
-    if (!confirm('Delete "' + ideaTitle + '"? This cannot be undone.')) return;
-    const card = document.getElementById('idea-card-' + ideaId);
-    if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
-    try {
-        await deleteDoc(doc(db, 'ideas', ideaId));
-        // onSnapshot will remove it from the grid automatically
-    } catch(err) {
-        console.error('Delete idea failed:', err);
-        if (card) { card.style.opacity = ''; card.style.pointerEvents = ''; }
-        alert('Could not delete idea: ' + err.message);
-    }
-};
-
-window.deleteEvent = async (i) => {
-    const ev = DB.events[i];
-    if (!ev) return;
-    if (!confirm('Delete "' + ev.name + '"? This cannot be undone.')) return;
-    DB.events.splice(i, 1);
-    renderOverview();
-    applyFilters();
-    await saveDB();
-    // Remove from global_events so Global Impact stats update
-    if (ev.status === 'done') {
-        const globalId = currentUser.uid + '_' + (ev.date || 'nodate') + '_' + ev.name.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
-        try { await deleteDoc(doc(db, 'global_events', globalId)); } catch(e) {}
-    }
-};
-
-document.getElementById('modal-save-btn').onclick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const nameVal = document.getElementById('f-name').value.trim();
-    const dateVal = document.getElementById('f-date').value.trim();
-    const durationVal = document.getElementById('f-duration').value.trim();
-    const attendeesVal = document.getElementById('f-attendees').value.trim();
-    
-    if (!nameVal) { alert('Event name is required'); return; }
-    if (!dateVal) { alert('Date is required'); return; }
-    if (!durationVal) { alert('Duration is required'); return; }
-    if (!attendeesVal) { alert('Attendees is required'); return; }
-
-    const newStatus = document.getElementById('f-status').value;
-    const linkedIdeaId = document.getElementById('f-idea-link').value;
-    const oldEv = editIdx !== null ? { ...DB.events[editIdx] } : null;
-    
-    const ev = {
-        name: nameVal,
-        date: dateVal,
-        location: document.getElementById('f-location').value.trim(),
-        duration: parseInt(durationVal),
-        attendees: parseInt(attendeesVal),
-        type: document.getElementById('f-type').value,
-        quarter: document.getElementById('f-quarter').value,
-        status: newStatus,
-        linkedIdeaId: linkedIdeaId || null,
-        photoLink: document.getElementById('f-photo-link').value.trim() || null
-    };
-    
-    // ── 1. Update in-memory DB ──
-    if (editIdx !== null) {
-        DB.events[editIdx] = ev;
-    } else {
-        DB.events.push(ev);
-    }
-    const savedIdx = editIdx !== null ? editIdx : DB.events.length - 1;
-    editIdx = null;
-
-    // ── 2. Close modal and update UI instantly ──
-    const modal = document.getElementById('event-modal');
-    modal.style.display = 'none';
-    modal.classList.remove('open');
-    clearEventForm();
-
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-panel="events"]').classList.add('active');
-    document.getElementById('panel-events').classList.add('show');
-
-    document.getElementById('filter-status').value = '';
-    document.getElementById('filter-quarter').value = '';
-    document.getElementById('filter-valid').value = '';
-
-    renderOverview();
-    renderReport();
-    applyFilters();
-
-    // ── 3. All Firestore ops fire-and-forget in background ──
-    (async () => {
-        try {
-            const displayName = DB.displayName || currentUser?.email || 'Ambassador';
-
-            const justCompleted = newStatus === 'done' && oldEv && oldEv.status !== 'done';
-            const wasAlreadyDone = !oldEv && newStatus === 'done';
-            if ((justCompleted || wasAlreadyDone) && linkedIdeaId) {
-                await updateDoc(doc(db, 'ideas', linkedIdeaId), { totalImpact: increment(ev.attendees) });
-            }
-
-            // Write to global_events for Global Impact page
-            if (newStatus === 'done') {
-                const globalPayload = {
-                    uid: currentUser.uid,
-                    displayName: DB.displayName || null,
-                    name: ev.name,
-                    type: ev.type || 'other',
-                    location: ev.location || '',
-                    date: ev.date || '',
-                    attendees: parseInt(ev.attendees) || 0,
-                    duration: parseInt(ev.duration) || 0,
-                    quarter: ev.quarter || '',
-                    savedAt: new Date().toISOString()
-                };
-                // Upsert: use uid+date+name as deterministic doc ID to avoid duplicates on re-save
-                const globalId = currentUser.uid + '_' + (ev.date || 'nodate') + '_' + ev.name.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
-                await setDoc(doc(db, 'global_events', globalId), globalPayload);
-            } else if (oldEv && oldEv.status === 'done' && newStatus !== 'done') {
-                // If un-completing an event, remove from global_events
-                const globalId = currentUser.uid + '_' + (ev.date || 'nodate') + '_' + ev.name.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
-                try { await deleteDoc(doc(db, 'global_events', globalId)); } catch(e) {}
-            }
-
-            // Single authoritative write of full DB to Firestore
-            await saveDB();
-        } catch (err) {
-            console.error('Background sync error:', err);
-        }
-    })();
-};
-
-// ── NAVIGATION HELPERS ──
-document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
-    btn.onclick = () => {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('panel-' + btn.dataset.panel).classList.add('show');
-
-        // Always re-render data-driven panels on navigation so they stay in sync
-        if (btn.dataset.panel === 'overview') renderOverview();
-        if (btn.dataset.panel === 'report')   { renderReport(); }
-        if (btn.dataset.panel === 'events')   renderEventsTable();
-        if (btn.dataset.panel === 'globalimpact') initGlobalImpact();
-    };
-});
-
-document.getElementById('nav-add-event').onclick = () => {
-    editIdx = null;
-    clearEventForm();
-    document.getElementById('event-modal').style.display = '';
-    document.getElementById('event-modal').classList.add('open');
-};
-
-document.getElementById('modal-close-btn').onclick = () => {
-    document.getElementById('event-modal').style.display = 'none';
-    document.getElementById('event-modal').classList.remove('open');
-};
-document.getElementById('modal-cancel-btn').onclick = () => {
-    document.getElementById('event-modal').style.display = 'none';
-    document.getElementById('event-modal').classList.remove('open');
-};
-
-document.getElementById('ov-add-btn').onclick = () => {
-    editIdx = null;
-    clearEventForm();
-    document.getElementById('event-modal').style.display = '';
-    document.getElementById('event-modal').classList.add('open');
-};
-
-if (document.getElementById('ev-add-btn')) {
-    document.getElementById('ev-add-btn').onclick = () => {
-        editIdx = null;
-        clearEventForm();
-        document.getElementById('event-modal').style.display = '';
-        document.getElementById('event-modal').classList.add('open');
-    };
-}
-
-document.getElementById('btn-goto-report').onclick = () => {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-panel="report"]').classList.add('active');
-    document.getElementById('panel-report').classList.add('show');
-    renderReport();
-};
-
-document.getElementById('print-btn').onclick = () => window.print();
-
-document.getElementById('copy-email-btn').onclick = async () => {
-    const now = new Date();
-    const thisMonth = now.getMonth();
-    const thisYear = now.getFullYear();
-    const monthName = now.toLocaleString('default', { month: 'long' });
-
-    // Pull completed events from the current month only
-    const monthEvents = (DB.events || []).filter(e => {
-        if (e.status === 'planned') return false;
-        if (!e.date) return false;
-        const d = new Date(e.date);
-        return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-    });
-
-    const btn = document.getElementById('copy-email-btn');
-
-    if (monthEvents.length === 0) {
-        // Show inline warning on the button instead of generating
-        btn.textContent = '⚠ No events this month';
-        btn.style.background = 'var(--amber)';
-        setTimeout(() => {
-            btn.textContent = '✉ Copy email draft';
-            btn.style.background = '';
-        }, 3000);
-        return;
-    }
-
-    const displayName = DB.displayName || 'Ambassador';
-    const totalAttendees = monthEvents.reduce((sum, e) => sum + (parseInt(e.attendees) || 0), 0);
-    const subject = `[Ambassador Activity Report] – ${monthName} ${thisYear} – ${displayName}`;
-
-    const eventLines = monthEvents.map((e, i) => {
-        const date = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Date TBD';
-        const type = e.type ? e.type.charAt(0).toUpperCase() + e.type.slice(1) : 'Event';
-        const location = e.location || 'Location not specified';
-        const attendees = e.attendees || 0;
-        const duration = e.duration ? e.duration + ' min' : 'Duration not recorded';
-        const photoLine = e.photoLink ? `\n     Photos: ${e.photoLink}` : '';
-        return `  ${i + 1}. ${e.name}\n     Date: ${date}\n     Type: ${type}\n     Location: ${location}\n     Attendees: ${attendees}\n     Duration: ${duration}${photoLine}`;
-    }).join('\n\n');
-    const anyPhotos = monthEvents.some(e => e.photoLink);
-
-    const summary = monthEvents.length === 1
-        ? `This month I ran 1 event, reaching ${totalAttendees} student${totalAttendees !== 1 ? 's' : ''} in total.`
-        : `This month I ran ${monthEvents.length} events, reaching ${totalAttendees} student${totalAttendees !== 1 ? 's' : ''} in total.`;
-
-    const emailText =
-`Subject: ${subject}
-
-Hi,
-
-${summary}
-
-Here's a summary of this month's activity:
-
-${eventLines}
-
-${anyPhotos ? 'Photo links for each event are included above.' : 'Please note that photos from each event are attached separately.'} Let me know if you need any additional information or documentation.
-
-Best,
-${displayName}`;
-
-    try {
-        await navigator.clipboard.writeText(emailText);
-        btn.textContent = '✓ Copied!';
-        btn.style.background = 'var(--green)';
-        setTimeout(() => {
-            btn.textContent = '✉ Copy email draft';
-            btn.style.background = '';
-        }, 2000);
-    } catch(err) {
-        // Fallback for browsers that block clipboard without interaction
-        prompt('Copy this email:', emailText);
-    }
-};
-
-function clearEventForm() {
-    document.getElementById('f-name').value = '';
-    document.getElementById('f-date').value = '';
-    document.getElementById('f-location').value = '';
-    document.getElementById('f-duration').value = '';
-    document.getElementById('f-attendees').value = '';
-    document.getElementById('f-type').value = 'workshop';
-    document.getElementById('f-quarter').value = currentQ();
-    document.getElementById('f-status').value = 'done';
-    document.getElementById('f-idea-link').value = '';
-    document.getElementById('f-photo-link').value = '';
-    document.getElementById('modal-title').textContent = 'Add New Event';
+function renderOverviewCore() {
+  const done = doneEvs(), q = currentQ();
+  const qc   = done.filter(e => e.quarter === q).length;
+  const tier  = tierFromN(qc);
+  const reach = done.reduce((s,e) => s + (parseInt(e.attendees)||0), 0);
+  document.getElementById('ov-metrics').innerHTML = `
+    <div class="metric c-blue"><div class="metric-lbl">Total events</div><div class="metric-val">${done.length}</div></div>
+    <div class="metric c-green"><div class="metric-lbl">This quarter</div><div class="metric-val">${qc}</div></div>
+    <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${reach.toLocaleString()}</div></div>
+    <div class="metric c-purple"><div class="metric-lbl">Current tier</div><div class="metric-val" style="font-size:18px;">${tier}</div></div>
+  `;
 }
 
 function renderRecent() {
-    const done = DB.events.filter(e => e.status !== 'planned');
-    const recent = done.slice(-3).reverse();
-    const html = recent.length ? recent.map(e => 
-        `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
-            <div style="font-weight:600;font-size:13px;">${e.name}</div>
-            <div style="font-size:11px;color:var(--text2);">${e.date} · ${e.attendees} attendees</div>
-        </div>`
-    ).join('') : '<div style="color:var(--text3);font-size:12px;">No events yet</div>';
-    document.getElementById('ov-recent').innerHTML = html;
+  const recent = doneEvs().slice(-4).reverse();
+  const html = recent.length ? recent.map(e => {
+    const thumb = (e.photos && e.photos.length)
+      ? `<img class="ev-photo-thumb" src="${e.photos[0]}" onclick="window.openLightbox('${e.photos[0]}')" title="View photo"/>`
+      : (e.photoLink ? `<span title="${escHtml(e.photoLink)}" style="font-size:12px;">🔗</span>` : '');
+    return `
+      <div style="padding:9px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(e.name)}</div>
+          <div style="font-size:11px;color:var(--text2);">${e.date || '—'} · ${e.attendees||0} attendees · ${e.duration||0}min</div>
+          ${e.summary ? `<div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;">${escHtml(e.summary.slice(0,80))}</div>` : ''}
+        </div>
+        ${thumb}
+      </div>`;
+  }).join('') : '<div style="color:var(--text3);font-size:12px;padding:12px 0;">No events yet.</div>';
+  document.getElementById('ov-recent').innerHTML = html;
 }
 
 function renderBadges() {
-    const done = DB.events.filter(e => e.status !== 'planned');
-    const workshops = done.filter(e => e.type === 'workshop').length;
-    const hasBadge1 = workshops >= 3;
-    const hasBadge2 = done.length >= 5;
-    
-    const html = `
-        <div class="badge-item">
-            <span>🎓 Workshop Leader</span>
-            <button class="badge-toggle ${hasBadge1 ? 'earned' : 'not-earned'}" disabled>
-                ${hasBadge1 ? '✓ Earned' : 'Locked'}
-            </button>
-        </div>
-        <div class="badge-item">
-            <span>🌟 Event Master</span>
-            <button class="badge-toggle ${hasBadge2 ? 'earned' : 'not-earned'}" disabled>
-                ${hasBadge2 ? '✓ Earned' : 'Locked'}
-            </button>
-        </div>
-    `;
-    document.getElementById('ov-badges').innerHTML = html;
+  const done      = doneEvs();
+  const workshops = done.filter(e => e.type === 'workshop').length;
+  document.getElementById('ov-badges').innerHTML = `
+    <div class="badge-item" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span>🎓 Workshop Leader</span>
+      <span style="font-size:12px;font-weight:700;${workshops>=3?'color:var(--green);':'color:var(--text3);'}">${workshops>=3?'✓ Earned':'3 workshops needed'}</span>
+    </div>
+    <div class="badge-item" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+      <span>🌟 Event Master</span>
+      <span style="font-size:12px;font-weight:700;${done.length>=5?'color:var(--green);':'color:var(--text3);'}">${done.length>=5?'✓ Earned':'5 events needed'}</span>
+    </div>
+  `;
 }
 
 function renderQtrBars() {
-    const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
-    const done = DB.events.filter(e => e.status !== 'planned');
-    const q = currentQ();
-    const html = quarters.map(qtr => {
-        const count = done.filter(e => e.quarter === qtr).length;
-        const isActive = qtr === q;
-        return `
-            <div class="prog-row">
-                <div class="prog-lbl" style="width:45px;">${qtr}</div>
-                <div class="prog-wrap">
-                    <div class="prog-fill" style="width:${Math.min(count * 20, 100)}%;background:${isActive ? 'var(--blue)' : 'var(--green)'}"></div>
-                </div>
-                <div class="prog-count">${count}</div>
-            </div>
-        `;
-    }).join('');
-    document.getElementById('ov-qtr-bars').innerHTML = html;
-    document.getElementById('ov-qtr-lbl').textContent = `${done.filter(e => e.quarter === q).length} this quarter`;
+  const q    = currentQ();
+  const done = doneEvs();
+  document.getElementById('ov-qtr-bars').innerHTML = ['Q1','Q2','Q3','Q4'].map(qtr => {
+    const count = done.filter(e => e.quarter === qtr).length;
+    return `<div class="prog-row">
+      <div class="prog-lbl" style="width:40px;">${qtr}</div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(count*20,100)}%;background:${qtr===q?'var(--blue)':'var(--green)'}"></div></div>
+      <div class="prog-count">${count}</div>
+    </div>`;
+  }).join('');
+  const qc = done.filter(e=>e.quarter===q).length;
+  document.getElementById('ov-qtr-lbl').textContent = `${qc} this quarter`;
 }
 
 function renderAnnualBars() {
-    const done = DB.events.filter(e => e.status !== 'planned');
-    const validEvents = done.filter(e => isValid(e)).length;
-    const html = `
-        <div class="prog-row">
-            <div class="prog-lbl">Valid events recorded</div>
-            <div class="prog-wrap">
-                <div class="prog-fill" style="width:${Math.min(validEvents * 10, 100)}%;background:var(--amber)"></div>
-            </div>
-            <div class="prog-count">${validEvents}/10</div>
-        </div>
-    `;
-    document.getElementById('ov-annual-bars').innerHTML = html;
+  const validN = doneEvs().filter(isValid).length;
+  document.getElementById('ov-annual-bars').innerHTML = `
+    <div class="prog-row">
+      <div class="prog-lbl">Valid events</div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(validN*10,100)}%;background:var(--amber)"></div></div>
+      <div class="prog-count">${validN}/10</div>
+    </div>`;
 }
 
-function renderSchedule() {
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const today = new Date().toDateString();
-    
-    if(!DB.schedTasks) DB.schedTasks = {};
-    
-    const html = days.map((day, i) => {
-        const key = `${today}-${day}`;
-        const checked = DB.schedChecks[key] || false;
-        const taskText = DB.schedTasks[key] || '';
-        
-        return `
-            <div class="sched-item">
-                <div class="sched-day" onclick="toggleSchedItem('${key}', this.parentElement)">${day.slice(0, 3)}</div>
-                <div class="sched-cb ${checked ? 'on' : ''}" onclick="toggleSchedItem('${key}', this.parentElement)">
-                    ${checked ? '✓' : ''}
-                </div>
-                <input type="text" class="sched-text-input ${checked ? 'on' : ''}" value="${taskText}" placeholder="Click to add task..." onchange="updateSchedTask('${key}', this.value)" />
-            </div>
-        `;
-    }).join('');
-    const container = document.getElementById('sched-list');
-    if (container) container.innerHTML = html;
+/* ══════════════════════════════════════════════
+   EVENTS TABLE
+══════════════════════════════════════════════ */
+function renderEventsTable() {
+  if (DB.events.length === 0) {
+    document.getElementById('ev-tbody').innerHTML = '';
+    document.getElementById('ev-empty').style.display = 'flex';
+    document.getElementById('ev-count').textContent = '0 events';
+  } else {
+    document.getElementById('ev-empty').style.display = 'none';
+    applyFilters();
+  }
 }
-
-window.updateSchedTask = (key, val) => {
-    if(!DB.schedTasks) DB.schedTasks = {};
-    DB.schedTasks[key] = val;
-    saveDB();
-};
-
-window.toggleSchedItem = (key, element) => {
-    DB.schedChecks[key] = !DB.schedChecks[key];
-    const cb = element.querySelector('.sched-cb');
-    const text = element.querySelector('.sched-text-input');
-    cb.classList.toggle('on');
-    text.classList.toggle('on');
-    cb.textContent = DB.schedChecks[key] ? '✓' : '';
-    saveDB();
-};
-
-function renderReport() {
-    const done = DB.events.filter(e => e.status !== 'planned');
-    const tier = tierFromN(done.length);
-    const valid = done.filter(e => isValid(e));
-    const totalAttendees = done.reduce((sum, e) => sum + parseInt(e.attendees || 0), 0);
-    
-    const rptDate = document.getElementById('rpt-date');
-    if (rptDate) rptDate.textContent = new Date().toLocaleDateString();
-    
-    const tierClasses = { Platinum: 'tb-platinum', Gold: 'tb-gold', Silver: 'tb-silver', Active: 'tb-active', None: 'tb-none' };
-    const rptTier = document.getElementById('rpt-tier');
-    if (rptTier) rptTier.innerHTML = `<span class="tier-badge ${tierClasses[tier]}">${tier}</span>`;
-    
-    const rptStats = document.getElementById('rpt-stats');
-    if (rptStats) rptStats.innerHTML = `
-        <div class="rs-box">
-            <div class="rs-val">${done.length}</div>
-            <div class="rs-lbl">Total Events</div>
-        </div>
-        <div class="rs-box">
-            <div class="rs-val">${totalAttendees}</div>
-            <div class="rs-lbl">Total Reached</div>
-        </div>
-        <div class="rs-box">
-            <div class="rs-val">${valid.length}</div>
-            <div class="rs-lbl">Valid Events</div>
-        </div>
-        <div class="rs-box">
-            <div class="rs-val">${tier}</div>
-            <div class="rs-lbl">Tier</div>
-        </div>
-    `;
-    
-    // Monthly Chart Builder
-    const monthCounts = {};
-    done.forEach(e => {
-        if(!e.date) return;
-        const m = e.date.substring(0,7);
-        if(!monthCounts[m]) monthCounts[m] = { events: 0, attendees: 0 };
-        monthCounts[m].events++;
-        monthCounts[m].attendees += parseInt(e.attendees) || 0;
-    });
-    
-    let chartHtml = '';
-    if(Object.keys(monthCounts).length > 0) {
-        chartHtml += '<div style="font-weight:700;font-size:15px;margin-bottom:14px;">Monthly Analysis</div>';
-        chartHtml += '<div style="display:flex; gap:12px; align-items:flex-end; height: 140px; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 24px;">';
-        
-        const maxAttendees = Math.max(...Object.values(monthCounts).map(m => m.attendees), 1);
-        
-        Object.keys(monthCounts).sort().forEach(m => {
-            const data = monthCounts[m];
-            const heightPct = Math.max((data.attendees / maxAttendees) * 100, 5);
-            const monthLabel = new Date(m + '-02').toLocaleString('default', { month: 'short' });
-            
-            chartHtml += `
-                <div style="flex:1; max-width:60px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px;">
-                    <div style="font-size:11px; color:var(--text2); font-weight:600;">${data.attendees}</div>
-                    <div style="width: 100%; background: var(--blue); height: ${heightPct}%; border-radius: 4px 4px 0 0; transition: height 0.3s;"></div>
-                    <div style="font-size:11px; font-weight:600; color:var(--text3);">${monthLabel}</div>
-                </div>
-            `;
-        });
-        chartHtml += '</div>';
-    }
-    const rptMonthly = document.getElementById('rpt-monthly');
-    if(rptMonthly) rptMonthly.innerHTML = chartHtml;
-    
-    const tbody = document.getElementById('rpt-tbody');
-    if (tbody) tbody.innerHTML = done.map((e, i) => `
-        <tr>
-            <td>${i+1}</td>
-            <td>${e.name}</td>
-            <td>${e.date}</td>
-            <td>${e.location || '—'}</td>
-            <td>${e.type}</td>
-            <td>${e.attendees}</td>
-            <td>${e.duration}m</td>
-            <td>${isValid(e) ? '✓' : '✗'}</td>
-        </tr>
-    `).join('');
-}
-
-// renderOverview already calls all sub-renders (defined above)
 
 function applyFilters() {
-    const status = document.getElementById('filter-status').value;
-    const quarter = document.getElementById('filter-quarter').value;
-    const valid = document.getElementById('filter-valid').value;
-    
-    let filtered = DB.events;
-    if (status) filtered = filtered.filter(e => e.status === status);
-    if (quarter) filtered = filtered.filter(e => e.quarter === quarter);
-    if (valid === 'yes') filtered = filtered.filter(e => isValid(e));
-    if (valid === 'no') filtered = filtered.filter(e => !isValid(e));
+  const status  = document.getElementById('filter-status').value;
+  const quarter = document.getElementById('filter-quarter').value;
+  const valid   = document.getElementById('filter-valid').value;
 
-    const tbody = document.getElementById('ev-tbody');
-    const empty = document.getElementById('ev-empty');
+  let filtered = DB.events.filter(e => {
+    if (status  && e.status !== status)   return false;
+    if (quarter && e.quarter !== quarter) return false;
+    if (valid === 'yes' && !isValid(e))   return false;
+    if (valid === 'no'  &&  isValid(e))   return false;
+    return true;
+  });
 
-    if (filtered.length === 0) {
-        tbody.innerHTML = '';
-        empty.style.display = 'flex';
-        empty.querySelector('.empty-txt').textContent = DB.events.length === 0
-            ? 'No events yet. Click "+ Add Event" to log your first one.'
-            : 'No events match the current filters.';
-    } else {
-        empty.style.display = 'none';
-        tbody.innerHTML = filtered.map((e, i) => `
-            <tr>
-                <td>${i+1}</td>
-                <td>${e.name}</td>
-                <td>${e.date}</td>
-                <td>${e.location || '—'}</td>
-                <td>${e.type}</td>
-                <td>${e.attendees}</td>
-                <td>${e.duration}m</td>
-                <td>${e.quarter}</td>
-                <td>${isValid(e) ? '<span class="valid-yes">✓</span>' : '<span class="valid-no">✗</span>'}</td>
-                <td style="display:flex;gap:4px;align-items:center;">
-                    ${e.photoLink ? `<a href="${e.photoLink.startsWith('http') ? e.photoLink : 'https://' + e.photoLink}" target="_blank" rel="noopener" title="View photos" style="font-size:16px;text-decoration:none;line-height:1;">📷</a>` : ''}
-                    <button class="btn btn-xs" onclick="window.editEvent(${DB.events.indexOf(e)})">Edit</button>
-                    <button class="btn btn-xs btn-red" onclick="window.deleteEvent(${DB.events.indexOf(e)})">Delete</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-    
-    document.getElementById('ev-count').textContent = `${filtered.length} event${filtered.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('ev-tbody');
+  const empty = document.getElementById('ev-empty');
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'flex';
+    const txt = empty.querySelector('.empty-txt') || empty;
+    if (txt) txt.textContent = DB.events.length === 0
+      ? 'No events yet.' : 'No events match these filters.';
+  } else {
+    empty.style.display = 'none';
+    tbody.innerHTML = filtered.map((e, i) => {
+      const realIdx = DB.events.indexOf(e);
+      const photoCell = (e.photos && e.photos.length)
+        ? `<div class="ev-photo-thumbs">${e.photos.slice(0,3).map(p => `<img class="ev-photo-thumb" src="${p}" onclick="window.openLightbox('${p}')"/>`).join('')}${e.photos.length>3?`<span style="font-size:11px;color:var(--text2);">+${e.photos.length-3}</span>`:''}</div>`
+        : e.photoLink
+          ? `<a href="${e.photoLink.startsWith('http')?e.photoLink:'https://'+e.photoLink}" target="_blank" style="font-size:12px;text-decoration:none;">🔗 link</a>`
+          : '—';
+      return `<tr>
+        <td style="color:var(--text3);font-size:12px;">${i+1}</td>
+        <td>
+          <div class="td-main">${escHtml(e.name)}</div>
+          ${e.summary ? `<div class="td-sub" style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(e.summary.slice(0,60))}</div>` : ''}
+        </td>
+        <td class="td-sm">${e.date||'—'}</td>
+        <td class="td-sm">${escHtml(e.location||'—')}</td>
+        <td><span class="tag tag-${e.type||'other'}">${e.type||'other'}</span></td>
+        <td style="font-weight:600;">${e.attendees||0}</td>
+        <td class="td-sm">${e.duration||0}m</td>
+        <td class="td-sm">${e.quarter||'—'}</td>
+        <td>${isValid(e)?'<span class="valid-yes">✓</span>':'<span class="valid-no">✗</span>'}</td>
+        <td>${photoCell}</td>
+        <td>
+          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-xs" onclick="window.editEvent(${realIdx})">Edit</button>
+            <button class="btn btn-xs btn-red" onclick="window.deleteEvent(${realIdx})">Del</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('ev-count').textContent = `${filtered.length} event${filtered.length!==1?'s':''}`;
 }
 
-document.getElementById('filter-status').onchange = applyFilters;
+document.getElementById('filter-status').onchange  = applyFilters;
 document.getElementById('filter-quarter').onchange = applyFilters;
-document.getElementById('filter-valid').onchange = applyFilters;
+document.getElementById('filter-valid').onchange   = applyFilters;
 
-
-// ── NATIONAL HUB ──
-
-let ideasCache = [];
-let logRunIdeaId = null;
-
-function showIdeaError(msg) {
-    const loading = document.getElementById('mkt-loading');
-    loading.innerHTML = '<div style="grid-column:1/-1;background:var(--red-bg);border-left:3px solid var(--red);border-radius:var(--rs);padding:14px 18px;font-size:13px;line-height:1.6;">⚠️ <strong>Could not load ideas.</strong> ' + msg + '<br><span style="color:var(--text3);font-size:11px;">Open DevTools (F12 → Console) for details. Check Firestore Rules.</span></div>';
-    loading.style.display = 'block';
-    document.getElementById('mkt-grid').style.display = 'none';
-    document.getElementById('mkt-empty').style.display = 'none';
+/* ══════════════════════════════════════════════
+   EVENT FORM — OPEN / CLOSE / CLEAR
+══════════════════════════════════════════════ */
+function openEventModal() {
+  document.getElementById('event-modal').classList.add('open');
+}
+function closeEventModal() {
+  document.getElementById('event-modal').classList.remove('open');
+}
+function clearEventForm() {
+  document.getElementById('f-name').value      = '';
+  document.getElementById('f-date').value      = '';
+  document.getElementById('f-location').value  = '';
+  document.getElementById('f-duration').value  = '';
+  document.getElementById('f-attendees').value = '';
+  document.getElementById('f-type').value      = 'workshop';
+  document.getElementById('f-quarter').value   = currentQ();
+  document.getElementById('f-status').value    = 'done';
+  document.getElementById('f-idea-link').value = '';
+  document.getElementById('f-summary').value   = '';
+  document.getElementById('f-notes').value     = '';
+  document.getElementById('f-photo-link').value = '';
+  document.getElementById('modal-title').textContent = 'Log Event';
+  // Reset photos
+  pendingPhotos = [];
+  renderPhotoPreviews();
+  editIdx = null;
 }
 
-// Called after writes to re-fetch ideas (used by idea save & refresh btn)
-async function fetchAndRenderIdeas() {
+window.editEvent = (i) => {
+  editIdx = i;
+  const e = DB.events[i];
+  document.getElementById('f-name').value       = e.name || '';
+  document.getElementById('f-date').value       = e.date || '';
+  document.getElementById('f-location').value   = e.location || '';
+  document.getElementById('f-duration').value   = e.duration || '';
+  document.getElementById('f-attendees').value  = e.attendees || '';
+  document.getElementById('f-type').value       = e.type || 'workshop';
+  document.getElementById('f-quarter').value    = e.quarter || currentQ();
+  document.getElementById('f-status').value     = e.status || 'done';
+  document.getElementById('f-idea-link').value  = e.linkedIdeaId || '';
+  document.getElementById('f-summary').value    = e.summary || '';
+  document.getElementById('f-notes').value      = e.notes || '';
+  document.getElementById('f-photo-link').value = e.photoLink || '';
+  document.getElementById('modal-title').textContent = 'Edit Event';
+  // Load existing photos into pending
+  pendingPhotos = e.photos ? [...e.photos] : [];
+  renderPhotoPreviews();
+  openEventModal();
+};
+
+window.deleteEvent = async (i) => {
+  const ev = DB.events[i];
+  if (!ev || !confirm(`Delete "${ev.name}"? This cannot be undone.`)) return;
+  DB.events.splice(i, 1);
+  renderOverview(); applyFilters();
+  await saveDB();
+  if (ev.status === 'done') {
+    const gId = globalId(ev);
+    try { await deleteDoc(doc(db, 'global_events', gId)); } catch(e) {}
+  }
+};
+
+/* ── NAV buttons that open modal ── */
+const openModalBtns = [
+  'nav-add-event','ov-add-btn','ev-add-btn','ev-empty-add-btn'
+];
+openModalBtns.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.onclick = () => { clearEventForm(); openEventModal(); };
+});
+document.getElementById('modal-close-btn').onclick  = closeEventModal;
+document.getElementById('modal-cancel-btn').onclick = closeEventModal;
+document.getElementById('event-modal').onclick = (ev) => {
+  if (ev.target === ev.currentTarget) closeEventModal();
+};
+
+/* ══════════════════════════════════════════════
+   SAVE EVENT
+══════════════════════════════════════════════ */
+function globalId(ev) {
+  return currentUser.uid + '_' + (ev.date||'nodate') + '_' +
+    (ev.name||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
+}
+
+document.getElementById('modal-save-btn').onclick = async (e) => {
+  e.preventDefault();
+  const nameVal      = document.getElementById('f-name').value.trim();
+  const dateVal      = document.getElementById('f-date').value.trim();
+  const durationVal  = document.getElementById('f-duration').value.trim();
+  const attendeesVal = document.getElementById('f-attendees').value.trim();
+  const summaryVal   = document.getElementById('f-summary').value.trim();
+
+  if (!nameVal)      { alert('Event title is required');   return; }
+  if (!dateVal)      { alert('Date is required');          return; }
+  if (!durationVal)  { alert('Duration is required');      return; }
+  if (!attendeesVal) { alert('Number of participants is required'); return; }
+  if (!summaryVal)   { alert('Activity summary is required'); return; }
+
+  const newStatus    = document.getElementById('f-status').value;
+  const linkedIdeaId = document.getElementById('f-idea-link').value;
+  const oldEv        = editIdx !== null ? { ...DB.events[editIdx] } : null;
+
+  const ev = {
+    name:         nameVal,
+    date:         dateVal,
+    location:     document.getElementById('f-location').value.trim(),
+    duration:     parseInt(durationVal),
+    attendees:    parseInt(attendeesVal),
+    type:         document.getElementById('f-type').value,
+    quarter:      document.getElementById('f-quarter').value,
+    status:       newStatus,
+    linkedIdeaId: linkedIdeaId || null,
+    summary:      summaryVal,
+    notes:        document.getElementById('f-notes').value.trim() || null,
+    photoLink:    document.getElementById('f-photo-link').value.trim() || null,
+    photos:       pendingPhotos.length ? [...pendingPhotos] : null,
+  };
+
+  // Update DB
+  if (editIdx !== null) { DB.events[editIdx] = ev; }
+  else                  { DB.events.push(ev); }
+
+  closeEventModal();
+  clearEventForm();
+
+  // Navigate to events panel
+  navTo('events');
+  document.getElementById('filter-status').value  = '';
+  document.getElementById('filter-quarter').value = '';
+  document.getElementById('filter-valid').value   = '';
+
+  renderOverview();
+  applyFilters();
+
+  // Background Firestore sync
+  (async () => {
     try {
-        const snap = await getDocs(query(collection(db, 'ideas'), orderBy('totalImpact', 'desc')));
-        ideasCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderMarketplace(ideasCache);
-        populateIdeaDropdown(ideasCache);
-        renderProfileIdeas(ideasCache);
-    } catch(err) {
-        console.error('Ideas fetch error:', err);
-        showIdeaError('Error: <strong>' + (err.code || err.message) + '</strong>');
-    }
+      const justCompleted = newStatus === 'done' && oldEv && oldEv.status !== 'done';
+      const brandNew      = !oldEv && newStatus === 'done';
+      if ((justCompleted || brandNew) && linkedIdeaId) {
+        await updateDoc(doc(db, 'ideas', linkedIdeaId), { totalImpact: increment(ev.attendees) });
+      }
+      if (newStatus === 'done') {
+        await setDoc(doc(db, 'global_events', globalId(ev)), {
+          uid:         currentUser.uid,
+          displayName: DB.displayName || null,
+          name:        ev.name,
+          type:        ev.type || 'other',
+          location:    ev.location || '',
+          date:        ev.date || '',
+          attendees:   ev.attendees,
+          duration:    ev.duration,
+          quarter:     ev.quarter || '',
+          savedAt:     new Date().toISOString()
+        });
+      } else if (oldEv && oldEv.status === 'done' && newStatus !== 'done') {
+        try { await deleteDoc(doc(db, 'global_events', globalId(ev))); } catch(err) {}
+      }
+      await saveDB();
+    } catch(err) { console.error('Background sync error:', err); }
+  })();
+};
+
+/* ══════════════════════════════════════════════
+   NAV
+══════════════════════════════════════════════ */
+function navTo(panel) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const panelEl = document.getElementById('panel-' + panel);
+  if (panelEl) panelEl.classList.add('show');
+  const btn = document.querySelector(`[data-panel="${panel}"]`);
+  if (btn) btn.classList.add('active');
+  closeSidebar();
 }
 
+document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
+  btn.onclick = () => {
+    navTo(btn.dataset.panel);
+    const p = btn.dataset.panel;
+    if (p === 'overview')     renderOverview();
+    if (p === 'report')       renderReport();
+    if (p === 'events')       renderEventsTable();
+    if (p === 'globalimpact') initGlobalImpact();
+    if (p === 'livecheck')    populateLiveEventSelect();
+    if (p === 'profile')      renderProfilePanel();
+  };
+});
+
+document.getElementById('btn-goto-report').onclick = () => { navTo('report'); renderReport(); };
+
+/* ══════════════════════════════════════════════
+   ACTIVITY REPORT
+══════════════════════════════════════════════ */
+function renderReport() {
+  const done  = doneEvs();
+  const tier  = tierFromN(done.length);
+  const valid = done.filter(isValid);
+  const reach = done.reduce((s,e) => s + (parseInt(e.attendees)||0), 0);
+
+  const rptDate = document.getElementById('rpt-date');
+  if (rptDate) rptDate.textContent = new Date().toLocaleDateString();
+
+  const rptTier = document.getElementById('rpt-tier');
+  if (rptTier) rptTier.innerHTML = `<span class="tier-badge ${TIER_CLASSES[tier]}">${tier}</span>`;
+
+  const rptStats = document.getElementById('rpt-stats');
+  if (rptStats) rptStats.innerHTML = `
+    <div class="rs-box"><div class="rs-val">${done.length}</div><div class="rs-lbl">Total Events</div></div>
+    <div class="rs-box"><div class="rs-val">${reach.toLocaleString()}</div><div class="rs-lbl">Total Reached</div></div>
+    <div class="rs-box"><div class="rs-val">${valid.length}</div><div class="rs-lbl">Valid Events</div></div>
+    <div class="rs-box"><div class="rs-val">${tier}</div><div class="rs-lbl">Tier</div></div>
+  `;
+
+  // Monthly mini-chart
+  const mc = {};
+  done.forEach(e => {
+    if (!e.date) return;
+    const m = e.date.slice(0, 7);
+    if (!mc[m]) mc[m] = { events: 0, attendees: 0 };
+    mc[m].events++; mc[m].attendees += parseInt(e.attendees)||0;
+  });
+  let chartHtml = '';
+  if (Object.keys(mc).length) {
+    const maxA = Math.max(...Object.values(mc).map(m => m.attendees), 1);
+    chartHtml = `<div style="font-weight:700;font-size:15px;margin-bottom:14px;">Monthly Breakdown</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;height:130px;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:24px;overflow-x:auto;">
+      ${Object.keys(mc).sort().map(m => {
+        const d = mc[m];
+        const pct = Math.max((d.attendees/maxA)*100,4);
+        const lbl = new Date(m+'-02').toLocaleString('default',{month:'short'});
+        return `<div style="flex:1;min-width:36px;max-width:54px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;">
+          <div style="font-size:10px;color:var(--text2);font-weight:600;">${d.attendees}</div>
+          <div style="width:100%;background:var(--blue);height:${pct}%;border-radius:4px 4px 0 0;"></div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);">${lbl}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+  const rptMonthly = document.getElementById('rpt-monthly');
+  if (rptMonthly) rptMonthly.innerHTML = chartHtml;
+
+  const tbody = document.getElementById('rpt-tbody');
+  const empty = document.getElementById('rpt-empty');
+  if (!tbody) return;
+  if (!done.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  tbody.innerHTML = done.map((e,i) => `<tr>
+    <td>${i+1}</td>
+    <td>${escHtml(e.name)}</td>
+    <td>${e.date||'—'}</td>
+    <td>${escHtml(e.location||'—')}</td>
+    <td>${e.type||'—'}</td>
+    <td>${e.attendees||0}</td>
+    <td>${e.duration||0}m</td>
+    <td>${isValid(e)?'✓':'✗'}</td>
+  </tr>`).join('');
+}
+
+/* ── Print / Copy Email ── */
+document.getElementById('print-btn').onclick = () => window.print();
+
+document.getElementById('copy-email-btn').onclick = async () => {
+  const now        = new Date();
+  const thisMonth  = now.getMonth();
+  const thisYear   = now.getFullYear();
+  const monthName  = now.toLocaleString('default', { month: 'long' });
+  const monthEvs   = doneEvs().filter(e => {
+    if (!e.date) return false;
+    const d = new Date(e.date);
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+  });
+  const btn = document.getElementById('copy-email-btn');
+  if (!monthEvs.length) {
+    btn.textContent = '⚠ No events this month';
+    btn.style.background = 'var(--amber)';
+    setTimeout(() => { btn.textContent = '✉ Copy email draft'; btn.style.background = ''; }, 3000);
+    return;
+  }
+  const displayName = DB.displayName || 'Ambassador';
+  const totalAtt    = monthEvs.reduce((s,e) => s+(parseInt(e.attendees)||0), 0);
+  const evLines = monthEvs.map((e,i) => {
+    const date = e.date ? new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'TBD';
+    const photoLine  = e.photos && e.photos.length ? '\n     Photos: (uploaded to dashboard)' : e.photoLink ? `\n     Photos: ${e.photoLink}` : '';
+    const summLine   = e.summary ? `\n     Summary: ${e.summary.slice(0,200)}${e.summary.length>200?'…':''}` : '';
+    return `  ${i+1}. ${e.name}\n     Date: ${date}\n     Type: ${e.type||'—'}\n     Location: ${e.location||'—'}\n     Participants: ${e.attendees||0}\n     Duration: ${e.duration||0} min${summLine}${photoLine}`;
+  }).join('\n\n');
+  const body = `Subject: [Ambassador Report] ${monthName} ${thisYear} – ${displayName}\n\nHi,\n\nThis month I ran ${monthEvs.length} event${monthEvs.length!==1?'s':''}, reaching ${totalAtt} student${totalAtt!==1?'s':''} in total.\n\n${evLines}\n\nBest,\n${displayName}`;
+  try {
+    await navigator.clipboard.writeText(body);
+    btn.textContent = '✓ Copied!'; btn.style.background = 'var(--green)';
+    setTimeout(() => { btn.textContent = '✉ Copy email draft'; btn.style.background = ''; }, 2000);
+  } catch { prompt('Copy this email:', body); }
+};
+
+/* ══════════════════════════════════════════════
+   NATIONAL HUB — IDEAS
+══════════════════════════════════════════════ */
 function initNationalHub() {
-    // ── Ideas: onSnapshot for real-time instant updates ──
-    const ideasQ = query(collection(db, 'ideas'), orderBy('totalImpact', 'desc'));
-    _unsubIdeas = onSnapshot(ideasQ, (snap) => {
-        ideasCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderMarketplace(ideasCache);
-        populateIdeaDropdown(ideasCache);
-        renderProfileIdeas(ideasCache);
-    }, (err) => {
-        console.error('Ideas listener error:', err);
-        showIdeaError('Error: <strong>' + (err.code || err.message) + '</strong>');
-    });
-
-
+  const q = query(collection(db, 'ideas'), orderBy('totalImpact', 'desc'));
+  _unsubIdeas = onSnapshot(q, (snap) => {
+    ideasCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderMarketplace(ideasCache);
+    populateIdeaDropdown(ideasCache);
+    renderProfileIdeas(ideasCache);
+  }, (err) => {
+    console.error('Ideas listener error:', err);
+    document.getElementById('mkt-loading').innerHTML = '<div style="grid-column:1/-1;padding:20px;color:var(--red);">Could not load ideas: ' + escHtml(err.message) + '</div>';
+  });
 }
 
 function populateIdeaDropdown(ideas) {
-    const sel = document.getElementById('f-idea-link');
-    const current = sel.value;
-    sel.innerHTML = '<option value="">— None —</option>';
-    ideas.forEach(idea => {
-        const opt = document.createElement('option');
-        opt.value = idea.id;
-        opt.textContent = idea.title;
-        sel.appendChild(opt);
-    });
-    if (current) sel.value = current;
+  const sel     = document.getElementById('f-idea-link');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— None —</option>';
+  ideas.forEach(idea => {
+    const opt = document.createElement('option');
+    opt.value = idea.id; opt.textContent = idea.title;
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
 }
 
 function renderMarketplace(ideas) {
-    const loading = document.getElementById('mkt-loading');
-    const grid = document.getElementById('mkt-grid');
-    const empty = document.getElementById('mkt-empty');
-
-    loading.style.display = 'none';
-
-    if (!ideas.length) {
-        grid.style.display = 'none';
-        empty.style.display = 'block';
-        return;
-    }
-    empty.style.display = 'none';
-    grid.style.display = 'grid';
-
-    grid.innerHTML = ideas.map(idea => {
-        const isProven = (idea.totalImpact || 0) > 0;
-        const isOwn = idea.uid === currentUser?.uid;
-        const provenBadge = isProven ? `<span class="proven-badge">✅ Proven Idea</span>` : '';
-        const linkHtml = idea.resourceLink
-            ? `<a class="idea-link" href="${idea.resourceLink}" target="_blank" rel="noopener noreferrer">🔗 Resource</a>`
-            : '';
-        return `
-            <div class="idea-card" id="idea-card-${idea.id}">
-                <div class="idea-card-top">
-                    <div class="idea-card-title">${escHtml(idea.title)}</div>
-                    ${provenBadge}
-                </div>
-                <div class="idea-card-desc">${escHtml(idea.description)}</div>
-                <div class="idea-card-foot">
-                    <span class="idea-impact" id="impact-${idea.id}">👥 ${idea.totalImpact || 0} total reached</span>
-                    ${linkHtml}
-                </div>
-                <div class="idea-card-actions">
-                    ${!isOwn
-                        ? `<button class="btn-log-run" onclick="window.openLogRun('${idea.id}','${escHtml(idea.title).replace(/'/g,"\'")}')">+ Log my run</button>`
-                        : `<button class="btn-delete-idea" onclick="window.deleteIdea('${idea.id}','${escHtml(idea.title).replace(/'/g,"\'")}')">🗑 Delete</button>`
-                    }
-                </div>
-                <div class="idea-submitter">Shared by ${escHtml(idea.submittedBy || 'Anonymous')}</div>
-            </div>
-        `;
-    }).join('');
+  document.getElementById('mkt-loading').style.display = 'none';
+  const grid  = document.getElementById('mkt-grid');
+  const empty = document.getElementById('mkt-empty');
+  if (!ideas.length) { grid.style.display='none'; empty.style.display='block'; return; }
+  empty.style.display = 'none'; grid.style.display = 'grid';
+  grid.innerHTML = ideas.map(idea => {
+    const isProven = (idea.totalImpact||0) > 0;
+    const isOwn    = idea.uid === currentUser?.uid;
+    return `
+      <div class="idea-card" id="idea-card-${idea.id}">
+        <div class="idea-card-top">
+          <div class="idea-card-title">${escHtml(idea.title)}</div>
+          ${isProven ? '<span class="proven-badge">✅ Proven</span>' : ''}
+        </div>
+        <div class="idea-card-desc">${escHtml(idea.description)}</div>
+        <div class="idea-card-foot">
+          <span class="idea-impact">👥 ${idea.totalImpact||0} total reached</span>
+          ${idea.resourceLink ? `<a class="idea-link" href="${escHtml(idea.resourceLink)}" target="_blank" rel="noopener">🔗 Resource</a>` : ''}
+        </div>
+        <div class="idea-card-actions">
+          ${!isOwn
+            ? `<button class="btn-log-run" onclick="window.openLogRun('${idea.id}','${escHtml(idea.title).replace(/'/g,"\\'")}')">+ Log my run</button>`
+            : `<button class="btn-delete-idea" onclick="window.deleteIdea('${idea.id}','${escHtml(idea.title).replace(/'/g,"\\'")}')">🗑 Delete</button>`
+          }
+        </div>
+        <div class="idea-submitter">Shared by ${escHtml(idea.submittedBy||'Anonymous')}</div>
+      </div>`;
+  }).join('');
 }
 
-function escHtml(str) {
-    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-
-// ── Log Run: opens the Add Event modal pre-filled with the idea ──
 window.openLogRun = (ideaId, ideaTitle) => {
-    logRunIdeaId = ideaId;
-    editIdx = null;
-    clearEventForm();
-
-    // Pre-fill name and link the idea
-    document.getElementById('f-name').value = ideaTitle;
-    document.getElementById('f-status').value = 'done';
-    // Pre-select the linked idea in the dropdown
-    const sel = document.getElementById('f-idea-link');
-    for (let opt of sel.options) { if (opt.value === ideaId) { sel.value = ideaId; break; } }
-
-    document.getElementById('modal-title').textContent = 'Log Run: ' + ideaTitle;
-    document.getElementById('event-modal').style.display = '';
-    document.getElementById('event-modal').classList.add('open');
+  clearEventForm();
+  document.getElementById('f-name').value = ideaTitle;
+  document.getElementById('f-status').value = 'done';
+  const sel = document.getElementById('f-idea-link');
+  for (let opt of sel.options) { if (opt.value === ideaId) { sel.value = ideaId; break; } }
+  document.getElementById('modal-title').textContent = 'Log Run: ' + ideaTitle;
+  openEventModal();
 };
 
-// ── Share Idea Modal — now OPTIMISTIC ──
-document.getElementById('mkt-refresh-btn').onclick = () => {
-    document.getElementById('mkt-loading').style.display = 'grid';
-    document.getElementById('mkt-grid').style.display = 'none';
-    document.getElementById('mkt-empty').style.display = 'none';
-    renderMarketplace(ideasCache); document.getElementById('mkt-loading').style.display='none';
+window.deleteIdea = async (ideaId, ideaTitle) => {
+  if (!confirm(`Delete "${ideaTitle}"?`)) return;
+  const card = document.getElementById('idea-card-'+ideaId);
+  if (card) { card.style.opacity = '.4'; card.style.pointerEvents = 'none'; }
+  try { await deleteDoc(doc(db, 'ideas', ideaId)); }
+  catch(err) {
+    alert('Could not delete: ' + err.message);
+    if (card) { card.style.opacity = ''; card.style.pointerEvents = ''; }
+  }
 };
-document.getElementById('mkt-share-btn').onclick = () => document.getElementById('idea-modal').classList.add('open');
-document.getElementById('idea-modal-close-btn').onclick = () => document.getElementById('idea-modal').classList.remove('open');
+
+document.getElementById('mkt-refresh-btn').onclick = () => renderMarketplace(ideasCache);
+document.getElementById('mkt-share-btn').onclick   = () => document.getElementById('idea-modal').classList.add('open');
+
+document.getElementById('idea-modal-close-btn').onclick  = () => document.getElementById('idea-modal').classList.remove('open');
 document.getElementById('idea-modal-cancel-btn').onclick = () => document.getElementById('idea-modal').classList.remove('open');
 
 document.getElementById('idea-modal-save-btn').onclick = async () => {
-    const title = document.getElementById('fi-title').value.trim();
-    const desc = document.getElementById('fi-desc').value.trim();
-    const link = document.getElementById('fi-link').value.trim();
-    if (!title) { alert('Title is required'); return; }
-    if (!desc) { alert('Description is required'); return; }
-
-    const btn = document.getElementById('idea-modal-save-btn');
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
-
-    try {
-        await addDoc(collection(db, 'ideas'), {
-            title,
-            description: desc,
-            resourceLink: link || null,
-            totalImpact: 0,
-            submittedBy: DB.displayName || currentUser?.email || 'Anonymous',
-            submittedAt: new Date().toISOString(),
-            uid: currentUser?.uid
-        });
-        // Clear form and close modal only on success
-        document.getElementById('idea-modal').classList.remove('open');
-        document.getElementById('fi-title').value = '';
-        document.getElementById('fi-desc').value = '';
-        document.getElementById('fi-link').value = '';
-        // Reload ideas from Firestore
-        await fetchAndRenderIdeas();
-    } catch(err) {
-        alert('Failed to save idea: ' + err.message);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Submit Idea';
-    }
+  const title = document.getElementById('fi-title').value.trim();
+  const desc  = document.getElementById('fi-desc').value.trim();
+  const link  = document.getElementById('fi-link').value.trim();
+  if (!title) { alert('Title is required'); return; }
+  if (!desc)  { alert('Description is required'); return; }
+  const btn = document.getElementById('idea-modal-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await addDoc(collection(db, 'ideas'), {
+      title, description: desc, resourceLink: link||null,
+      totalImpact: 0,
+      submittedBy: DB.displayName || currentUser?.email || 'Anonymous',
+      submittedAt: new Date().toISOString(),
+      uid: currentUser?.uid
+    });
+    document.getElementById('idea-modal').classList.remove('open');
+    document.getElementById('fi-title').value = '';
+    document.getElementById('fi-desc').value  = '';
+    document.getElementById('fi-link').value  = '';
+  } catch(err) { alert('Failed: ' + err.message); }
+  finally { btn.disabled = false; btn.textContent = 'Submit Idea'; }
 };
 
-// ── Display Name Banner (Marketplace) ──
+/* ── Display name banner ── */
 function checkDisplayNameBanner() {
-    document.getElementById('mkt-profile-banner').style.display = DB.displayName ? 'none' : 'flex';
+  const banner = document.getElementById('mkt-profile-banner');
+  if (banner) banner.style.display = DB.displayName ? 'none' : 'flex';
 }
 document.getElementById('mkt-set-name-btn').onclick = () => {
-    const name = prompt('Enter your display name (e.g. "Alex - UW Madison"):');
-    if (name && name.trim()) {
-        DB.displayName = name.trim();
-        checkDisplayNameBanner();
-        renderProfilePanel();
-        document.getElementById('hdr-username').textContent = `Signed in as ${currentUser.email} · ${DB.displayName}`;
-        saveDB();
-    }
+  const name = prompt('Enter your display name (e.g. "Alex – UW Madison"):');
+  if (name && name.trim()) {
+    DB.displayName = name.trim();
+    updateHdrUsername(); checkDisplayNameBanner(); renderProfilePanel(); saveDB();
+  }
 };
 
-// ── Profile Panel ──
+/* ══════════════════════════════════════════════
+   PROFILE
+══════════════════════════════════════════════ */
 function renderProfilePanel() {
-    const name = DB.displayName || '';
-    const email = currentUser?.email || '';
-    const initials = name ? name.slice(0,2).toUpperCase() : email.slice(0,2).toUpperCase();
-
-    document.getElementById('prof-avatar').textContent = initials;
-    document.getElementById('prof-name').textContent = name || '(no display name set)';
-    document.getElementById('prof-email').textContent = email;
-    document.getElementById('prof-name-input').value = name;
-
-    // Stats from local DB
-    const done = DB.events.filter(e => e.status !== 'planned');
-    const totalAttendees = done.reduce((s, e) => s + (parseInt(e.attendees) || 0), 0);
-    document.getElementById('prof-stat-events').textContent = done.length;
-    document.getElementById('prof-stat-attendees').textContent = totalAttendees;
-
-    // Ideas count from cache
-    const myIdeas = ideasCache.filter(i => i.uid === currentUser?.uid);
-    document.getElementById('prof-stat-ideas').textContent = myIdeas.length;
+  const name     = DB.displayName || '';
+  const email    = currentUser?.email || '';
+  const initials = (name || email).slice(0,2).toUpperCase();
+  document.getElementById('prof-avatar').textContent    = initials;
+  document.getElementById('prof-name').textContent      = name || '(no display name set)';
+  document.getElementById('prof-email').textContent     = email;
+  document.getElementById('prof-name-input').value      = name;
+  const done  = doneEvs();
+  const reach = done.reduce((s,e) => s+(parseInt(e.attendees)||0), 0);
+  document.getElementById('prof-stat-events').textContent    = done.length;
+  document.getElementById('prof-stat-attendees').textContent = reach.toLocaleString();
+  document.getElementById('prof-stat-ideas').textContent     = ideasCache.filter(i => i.uid === currentUser?.uid).length;
 }
 
 function renderProfileIdeas(ideas) {
-    const myIdeas = ideas.filter(i => i.uid === currentUser?.uid);
-    const container = document.getElementById('prof-ideas-list');
-    if (!container) return;
-
-    if (!myIdeas.length) {
-        container.innerHTML = '<div style="color:var(--text3);font-size:13px;">You haven\'t shared any ideas yet. Head to the Idea Marketplace to share one!</div>';
-        return;
-    }
-    container.innerHTML = myIdeas.map(idea => `
-        <div class="my-idea-row">
-            <div class="my-idea-title">${escHtml(idea.title)}</div>
-            <div class="my-idea-impact">👥 ${idea.totalImpact || 0} total reached</div>
-            ${idea.totalImpact > 0 ? '<span class="proven-badge">✅ Proven</span>' : ''}
-        </div>
-    `).join('');
-
-    // Also update ideas stat
-    document.getElementById('prof-stat-ideas').textContent = myIdeas.length;
+  const my  = ideas.filter(i => i.uid === currentUser?.uid);
+  const el  = document.getElementById('prof-ideas-list');
+  if (!el) return;
+  document.getElementById('prof-stat-ideas').textContent = my.length;
+  if (!my.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;">No ideas shared yet.</div>'; return; }
+  el.innerHTML = my.map(idea => `
+    <div class="my-idea-row">
+      <div class="my-idea-title">${escHtml(idea.title)}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--blue);">👥 ${idea.totalImpact||0}</div>
+      ${(idea.totalImpact||0)>0 ? '<span class="proven-badge">✅</span>' : ''}
+    </div>`).join('');
 }
 
 document.getElementById('prof-save-name-btn').onclick = () => {
-    const name = document.getElementById('prof-name-input').value.trim();
-    if (!name) { alert('Display name cannot be empty'); return; }
-    DB.displayName = name;
-    checkDisplayNameBanner();
-    renderProfilePanel();
-    document.getElementById('hdr-username').textContent = `Signed in as ${currentUser.email} · ${name}`;
-    saveDB();
-    const btn = document.getElementById('prof-save-name-btn');
-    btn.textContent = 'Saved ✓';
-    setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+  const name = document.getElementById('prof-name-input').value.trim();
+  if (!name) { alert('Display name cannot be empty'); return; }
+  DB.displayName = name;
+  updateHdrUsername(); checkDisplayNameBanner(); renderProfilePanel(); saveDB();
+  const btn = document.getElementById('prof-save-name-btn');
+  btn.textContent = 'Saved ✓';
+  setTimeout(() => btn.textContent = 'Save', 1500);
 };
 
-// Render profile when navigating to it
-document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
-    const orig = btn.onclick;
-    if (btn.dataset.panel === 'profile') {
-        btn.addEventListener('click', () => renderProfilePanel());
-    }
-});
-
-// ── LIVE CHECK-IN ──
-let _liveSessionId = null;
-let _liveEventIdx = null;
-let _unsubLive = null;
-
-let _liveTimerInterval = null;
-let _liveStartTime = null;
-let _liveNewEvent = null; // holds data for events created directly from check-in
-
+/* ══════════════════════════════════════════════
+   LIVE CHECK-IN
+══════════════════════════════════════════════ */
 function populateLiveEventSelect() {
-    const sel = document.getElementById('lc-event-select');
-    const planned = (DB.events || [])
-        .map((e, i) => ({ ...e, _idx: i }))
-        .filter(e => e.status === 'planned');
-    sel.innerHTML = '<option value="">— Choose a planned event —</option>' +
-        '<option value="__new__">＋ Start a new event now</option>' +
-        planned.map(e => `<option value="${e._idx}">${e.name} (${e.date || 'no date'})</option>`).join('');
+  const sel     = document.getElementById('lc-event-select');
+  const planned = (DB.events||[]).map((e,i)=>({...e,_idx:i})).filter(e=>e.status==='planned');
+  sel.innerHTML = '<option value="">— Choose a planned event —</option><option value="__new__">＋ Start a new event now</option>'
+    + planned.map(e=>`<option value="${e._idx}">${escHtml(e.name)} (${e.date||'no date'})</option>`).join('');
 }
 
-// Show/hide new event form based on selection
 document.getElementById('lc-event-select').onchange = () => {
-    const val = document.getElementById('lc-event-select').value;
-    document.getElementById('lc-new-form').style.display = val === '__new__' ? 'block' : 'none';
+  document.getElementById('lc-new-form').style.display =
+    document.getElementById('lc-event-select').value === '__new__' ? 'block' : 'none';
 };
 
 document.getElementById('lc-start-btn').onclick = async () => {
-    const sel = document.getElementById('lc-event-select');
-    const val = sel.value;
-    if (val === '') { alert('Please select an event or choose "Start a new event now".'); return; }
-
-    let eventName, eventIdx;
-
-    if (val === '__new__') {
-        // Validate new event form
-        const name = document.getElementById('lc-new-name').value.trim();
-        if (!name) { alert('Please enter an event name.'); return; }
-        const type = document.getElementById('lc-new-type').value;
-        const location = document.getElementById('lc-new-location').value.trim();
-        const quarter = document.getElementById('lc-new-quarter').value;
-        const today = new Date().toISOString().split('T')[0];
-
-        // Create a placeholder event in DB — will be updated with real duration/attendees on end
-        _liveNewEvent = { name, type, location, quarter, date: today, status: 'done', attendees: 0, duration: 0 };
-        eventName = name;
-        eventIdx = null;
-    } else {
-        eventIdx = parseInt(val);
-        const ev = DB.events[eventIdx];
-        if (!ev) return;
-        eventName = ev.name;
-        _liveNewEvent = null;
-    }
-
-    const btn = document.getElementById('lc-start-btn');
-    btn.disabled = true;
-    btn.textContent = 'Starting…';
-
-    try {
-        const sessionRef = await addDoc(collection(db, 'checkin_sessions'), {
-            eventName,
-            eventIdx: eventIdx !== null ? eventIdx : -1,
-            ownerUid: currentUser.uid,
-            count: 0,
-            scans: [],
-            createdAt: new Date().toISOString(),
-            active: true
-        });
-        _liveSessionId = sessionRef.id;
-        _liveEventIdx = eventIdx;
-        startLiveSession(sessionRef.id, eventName);
-    } catch(err) {
-        alert('Could not start session: ' + err.message);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = '▶ Start Event & Generate QR';
-    }
+  const val = document.getElementById('lc-event-select').value;
+  if (!val) { alert('Please select an event.'); return; }
+  let eventName, eventIdx;
+  if (val === '__new__') {
+    const name = document.getElementById('lc-new-name').value.trim();
+    if (!name) { alert('Please enter an event name.'); return; }
+    _liveNewEvent = {
+      name, type: document.getElementById('lc-new-type').value,
+      location: document.getElementById('lc-new-location').value.trim(),
+      quarter: document.getElementById('lc-new-quarter').value,
+      date: new Date().toISOString().split('T')[0],
+      status: 'done', attendees: 0, duration: 0
+    };
+    eventName = name; eventIdx = null;
+  } else {
+    eventIdx = parseInt(val);
+    eventName = DB.events[eventIdx]?.name || 'Event';
+    _liveNewEvent = null;
+  }
+  const btn = document.getElementById('lc-start-btn');
+  btn.disabled = true; btn.textContent = 'Starting…';
+  try {
+    const ref = await addDoc(collection(db, 'checkin_sessions'), {
+      eventName, eventIdx: eventIdx !== null ? eventIdx : -1,
+      ownerUid: currentUser.uid,
+      count: 0, scans: [],
+      createdAt: new Date().toISOString(), active: true
+    });
+    _liveSessionId = ref.id; _liveEventIdx = eventIdx;
+    startLiveSession(ref.id, eventName);
+  } catch(err) { alert('Could not start: ' + err.message); }
+  finally { btn.disabled = false; btn.textContent = '▶ Start Event & Generate QR'; }
 };
 
-function startTimer() {
-    _liveStartTime = Date.now();
-    _liveTimerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - _liveStartTime) / 1000);
-        const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
-        const s = (elapsed % 60).toString().padStart(2, '0');
-        const el = document.getElementById('lc-timer');
-        if (el) el.textContent = m + ':' + s;
-    }, 1000);
-}
-
-function stopTimer() {
-    if (_liveTimerInterval) { clearInterval(_liveTimerInterval); _liveTimerInterval = null; }
-    const elapsed = _liveStartTime ? Math.floor((Date.now() - _liveStartTime) / 1000) : 0;
-    _liveStartTime = null;
-    return Math.round(elapsed / 60); // return duration in minutes
-}
-
 function startLiveSession(sessionId, eventName) {
-    document.getElementById('lc-setup').style.display = 'none';
-    document.getElementById('lc-session').style.display = 'block';
-    document.getElementById('lc-event-name-display').textContent = eventName;
-    document.getElementById('lc-count').textContent = '0';
-    document.getElementById('lc-timer').textContent = '00:00';
-    document.getElementById('lc-last-scan').textContent = '';
-    document.getElementById('lc-scan-list').innerHTML = '<div style="color:var(--text3);">No scans yet — waiting for attendees...</div>';
+  document.getElementById('lc-setup').style.display   = 'none';
+  document.getElementById('lc-session').style.display = 'block';
+  document.getElementById('lc-event-name-display').textContent = eventName;
+  document.getElementById('lc-count').textContent = '0';
+  document.getElementById('lc-timer').textContent = '00:00';
+  document.getElementById('lc-last-scan').textContent = '';
+  document.getElementById('lc-scan-list').innerHTML = '<div style="color:var(--text3);">No scans yet…</div>';
 
-    // Build check-in URL
-    const base = window.location.origin + window.location.pathname.replace('index.html','');
-    const url = base + 'checkin.html?session=' + sessionId;
-    document.getElementById('lc-url-display').textContent = url;
+  const base = window.location.origin + window.location.pathname.replace('index.html','');
+  const url  = base + 'checkin.html?session=' + sessionId;
+  document.getElementById('lc-url-display').textContent = url;
+  document.getElementById('lc-qr').innerHTML = '';
+  new QRCode(document.getElementById('lc-qr'), { text:url, width:176, height:176, correctLevel:QRCode.CorrectLevel.M });
 
-    // Generate QR
-    const qrEl = document.getElementById('lc-qr');
-    qrEl.innerHTML = '';
-    new QRCode(qrEl, { text: url, width: 180, height: 180, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  _liveStartTime = Date.now();
+  _liveTimerInterval = setInterval(() => {
+    const s = Math.floor((Date.now()-_liveStartTime)/1000);
+    const el = document.getElementById('lc-timer');
+    if (el) el.textContent = String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  }, 1000);
 
-    // Start timer
-    startTimer();
-
-    // Live listener on session doc
-    if (_unsubLive) _unsubLive();
-    _unsubLive = onSnapshot(doc(db, 'checkin_sessions', sessionId), (snap) => {
-        if (!snap.exists()) return;
-        const data = snap.data();
-        document.getElementById('lc-count').textContent = data.count || 0;
-        const scans = data.scans || [];
-        if (scans.length) {
-            document.getElementById('lc-last-scan').textContent = 'Last scan: ' + new Date(scans[scans.length-1]).toLocaleTimeString();
-            document.getElementById('lc-scan-list').innerHTML = scans.slice().reverse().map((t, i) =>
-                `<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
-                    <span>#${scans.length - i}</span><span>${new Date(t).toLocaleTimeString()}</span>
-                 </div>`
-            ).join('');
-        }
-    });
+  if (_unsubLive) _unsubLive();
+  _unsubLive = onSnapshot(doc(db, 'checkin_sessions', sessionId), (snap) => {
+    if (!snap.exists()) return;
+    const data  = snap.data();
+    document.getElementById('lc-count').textContent = data.count||0;
+    const scans = data.scans || [];
+    if (scans.length) {
+      document.getElementById('lc-last-scan').textContent = 'Last: ' + new Date(scans[scans.length-1]).toLocaleTimeString();
+      document.getElementById('lc-scan-list').innerHTML = scans.slice().reverse().map((t,i) =>
+        `<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+          <span>#${scans.length-i}</span><span>${new Date(t).toLocaleTimeString()}</span></div>`
+      ).join('');
+    }
+  });
 }
 
 document.getElementById('lc-end-btn').onclick = async () => {
-    if (!_liveSessionId) return;
-    const durationMins = stopTimer();
-
-    // Get final count from the live counter display (already synced by onSnapshot)
-    const finalCount = parseInt(document.getElementById('lc-count').textContent) || 0;
-
-    if (_liveNewEvent) {
-        // Brand new event — create it in DB with timer duration + live count
-        _liveNewEvent.attendees = finalCount;
-        _liveNewEvent.duration = durationMins;
-        DB.events.push(_liveNewEvent);
-        _liveNewEvent = null;
-    } else if (_liveEventIdx !== null && DB.events[_liveEventIdx]) {
-        // Existing event — update attendees, duration, status
-        DB.events[_liveEventIdx].attendees = finalCount;
-        DB.events[_liveEventIdx].duration = durationMins;
-        DB.events[_liveEventIdx].status = 'done';
-    }
-
-    await saveDB();
-    renderOverview();
-    applyFilters();
-
-    // Write to global_events
-    const liveEv = DB.events[_liveEventIdx] || _liveNewEvent;
-    if (liveEv) {
-        const globalPayload = {
-            uid: currentUser.uid,
-            displayName: DB.displayName || null,
-            name: liveEv.name,
-            type: liveEv.type || 'other',
-            location: liveEv.location || '',
-            date: liveEv.date || new Date().toISOString().split('T')[0],
-            attendees: finalCount,
-            duration: durationMins,
-            quarter: liveEv.quarter || '',
-            savedAt: new Date().toISOString()
-        };
-        const globalId = currentUser.uid + '_' + (liveEv.date || 'nodate') + '_' + liveEv.name.replace(/[^a-zA-Z0-9]/g,'').toLowerCase().slice(0,20);
-        try { await setDoc(doc(db, 'global_events', globalId), globalPayload); } catch(e) { console.error('global_events live write failed:', e); }
-    }
-
-    await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false });
-    if (_unsubLive) { _unsubLive(); _unsubLive = null; }
-    _liveSessionId = null;
-    _liveEventIdx = null;
-
-    document.getElementById('lc-session').style.display = 'none';
-    document.getElementById('lc-setup').style.display = 'block';
-    // Reset new event form
-    document.getElementById('lc-new-form').style.display = 'none';
-    document.getElementById('lc-new-name').value = '';
-    document.getElementById('lc-event-select').value = '';
-    populateLiveEventSelect();
-
-    alert('Event saved! ' + finalCount + ' attendees · ' + durationMins + ' min duration added to your event log.');
+  if (!_liveSessionId) return;
+  const elapsed = _liveStartTime ? Math.round((Date.now()-_liveStartTime)/1000/60) : 0;
+  if (_liveTimerInterval) { clearInterval(_liveTimerInterval); _liveTimerInterval = null; }
+  const finalCount = parseInt(document.getElementById('lc-count').textContent)||0;
+  if (_liveNewEvent) {
+    _liveNewEvent.attendees = finalCount; _liveNewEvent.duration = elapsed;
+    DB.events.push(_liveNewEvent); _liveNewEvent = null;
+  } else if (_liveEventIdx !== null && DB.events[_liveEventIdx]) {
+    DB.events[_liveEventIdx].attendees = finalCount;
+    DB.events[_liveEventIdx].duration  = elapsed;
+    DB.events[_liveEventIdx].status    = 'done';
+  }
+  await saveDB(); renderOverview(); applyFilters();
+  try { await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false }); } catch(e) {}
+  if (_unsubLive) { _unsubLive(); _unsubLive = null; }
+  _liveSessionId = null; _liveEventIdx = null;
+  document.getElementById('lc-session').style.display = 'none';
+  document.getElementById('lc-setup').style.display = 'block';
+  document.getElementById('lc-new-form').style.display = 'none';
+  document.getElementById('lc-event-select').value = '';
+  alert(`✓ Saved! ${finalCount} attendees · ${elapsed}min`);
 };
 
 document.getElementById('lc-cancel-btn').onclick = async () => {
-    if (!confirm('Cancel session? Attendance will not be saved.')) return;
-    stopTimer();
-    if (_liveSessionId) await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false });
-    if (_unsubLive) { _unsubLive(); _unsubLive = null; }
-    _liveSessionId = null;
-    _liveEventIdx = null;
-    _liveNewEvent = null;
-    document.getElementById('lc-session').style.display = 'none';
-    document.getElementById('lc-setup').style.display = 'block';
-    document.getElementById('lc-new-form').style.display = 'none';
-    document.getElementById('lc-event-select').value = '';
+  if (!confirm('Cancel session? Attendance won\'t be saved.')) return;
+  if (_liveTimerInterval) { clearInterval(_liveTimerInterval); _liveTimerInterval = null; }
+  if (_liveSessionId) { try { await updateDoc(doc(db, 'checkin_sessions', _liveSessionId), { active: false }); } catch(e) {} }
+  if (_unsubLive) { _unsubLive(); _unsubLive = null; }
+  _liveSessionId = null; _liveEventIdx = null; _liveNewEvent = null;
+  document.getElementById('lc-session').style.display = 'none';
+  document.getElementById('lc-setup').style.display   = 'block';
+  document.getElementById('lc-new-form').style.display = 'none';
+  document.getElementById('lc-event-select').value = '';
 };
 
-// Populate event select when navigating to live check-in panel
-document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
-    if (btn.dataset.panel === 'livecheck') {
-        btn.addEventListener('click', () => populateLiveEventSelect());
-    }
-});
-
-// ── GLOBAL IMPACT ──
-let _unsubGlobal = null;
-let _giView = 'monthly';
-let _giData = [];
-let _giChartEvents = null;
-let _giChartReached = null;
-
-window.setGiView = (view) => {
-    _giView = view;
-    document.getElementById('gi-toggle-monthly').style.background = view === 'monthly' ? 'var(--green)' : 'var(--surface)';
-    document.getElementById('gi-toggle-monthly').style.color = view === 'monthly' ? '#fff' : 'var(--text2)';
-    document.getElementById('gi-toggle-quarterly').style.background = view === 'quarterly' ? 'var(--green)' : 'var(--surface)';
-    document.getElementById('gi-toggle-quarterly').style.color = view === 'quarterly' ? '#fff' : 'var(--text2)';
-    renderGiCharts(_giData);
-};
-
+/* ══════════════════════════════════════════════
+   GLOBAL IMPACT
+══════════════════════════════════════════════ */
 function initGlobalImpact() {
-    if (_unsubGlobal) return; // already listening
-    const q = query(collection(db, 'global_events'), orderBy('savedAt', 'desc'));
-    _unsubGlobal = onSnapshot(q, (snap) => {
-        _giData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderGlobalImpact(_giData);
-    }, (err) => {
-        console.error('Global impact listener error:', err);
-    });
+  if (_unsubGlobal) return;
+  _unsubGlobal = onSnapshot(
+    query(collection(db, 'global_events'), orderBy('savedAt','desc')),
+    (snap) => { _giData = snap.docs.map(d=>({id:d.id,...d.data()})); renderGlobalImpact(_giData); },
+    (err) => console.error('Global impact error:', err)
+  );
 }
 
 function renderGlobalImpact(data) {
-    // ── Stats ──
-    const totalEvents = data.length;
-    const totalReached = data.reduce((s, e) => s + (parseInt(e.attendees) || 0), 0);
-    const totalMins = data.reduce((s, e) => s + (parseInt(e.duration) || 0), 0);
-    const totalHours = (totalMins / 60).toFixed(1);
-    const ambassadors = new Set(data.map(e => e.uid)).size;
-
-    document.getElementById('gi-total-events').textContent = totalEvents.toLocaleString();
-    document.getElementById('gi-total-reached').textContent = totalReached.toLocaleString();
-    document.getElementById('gi-total-hours').textContent = totalHours;
-    document.getElementById('gi-total-ambassadors').textContent = ambassadors;
-    document.getElementById('gi-last-updated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
-
-    // ── Charts ──
-    renderGiCharts(data);
-
-    // ── Feed ──
-    const tbody = document.getElementById('gi-feed-tbody');
-    const recent = data.slice(0, 20);
-    if (!recent.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">No events yet.</td></tr>';
-        return;
-    }
-    tbody.innerHTML = recent.map(e => {
-        const name = e.displayName ? e.displayName : 'An ambassador';
-        const date = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-        const type = e.type ? e.type.charAt(0).toUpperCase() + e.type.slice(1) : '—';
-        const attendees = parseInt(e.attendees) || 0;
-        return `<tr>
-            <td style="font-weight:600;font-size:13px;">${escHtml(name)}</td>
-            <td style="font-size:13px;">${escHtml(e.name || '—')}</td>
-            <td><span style="font-size:11px;background:var(--surface2);color:var(--text2);border-radius:4px;padding:2px 7px;font-weight:600;">${escHtml(type)}</span></td>
-            <td style="font-size:12px;color:var(--text2);">${escHtml(e.location || '—')}</td>
-            <td style="font-size:12px;color:var(--text2);white-space:nowrap;">${date}</td>
-            <td style="text-align:right;font-weight:700;font-size:13px;">${attendees.toLocaleString()}</td>
-        </tr>`;
-    }).join('');
+  document.getElementById('gi-total-events').textContent      = data.length.toLocaleString();
+  document.getElementById('gi-total-reached').textContent     = data.reduce((s,e)=>s+(parseInt(e.attendees)||0),0).toLocaleString();
+  document.getElementById('gi-total-hours').textContent       = (data.reduce((s,e)=>s+(parseInt(e.duration)||0),0)/60).toFixed(1);
+  document.getElementById('gi-total-ambassadors').textContent = new Set(data.map(e=>e.uid)).size;
+  document.getElementById('gi-last-updated').textContent      = 'Updated: ' + new Date().toLocaleTimeString();
+  renderGiCharts(data);
+  const tbody = document.getElementById('gi-feed-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:24px;">No events yet.</td></tr>'; return; }
+  tbody.innerHTML = data.slice(0,20).map(e => {
+    const date = e.date ? new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+    return `<tr>
+      <td style="font-weight:600;font-size:13px;">${escHtml(e.displayName||'Ambassador')}</td>
+      <td style="font-size:13px;">${escHtml(e.name||'—')}</td>
+      <td><span style="font-size:11px;background:var(--surface2);border-radius:4px;padding:2px 7px;font-weight:600;">${escHtml(e.type||'—')}</span></td>
+      <td style="font-size:12px;color:var(--text2);">${escHtml(e.location||'—')}</td>
+      <td style="font-size:12px;color:var(--text2);">${date}</td>
+      <td style="text-align:right;font-weight:700;font-size:13px;">${(parseInt(e.attendees)||0).toLocaleString()}</td>
+    </tr>`;
+  }).join('');
 }
+
+window.setGiView = (view) => {
+  _giView = view;
+  ['monthly','quarterly'].forEach(v => {
+    const btn = document.getElementById('gi-toggle-'+v);
+    if (btn) { btn.style.background = v===view?'var(--green)':'var(--surface)'; btn.style.color = v===view?'#fff':'var(--text2)'; }
+  });
+  renderGiCharts(_giData);
+};
 
 function renderGiCharts(data) {
-    // Build labels + datasets based on view
-    const buckets = {};
-    data.forEach(e => {
-        if (!e.date) return;
-        let key;
-        if (_giView === 'monthly') {
-            const d = new Date(e.date + 'T12:00:00');
-            key = d.toLocaleString('default', { month: 'short', year: 'numeric' });
-        } else {
-            // Quarterly: map month to Q1-Q4
-            const d = new Date(e.date + 'T12:00:00');
-            const q = Math.floor(d.getMonth() / 3) + 1;
-            key = 'Q' + q + ' ' + d.getFullYear();
-        }
-        if (!buckets[key]) buckets[key] = { events: 0, reached: 0 };
-        buckets[key].events++;
-        buckets[key].reached += parseInt(e.attendees) || 0;
-    });
-
-    // Sort keys chronologically
-    const sortedKeys = Object.keys(buckets).sort((a, b) => {
-        if (_giView === 'monthly') {
-            return new Date('1 ' + a) - new Date('1 ' + b);
-        } else {
-            const [qa, ya] = [a[1], parseInt(a.split(' ')[1])];
-            const [qb, yb] = [b[1], parseInt(b.split(' ')[1])];
-            return ya !== yb ? ya - yb : qa - qb;
-        }
-    });
-
-    const labels = sortedKeys;
-    const eventsData = sortedKeys.map(k => buckets[k].events);
-    const reachedData = sortedKeys.map(k => buckets[k].reached);
-
-    const chartDefaults = {
-        type: 'bar',
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: { duration: 300 },
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 45 } },
-                y: { grid: { color: '#f0f0ee' }, ticks: { font: { size: 11 }, precision: 0 }, beginAtZero: true }
-            }
-        }
-    };
-
-    // Destroy and recreate to avoid stale data
-    if (_giChartEvents) _giChartEvents.destroy();
-    if (_giChartReached) _giChartReached.destroy();
-
-    const ctxE = document.getElementById('gi-chart-events');
-    const ctxR = document.getElementById('gi-chart-reached');
-    if (!ctxE || !ctxR) return;
-
-    _giChartEvents = new Chart(ctxE, {
-        ...chartDefaults,
-        data: { labels, datasets: [{ data: eventsData, backgroundColor: '#16a34a', borderRadius: 4, maxBarThickness: 48, barPercentage: 0.6 }] }
-    });
-    _giChartReached = new Chart(ctxR, {
-        ...chartDefaults,
-        data: { labels, datasets: [{ data: reachedData, backgroundColor: '#2563eb', borderRadius: 4, maxBarThickness: 48, barPercentage: 0.6 }] }
-    });
+  const buckets = {};
+  data.forEach(e => {
+    if (!e.date) return;
+    const d = new Date(e.date+'T12:00:00');
+    const key = _giView === 'monthly'
+      ? d.toLocaleString('default',{month:'short',year:'numeric'})
+      : 'Q'+(Math.floor(d.getMonth()/3)+1)+' '+d.getFullYear();
+    if (!buckets[key]) buckets[key] = { events:0, reached:0 };
+    buckets[key].events++;
+    buckets[key].reached += parseInt(e.attendees)||0;
+  });
+  const keys = Object.keys(buckets).sort((a,b) => {
+    if (_giView === 'monthly') return new Date('1 '+a) - new Date('1 '+b);
+    const [qa,ya] = [a[1],parseInt(a.split(' ')[1])];
+    const [qb,yb] = [b[1],parseInt(b.split(' ')[1])];
+    return ya!==yb ? ya-yb : qa-qb;
+  });
+  const opts = {
+    type:'bar',
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:300},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45}},
+        y:{grid:{color:'#f0f0ee'},ticks:{font:{size:10},precision:0},beginAtZero:true}
+      }
+    }
+  };
+  if (_giChartEvents)  _giChartEvents.destroy();
+  if (_giChartReached) _giChartReached.destroy();
+  const ctxE = document.getElementById('gi-chart-events');
+  const ctxR = document.getElementById('gi-chart-reached');
+  if (ctxE) _giChartEvents  = new Chart(ctxE, {...opts, data:{labels:keys,datasets:[{data:keys.map(k=>buckets[k].events), backgroundColor:'#16a34a',borderRadius:4,maxBarThickness:44,barPercentage:.6}]}});
+  if (ctxR) _giChartReached = new Chart(ctxR, {...opts, data:{labels:keys,datasets:[{data:keys.map(k=>buckets[k].reached),backgroundColor:'#2563eb',borderRadius:4,maxBarThickness:44,barPercentage:.6}]}});
 }
-
 </script>
+</body>
 </html>
