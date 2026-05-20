@@ -50,6 +50,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .main{flex:1;padding:28px 32px;min-width:0;}
 .panel{display:none;}
 .panel.show{display:block;}
+/* SYNC INDICATOR */
+.sync-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:5px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 /* COMPONENTS */
 .page-hd{margin-bottom:20px;}
 .page-hd h1{font-size:22px;font-weight:700;margin-bottom:3px;}
@@ -64,7 +67,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh);}
 .card-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:14px;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
 .mt16{margin-top:16px;}
 .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
@@ -107,47 +109,32 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
 .amb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:16px;}
 .amb-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);cursor:pointer;transition:all .15s;}
 .amb-card:hover{box-shadow:var(--shm);border-color:var(--border2);}
+.amb-card.at-risk{border-left:3px solid var(--red);}
 .amb-card-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
-.amb-avatar{width:44px;height:44px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;flex-shrink:0;}
+.amb-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;flex-shrink:0;color:#fff;}
 .amb-name{font-size:14px;font-weight:700;}
 .amb-email{font-size:11px;color:var(--text3);margin-top:2px;}
 .amb-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
 .amb-stat{background:var(--surface2);border-radius:var(--rs);padding:8px 10px;text-align:center;}
 .amb-stat-val{font-size:18px;font-weight:700;letter-spacing:-.3px;}
 .amb-stat-lbl{font-size:10px;color:var(--text2);margin-top:1px;}
-.amb-bar-wrap{background:var(--surface2);border-radius:4px;height:5px;overflow:hidden;margin-bottom:6px;}
-.amb-bar-fill{height:100%;border-radius:4px;transition:width .5s;}
-.amb-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
-/* EVENT DETAIL MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
-.overlay.open{display:flex;}
-.modal{background:var(--surface);border-radius:var(--r);width:680px;max-width:100%;box-shadow:var(--shm);margin:auto;}
-.modal-hdr{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:var(--r) var(--r) 0 0;}
-.modal-hdr h2{font-size:16px;font-weight:700;}
-.modal-body{padding:20px 22px 24px;}
-.detail-section{margin-bottom:18px;}
-.detail-section h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:10px;}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.detail-item{background:var(--surface2);border-radius:var(--rs);padding:10px 12px;}
-.detail-item-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:3px;}
-.detail-item-val{font-size:13px;font-weight:500;}
-.summary-box{background:var(--surface2);border-radius:var(--rs);padding:12px 14px;font-size:13px;line-height:1.6;color:var(--text);}
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px;}
-.photo-thumb{width:100%;aspect-ratio:1;border-radius:var(--rs);object-fit:cover;cursor:pointer;border:1px solid var(--border);transition:opacity .15s;}
-.photo-thumb:hover{opacity:.85;}
-/* AMB DETAIL PANEL */
+/* QUARTERLY GRID on cards */
+.qtr-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:10px;}
+.qtr-cell{border-radius:5px;padding:5px 4px;text-align:center;font-size:10px;font-weight:700;}
+.qtr-cell.has{background:var(--green-bg);color:var(--green);}
+.qtr-cell.missing{background:var(--red-bg);color:var(--red);}
+.qtr-cell.future{background:var(--surface2);color:var(--text3);}
+.qtr-cell-label{display:block;font-size:9px;font-weight:600;letter-spacing:.04em;opacity:.7;margin-bottom:2px;}
+.qtr-cell-count{display:block;font-size:14px;font-weight:700;line-height:1;}
+/* BACK BUTTON */
 .back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;margin-bottom:16px;background:none;border:none;font-family:inherit;padding:0;}
 .back-btn:hover{color:var(--text);}
 /* PROGRESS BAR */
 .prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
-.prog-lbl{font-size:12px;color:var(--text2);width:60px;flex-shrink:0;}
+.prog-lbl{font-size:12px;color:var(--text2);width:70px;flex-shrink:0;}
 .prog-wrap{flex:1;background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;}
 .prog-fill{height:100%;border-radius:4px;transition:width .5s ease;}
 .prog-count{font-size:12px;color:var(--text2);min-width:32px;text-align:right;}
-/* LIGHTBOX */
-#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;cursor:zoom-out;}
-#lightbox.open{display:flex;}
-#lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.5);}
 /* TIER BADGES */
 .tb{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
 .tb-none{background:var(--surface2);color:var(--text3);}
@@ -155,14 +142,32 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
 .tb-silver{background:#eeede9;color:#4a4840;border:1px solid var(--border2);}
 .tb-gold{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b);}
 .tb-platinum{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b);}
+/* OVERLAY / MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r);width:680px;max-width:100%;box-shadow:var(--shm);margin:auto;}
+.modal-hdr{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:var(--r) var(--r) 0 0;}
+.modal-hdr h2{font-size:16px;font-weight:700;}
+.modal-body{padding:20px 22px 24px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.detail-item{background:var(--surface2);border-radius:var(--rs);padding:10px 12px;}
+.detail-item-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:3px;}
+.detail-item-val{font-size:13px;font-weight:500;}
+/* COMPLIANCE TABLE */
+.comp-ok{color:var(--green);font-weight:700;font-size:13px;}
+.comp-miss{color:var(--red);font-weight:700;font-size:13px;}
+.comp-future{color:var(--text3);font-size:13px;}
+.comp-row-atrisk td{background:rgba(184,58,30,.03);}
+/* ALERT */
 .alert{border-radius:var(--rs);padding:11px 14px;font-size:13px;margin-bottom:12px;line-height:1.5;}
 .alert-amber{background:var(--amber-bg);border-left:3px solid var(--amber-b);}
+.alert-red{background:var(--red-bg);border-left:3px solid var(--red);}
+.alert-blue{background:var(--blue-bg);border-left:3px solid var(--blue);}
 /* MOBILE */
 @media(max-width:768px){
   .sidebar{display:none;}
   .main{padding:16px;}
   .g4{grid-template-columns:1fr 1fr;}
-  .g3{grid-template-columns:1fr 1fr;}
   .g2{grid-template-columns:1fr;}
   .hdr{padding:0 16px;}
   .amb-grid{grid-template-columns:1fr;}
@@ -190,7 +195,7 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
     <div class="hdr-mark">BL</div>
     <div>
       <div class="hdr-title">Bambu Lab · Regional Director</div>
-      <div class="hdr-sub" id="hdr-region">California Region · Admin View</div>
+      <div class="hdr-sub">Admin View · <span class="sync-dot"></span><span id="sync-status">Connecting…</span></div>
     </div>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
@@ -209,6 +214,7 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
     <div class="nav-group">
       <div class="nav-group-label">Ambassadors</div>
       <button class="nav-btn" data-panel="ambassadors"><span class="nav-icon">👥</span>All Ambassadors</button>
+      <button class="nav-btn" data-panel="compliance"><span class="nav-icon">📋</span>Quarterly Compliance</button>
       <button class="nav-btn" data-panel="events"><span class="nav-icon">📅</span>All Events</button>
     </div>
     <div class="nav-div"></div>
@@ -222,12 +228,12 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
 
     <!-- OVERVIEW -->
     <div id="panel-overview" class="panel show">
-      <div class="page-hd"><h1>Regional Overview</h1><p>All ambassador activity across California.</p></div>
+      <div class="page-hd"><h1>Regional Overview</h1><p>All ambassador activity — updates in real time.</p></div>
       <div class="g4" id="ov-metrics" style="margin-bottom:16px;"></div>
       <div class="g2">
         <div class="card">
-          <div class="card-hd">Ambassador tiers</div>
-          <div id="ov-tiers"></div>
+          <div class="card-hd">Quarterly compliance summary</div>
+          <div id="ov-compliance-summary"></div>
         </div>
         <div class="card">
           <div class="card-hd">Activity by event type</div>
@@ -238,7 +244,7 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
         <div class="card-hd">Recent events across all ambassadors</div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Ambassador</th><th>Event</th><th>Type</th><th>Date</th><th>Attendees</th><th>Summary</th><th>Photos</th></tr></thead>
+            <thead><tr><th>Ambassador</th><th>Event</th><th>Type</th><th>Date</th><th>Quarter</th><th>Attendees</th></tr></thead>
             <tbody id="ov-recent-tbody"></tbody>
           </table>
         </div>
@@ -248,7 +254,7 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
     <!-- AMBASSADORS LIST -->
     <div id="panel-ambassadors" class="panel">
       <div class="page-hd-row">
-        <div class="page-hd"><h1>All Ambassadors</h1><p>Click any card to see full event history and details.</p></div>
+        <div class="page-hd"><h1>All Ambassadors</h1><p>Click any card to see full event history.</p></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <input class="search-input" id="amb-search" placeholder="🔍  Search name or email…"/>
           <select class="filter-sel" id="amb-filter-tier">
@@ -259,29 +265,76 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
             <option value="Active">Active</option>
             <option value="None">None</option>
           </select>
+          <select class="filter-sel" id="amb-filter-compliance">
+            <option value="">All ambassadors</option>
+            <option value="atrisk">⚠ Missing quarter(s)</option>
+            <option value="ok">✓ Fully compliant</option>
+          </select>
         </div>
       </div>
       <div id="amb-loading" style="padding:40px;text-align:center;color:var(--text3);">Loading ambassadors…</div>
       <div class="amb-grid" id="amb-grid" style="display:none;"></div>
     </div>
 
-    <!-- AMBASSADOR DETAIL (injected dynamically) -->
+    <!-- AMBASSADOR DETAIL -->
     <div id="panel-amb-detail" class="panel"></div>
+
+    <!-- QUARTERLY COMPLIANCE -->
+    <div id="panel-compliance" class="panel">
+      <div class="page-hd-row">
+        <div class="page-hd"><h1>📋 Quarterly Compliance</h1><p>See which ambassadors have met the 1-event-per-quarter requirement.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <select class="filter-sel" id="comp-filter">
+            <option value="">All ambassadors</option>
+            <option value="atrisk">⚠ Missing at least one quarter</option>
+            <option value="ok">✓ All required quarters covered</option>
+          </select>
+          <select class="filter-sel" id="comp-sort">
+            <option value="missing">Sort: Most missing first</option>
+            <option value="name">Sort: Name A–Z</option>
+            <option value="events">Sort: Most events</option>
+          </select>
+        </div>
+      </div>
+      <div class="alert alert-blue" id="comp-alert" style="margin-bottom:14px;"></div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="tbl-wrap">
+          <table id="comp-table">
+            <thead>
+              <tr>
+                <th>Ambassador</th>
+                <th style="text-align:center;">Q1 · Jan–Mar</th>
+                <th style="text-align:center;">Q2 · Apr–Jun</th>
+                <th style="text-align:center;">Q3 · Jul–Sep</th>
+                <th style="text-align:center;">Q4 · Oct–Dec</th>
+                <th style="text-align:center;">Missing</th>
+                <th style="text-align:center;">Total Events</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="comp-tbody"></tbody>
+          </table>
+          <div id="comp-empty" class="empty" style="display:none;">No ambassadors found.</div>
+        </div>
+      </div>
+    </div>
 
     <!-- ALL EVENTS -->
     <div id="panel-events" class="panel">
       <div class="page-hd-row">
         <div class="page-hd"><h1>All Events</h1><p>Every completed event across all ambassadors.</p></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input class="search-input" id="ev-search" placeholder="🔍  Search event name…" style="min-width:160px;"/>
+          <input class="search-input" id="ev-search" placeholder="🔍  Search event or ambassador…" style="min-width:200px;"/>
           <select class="filter-sel" id="ev-filter-type"><option value="">All types</option><option value="workshop">Workshop</option><option value="demo">Demo</option><option value="competition">Competition</option><option value="class">Class</option><option value="club">Club</option><option value="fair">Fair</option><option value="other">Other</option></select>
-          <select class="filter-sel" id="ev-filter-quarter"><option value="">All quarters</option><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option></select>
+          <select class="filter-sel" id="ev-filter-quarter"><option value="">All quarters</option><option value="Q1">Q1 · Jan–Mar</option><option value="Q2">Q2 · Apr–Jun</option><option value="Q3">Q3 · Jul–Sep</option><option value="Q4">Q4 · Oct–Dec</option></select>
+          <select class="filter-sel" id="ev-filter-amb"><option value="">All ambassadors</option></select>
+          <span id="ev-count" style="font-size:12px;color:var(--text3);align-self:center;"></span>
         </div>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-top:4px;">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Ambassador</th><th>Event</th><th>Date</th><th>Type</th><th>Location</th><th>Attendees</th><th>Duration</th><th>Summary</th><th>Photos</th></tr></thead>
+            <thead><tr><th>Ambassador</th><th>Event</th><th>Date</th><th>Type</th><th>Location</th><th>Attendees</th><th>Duration</th><th>Quarter</th><th>Valid?</th></tr></thead>
             <tbody id="ev-tbody"></tbody>
           </table>
           <div id="ev-empty" class="empty" style="display:none;">No events found.</div>
@@ -292,7 +345,7 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
     <!-- PHOTO PROOF -->
     <div id="panel-photos" class="panel">
       <div class="page-hd"><h1>Photo Proof</h1><p>All event photos submitted by ambassadors.</p></div>
-      <div id="photos-loading" style="padding:40px;text-align:center;color:var(--text3);">Loading photos…</div>
+      <div id="photos-loading" style="padding:40px;text-align:center;color:var(--text3);">Loading…</div>
       <div id="photos-grid" style="display:none;"></div>
       <div id="photos-empty" class="empty" style="display:none;">No photos submitted yet.</div>
     </div>
@@ -312,14 +365,20 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
 </div>
 
 <!-- LIGHTBOX -->
-<div id="lightbox" onclick="this.classList.remove('open')">
-  <img id="lightbox-img" src="" alt=""/>
+<div id="lightbox" onclick="this.classList.remove('open')" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;cursor:zoom-out;">
+  <img id="lightbox-img" src="" alt="" style="max-width:90vw;max-height:90vh;border-radius:8px;"/>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged,
+  signInWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc,
+  collection, onSnapshot, query, orderBy
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3ZA_XQyhcOZpEK8WbP5UbuxQnnKwFGW8",
@@ -331,233 +390,322 @@ const firebaseConfig = {
   measurementId: "G-2VHL7TJGCS"
 };
 
-const app = initializeApp(firebaseConfig);
+const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db   = getFirestore(app);
 
-let allUsers = []; // { uid, email, displayName, events[], ... }
+// ── State ──
+let allUsers = [];       // live array rebuilt on every snapshot
 let currentUser = null;
+let _unsubUsers = null;  // real-time listener handle
+
+// ── Program quarters: which quarters are "active" (current or past in program year) ──
+// Program: May 2026 – May 2027 → Q2 2026 onward is relevant
+// For simplicity, we consider all 4 calendar quarters and mark the ones that have
+// already started as "required" (ambassadors must have ≥1 event in them).
+function pastOrCurrentQuarters() {
+  const now = new Date();
+  const currentQNum = Math.floor(now.getMonth() / 3) + 1; // 1-4
+  // return array of Q labels that have at least partially passed
+  return ['Q1','Q2','Q3','Q4'].filter((_,i) => (i+1) <= currentQNum);
+}
 
 // ── AUTH ──
 document.getElementById('btn-login').onclick = async () => {
   document.getElementById('auth-error').textContent = '';
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Signing in…';
   try {
     await signInWithEmailAndPassword(auth,
-      document.getElementById('auth-email').value,
+      document.getElementById('auth-email').value.trim(),
       document.getElementById('auth-pass').value);
-  } catch(e) { document.getElementById('auth-error').textContent = e.message; }
+  } catch(e) {
+    document.getElementById('auth-error').textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
 };
-document.getElementById('btn-logout').onclick = () => signOut(auth);
+document.getElementById('btn-logout').onclick = () => {
+  if (_unsubUsers) { _unsubUsers(); _unsubUsers = null; }
+  signOut(auth);
+};
 
+// ── AUTH STATE ──
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     document.getElementById('auth-overlay').style.display = 'flex';
+    setSyncStatus('—', false);
     currentUser = null;
     return;
   }
-  // Check isAdmin
-  const snap = await getDoc(doc(db, 'users', user.uid));
-  if (!snap.exists() || !snap.data().isAdmin) {
+
+  // Verify admin flag
+  let snap;
+  try { snap = await getDoc(doc(db, 'users', user.uid)); } catch(e) { snap = null; }
+  if (!snap || !snap.exists() || !snap.data().isAdmin) {
     await signOut(auth);
-    document.getElementById('auth-error').textContent = 'Access denied. This account does not have admin privileges.';
+    document.getElementById('auth-error').textContent = 'Access denied — this account does not have admin privileges.';
     document.getElementById('auth-overlay').style.display = 'flex';
     return;
   }
+
   currentUser = user;
   document.getElementById('auth-overlay').style.display = 'none';
   document.getElementById('hdr-email').textContent = user.email;
-  loadAllData();
+  setSyncStatus('Connecting…', false);
+
+  // ── REAL-TIME LISTENER on all user docs ──
+  // This fires immediately with current data, then again on every change.
+  // No more stale data — every ambassador update is pushed here automatically.
+  if (_unsubUsers) _unsubUsers();
+  _unsubUsers = onSnapshot(
+    collection(db, 'users'),
+    (querySnap) => {
+      allUsers = [];
+      querySnap.forEach(d => {
+        const data = d.data();
+        if (data.isAdmin) return; // skip admin accounts
+        const events = (data.events || []).filter(e => e.status === 'done');
+        allUsers.push({
+          uid:         d.id,
+          email:       data.email || data.displayName || d.id.slice(0,12),
+          displayName: data.displayName || '',
+          events,
+          badges:      data.badges || {},
+        });
+      });
+      setSyncStatus('Live · ' + new Date().toLocaleTimeString(), true);
+      // Re-render whichever panels are visible
+      renderOverview();
+      renderAmbassadors();
+      renderAllEvents();
+      renderComplianceTable();
+      renderPhotos();
+    },
+    (err) => {
+      console.error('Users listener error:', err);
+      setSyncStatus('Error: ' + err.code, false);
+    }
+  );
 });
 
-// ── DATA LOADING ──
-async function loadAllData() {
-  const snap = await getDocs(collection(db, 'users'));
-  allUsers = [];
-  snap.forEach(d => {
-    const data = d.data();
-    if (data.isAdmin) return; // skip admin accounts
-    const events = (data.events || []).filter(e => e.status === 'done');
-    allUsers.push({
-      uid: d.id,
-      email: data.email || d.id,
-      displayName: data.displayName || '',
-      events,
-      badges: data.badges || {},
-    });
-  });
-  renderOverview();
-  renderAmbassadors();
-  renderAllEvents();
-  renderPhotos();
+function setSyncStatus(msg, live) {
+  document.getElementById('sync-status').textContent = msg;
+  const dot = document.querySelector('.sync-dot');
+  if (dot) dot.style.background = live ? 'var(--green)' : 'var(--amber)';
 }
 
 // ── HELPERS ──
-function tierFromN(n){ return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
-function tierClass(t){ return {Platinum:'tb-platinum',Gold:'tb-gold',Silver:'tb-silver',Active:'tb-active',None:'tb-none'}[t]||'tb-none'; }
-function currentQ(){ const m=new Date().getMonth(); return m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4'; }
-function fmtDate(d){ if(!d) return '—'; try{ return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return d; } }
-function avatarLetter(u){ return (u.displayName||u.email||'?')[0].toUpperCase(); }
-function colorForLetter(l){ const colors=['#1a4f9e','#2d7a3a','#7a5010','#5b3ab5','#b83a1e']; return colors[(l.charCodeAt(0)||0)%colors.length]; }
-function tagHTML(type){ return `<span class="tag tag-${type||'other'}">${type||'other'}</span>`; }
-function tierBadge(n){ const t=tierFromN(n); return `<span class="tb ${tierClass(t)}">${t}</span>`; }
+function tierFromN(n)  { return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
+function tierClass(t)  { return {Platinum:'tb-platinum',Gold:'tb-gold',Silver:'tb-silver',Active:'tb-active',None:'tb-none'}[t]||'tb-none'; }
+function currentQ()    { const m=new Date().getMonth(); return m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4'; }
+function isValid(e)    { return (parseInt(e.attendees)||0)>=5 && (parseInt(e.duration)||0)>=30; }
+function fmtDate(d)    { if(!d) return '—'; try{ return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return d; } }
+function avatarLetter(u){ return ((u.displayName||u.email||'?')[0]||'?').toUpperCase(); }
+function avatarColor(l){ const c=['#1a4f9e','#2d7a3a','#7a5010','#5b3ab5','#b83a1e']; return c[(l.charCodeAt(0)||0)%c.length]; }
+function tagHTML(t)    { return `<span class="tag tag-${t||'other'}">${t||'other'}</span>`; }
+function tierBadge(n)  { const t=tierFromN(n); return `<span class="tb ${tierClass(t)}">${t}</span>`; }
+function escHtml(s)    { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/** Returns object { Q1: count, Q2: count, Q3: count, Q4: count } for an ambassador */
+function qtrCounts(u) {
+  const r = { Q1:0, Q2:0, Q3:0, Q4:0 };
+  u.events.forEach(e => { if (r[e.quarter] !== undefined) r[e.quarter]++; });
+  return r;
+}
+
+/** How many required (past/current) quarters is this ambassador missing? */
+function missingCount(u) {
+  const required = pastOrCurrentQuarters();
+  const counts   = qtrCounts(u);
+  return required.filter(q => counts[q] === 0).length;
+}
 
 // ── OVERVIEW ──
 function renderOverview() {
-  const q = currentQ();
-  const totalEvs = allUsers.reduce((s,u) => s + u.events.length, 0);
-  const totalReach = allUsers.reduce((s,u) => s + u.events.reduce((a,e) => a + (parseInt(e.attendees)||0), 0), 0);
-  const totalHrs = allUsers.reduce((s,u) => s + u.events.reduce((a,e) => a + (parseInt(e.duration)||0), 0), 0);
-  const active = allUsers.filter(u => u.events.length > 0).length;
+  const q         = currentQ();
+  const totalEvs  = allUsers.reduce((s,u)=>s+u.events.length,0);
+  const totalReach = allUsers.reduce((s,u)=>s+u.events.reduce((a,e)=>a+(parseInt(e.attendees)||0),0),0);
+  const active    = allUsers.filter(u=>u.events.length>0).length;
+  const atRisk    = allUsers.filter(u=>missingCount(u)>0).length;
 
   document.getElementById('ov-metrics').innerHTML = `
     <div class="metric c-blue"><div class="metric-lbl">Total ambassadors</div><div class="metric-val">${allUsers.length}</div><div class="metric-sub">${active} with events</div></div>
     <div class="metric c-green"><div class="metric-lbl">Total events</div><div class="metric-val">${totalEvs}</div></div>
     <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${totalReach.toLocaleString()}</div></div>
-    <div class="metric c-purple"><div class="metric-lbl">Hours delivered</div><div class="metric-val">${Math.round(totalHrs/60)}</div></div>
+    <div class="metric c-purple"><div class="metric-lbl">At-risk ambassadors</div><div class="metric-val">${atRisk}</div><div class="metric-sub">missing a required quarter</div></div>
   `;
 
-  // Tier breakdown
-  const tiers = {Platinum:0,Gold:0,Silver:0,Active:0,None:0};
-  allUsers.forEach(u => { const t = tierFromN(u.events.filter(e=>e.quarter===q).length); tiers[t]++; });
-  const maxT = Math.max(...Object.values(tiers), 1);
-  document.getElementById('ov-tiers').innerHTML = Object.entries(tiers).map(([t,n]) =>
-    `<div class="prog-row">
-      <div style="width:70px;font-size:12px;color:var(--text2);">${t}</div>
-      <div class="prog-wrap"><div class="prog-fill" style="width:${(n/maxT)*100}%;background:var(--blue);"></div></div>
-      <div class="prog-count">${n}</div>
-    </div>`
-  ).join('');
+  // Quarterly compliance summary
+  const required = pastOrCurrentQuarters();
+  document.getElementById('ov-compliance-summary').innerHTML = ['Q1','Q2','Q3','Q4'].map(qtr => {
+    const isReq  = required.includes(qtr);
+    const hasCnt = allUsers.filter(u => qtrCounts(u)[qtr] > 0).length;
+    const pct    = allUsers.length ? Math.round((hasCnt/allUsers.length)*100) : 0;
+    return `<div class="prog-row">
+      <div class="prog-lbl">${qtr}${isReq?'':'*'}</div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%;background:${isReq?'var(--blue)':'var(--surface3)'}"></div></div>
+      <div class="prog-count">${hasCnt}/${allUsers.length}</div>
+    </div>`;
+  }).join('') + `<div style="font-size:11px;color:var(--text3);margin-top:6px;">* = not yet started</div>`;
 
-  // Event type breakdown
+  // Event types
   const types = {};
-  allUsers.forEach(u => u.events.forEach(e => { types[e.type||'other'] = (types[e.type||'other']||0)+1; }));
-  const maxTy = Math.max(...Object.values(types), 1);
-  document.getElementById('ov-types').innerHTML = Object.entries(types).sort((a,b)=>b[1]-a[1]).map(([t,n]) =>
+  allUsers.forEach(u => u.events.forEach(e => { types[e.type||'other']=(types[e.type||'other']||0)+1; }));
+  const maxT = Math.max(...Object.values(types),1);
+  document.getElementById('ov-types').innerHTML = Object.entries(types).sort((a,b)=>b[1]-a[1]).map(([t,n])=>
     `<div class="prog-row">
-      <div style="width:80px;font-size:12px;color:var(--text2);text-transform:capitalize;">${t}</div>
-      <div class="prog-wrap"><div class="prog-fill" style="width:${(n/maxTy)*100}%;background:var(--green);"></div></div>
+      <div class="prog-lbl" style="width:80px;text-transform:capitalize;">${t}</div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${(n/maxT)*100}%;background:var(--green);"></div></div>
       <div class="prog-count">${n}</div>
-    </div>`
-  ).join('') || '<div style="color:var(--text3);font-size:13px;">No data yet.</div>';
+    </div>`).join('') || '<div style="color:var(--text3);font-size:13px;">No data yet.</div>';
 
   // Recent events
-  const recent = allUsers.flatMap(u => u.events.map(e => ({...e, _user:u})))
-    .filter(e => e.date).sort((a,b) => b.date.localeCompare(a.date)).slice(0,15);
-  document.getElementById('ov-recent-tbody').innerHTML = recent.map(e => `
+  const recent = allUsers.flatMap(u=>u.events.map(e=>({...e,_user:u})))
+    .filter(e=>e.date).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15);
+  document.getElementById('ov-recent-tbody').innerHTML = recent.map(e=>`
     <tr style="cursor:pointer;" onclick="window.openEventModal(${JSON.stringify(e).replace(/"/g,'&quot;')})">
-      <td><div class="td-main">${e._user.displayName || e._user.email}</div></td>
-      <td><div class="td-main">${e.name}</div><div class="td-sub">${e.location||''}</div></td>
+      <td class="td-main">${escHtml(e._user.displayName||e._user.email)}</td>
+      <td><div class="td-main">${escHtml(e.name)}</div><div class="td-sub">${escHtml(e.location||'')}</div></td>
       <td>${tagHTML(e.type)}</td>
       <td style="font-size:12px;color:var(--text2);">${fmtDate(e.date)}</td>
-      <td style="font-size:13px;font-weight:600;">${e.attendees||0}</td>
-      <td style="max-width:180px;"><div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${e.summary||e.notes||'—'}</div></td>
-      <td style="font-size:12px;">${(e.photos && e.photos.length > 0) ? `📷 ${e.photos.length}` : (e.photoLink ? '🔗 link' : '—')}</td>
-    </tr>
-  `).join('') || '<tr><td colspan="7" class="empty">No events yet.</td></tr>';
+      <td><span style="font-size:11px;background:var(--surface2);padding:2px 7px;border-radius:4px;font-weight:600;">${e.quarter||'—'}</span></td>
+      <td style="font-weight:600;">${e.attendees||0}</td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty">No events yet.</td></tr>';
 }
 
 // ── AMBASSADORS ──
 function renderAmbassadors() {
-  const search = (document.getElementById('amb-search').value || '').toLowerCase();
+  const search     = (document.getElementById('amb-search').value||'').toLowerCase();
   const tierFilter = document.getElementById('amb-filter-tier').value;
+  const compFilter = document.getElementById('amb-filter-compliance').value;
   const q = currentQ();
   document.getElementById('amb-loading').style.display = 'none';
   const grid = document.getElementById('amb-grid');
   grid.style.display = 'grid';
 
-  const filtered = allUsers.filter(u => {
-    const matchSearch = !search || (u.displayName+u.email).toLowerCase().includes(search);
-    const qCount = u.events.filter(e=>e.quarter===q).length;
-    const tier = tierFromN(qCount);
-    const matchTier = !tierFilter || tier === tierFilter;
-    return matchSearch && matchTier;
-  }).sort((a,b) => b.events.length - a.events.length);
+  const required = pastOrCurrentQuarters();
 
-  if (!filtered.length) {
-    grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">No ambassadors found.</div>';
-    return;
-  }
+  const filtered = allUsers.filter(u => {
+    const matchSearch = !search || (u.displayName+' '+u.email).toLowerCase().includes(search);
+    const qCount = u.events.filter(e=>e.quarter===q).length;
+    const tier   = tierFromN(qCount);
+    const matchTier = !tierFilter || tier === tierFilter;
+    const miss = missingCount(u);
+    const matchComp = !compFilter || (compFilter==='atrisk'?miss>0:miss===0);
+    return matchSearch && matchTier && matchComp;
+  }).sort((a,b) => missingCount(b) - missingCount(a) || b.events.length - a.events.length);
+
+  if (!filtered.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">No ambassadors found.</div>'; return; }
 
   grid.innerHTML = filtered.map(u => {
-    const qCount = u.events.filter(e=>e.quarter===q).length;
-    const tier = tierFromN(qCount);
-    const totalReach = u.events.reduce((s,e) => s+(parseInt(e.attendees)||0), 0);
-    const hasPhotos = u.events.some(e => (e.photos && e.photos.length) || e.photoLink);
-    const maxForPlat = 8;
-    const pct = Math.min((qCount/maxForPlat)*100, 100);
-    const letter = avatarLetter(u);
-    const color = colorForLetter(letter);
-    return `<div class="amb-card" onclick="window.showAmbDetail('${u.uid}')">
+    const qCount  = u.events.filter(e=>e.quarter===q).length;
+    const tier    = tierFromN(qCount);
+    const reach   = u.events.reduce((s,e)=>s+(parseInt(e.attendees)||0),0);
+    const letter  = avatarLetter(u);
+    const color   = avatarColor(letter);
+    const counts  = qtrCounts(u);
+    const miss    = missingCount(u);
+    const atRisk  = miss > 0;
+
+    const qtrCells = ['Q1','Q2','Q3','Q4'].map(qtr => {
+      const isReq = required.includes(qtr);
+      const cnt   = counts[qtr];
+      const cls   = isReq ? (cnt>0?'has':'missing') : (cnt>0?'has':'future');
+      return `<div class="qtr-cell ${cls}">
+        <span class="qtr-cell-label">${qtr}</span>
+        <span class="qtr-cell-count">${cnt>0?cnt:'✗'}</span>
+      </div>`;
+    }).join('');
+
+    return `<div class="amb-card${atRisk?' at-risk':''}" onclick="window.showAmbDetail('${u.uid}')">
       <div class="amb-card-top">
         <div class="amb-avatar" style="background:${color};">${letter}</div>
         <div style="flex:1;min-width:0;">
-          <div class="amb-name">${u.displayName || '(No name set)'}</div>
-          <div class="amb-email">${u.email}</div>
+          <div class="amb-name">${escHtml(u.displayName||'(No name set)')}</div>
+          <div class="amb-email">${escHtml(u.email)}</div>
         </div>
         ${tierBadge(qCount)}
       </div>
+      <div class="qtr-grid">${qtrCells}</div>
       <div class="amb-stats">
         <div class="amb-stat"><div class="amb-stat-val">${u.events.length}</div><div class="amb-stat-lbl">Events</div></div>
         <div class="amb-stat"><div class="amb-stat-val">${qCount}</div><div class="amb-stat-lbl">This Qtr</div></div>
-        <div class="amb-stat"><div class="amb-stat-val">${totalReach}</div><div class="amb-stat-lbl">Reached</div></div>
+        <div class="amb-stat"><div class="amb-stat-val">${reach}</div><div class="amb-stat-lbl">Reached</div></div>
       </div>
-      <div class="amb-bar-wrap"><div class="amb-bar-fill" style="width:${pct}%;background:${pct>=100?'var(--green)':pct>=60?'var(--amber)':'var(--blue)'};"></div></div>
-      <div class="amb-footer">
-        <span style="font-size:11px;color:var(--text3);">${qCount}/${maxForPlat} events toward Platinum</span>
-        <span style="font-size:11px;color:var(--text3);">${hasPhotos?'📷 has photos':''}</span>
-      </div>
+      ${atRisk ? `<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px;">⚠ Missing ${miss} required quarter${miss>1?'s':''}</div>` : `<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px;">✓ All required quarters covered</div>`}
     </div>`;
   }).join('');
 }
 
-document.getElementById('amb-search').oninput = renderAmbassadors;
-document.getElementById('amb-filter-tier').onchange = renderAmbassadors;
+document.getElementById('amb-search').oninput        = renderAmbassadors;
+document.getElementById('amb-filter-tier').onchange  = renderAmbassadors;
+document.getElementById('amb-filter-compliance').onchange = renderAmbassadors;
 
 // ── AMB DETAIL ──
 window.showAmbDetail = (uid) => {
-  const u = allUsers.find(x => x.uid === uid);
+  const u = allUsers.find(x=>x.uid===uid);
   if (!u) return;
-  const q = currentQ();
+  const q      = currentQ();
   const qCount = u.events.filter(e=>e.quarter===q).length;
-  const totalReach = u.events.reduce((s,e)=>s+(parseInt(e.attendees)||0),0);
-  const totalHrs = u.events.reduce((s,e)=>s+(parseInt(e.duration)||0),0);
+  const reach  = u.events.reduce((s,e)=>s+(parseInt(e.attendees)||0),0);
+  const hrs    = u.events.reduce((s,e)=>s+(parseInt(e.duration)||0),0);
   const letter = avatarLetter(u);
-  const color = colorForLetter(letter);
+  const color  = avatarColor(letter);
+  const counts = qtrCounts(u);
+  const required = pastOrCurrentQuarters();
+  const miss   = missingCount(u);
 
-  const eventRows = u.events.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map((e,i) => `
+  const qtrSummaryCards = ['Q1','Q2','Q3','Q4'].map(qtr => {
+    const isReq = required.includes(qtr);
+    const cnt   = counts[qtr];
+    const bg    = isReq ? (cnt>0?'var(--green-bg)':'var(--red-bg)') : 'var(--surface2)';
+    const border= isReq ? (cnt>0?'var(--green-b)':'var(--red-b)') : 'var(--border)';
+    const txtc  = isReq ? (cnt>0?'var(--green)':'var(--red)') : 'var(--text3)';
+    const icon  = isReq ? (cnt>0?'✓':cnt===0?'✗':'') : '—';
+    return `<div style="background:${bg};border:1px solid ${border};border-radius:var(--r);padding:14px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${txtc};margin-bottom:4px;">${qtr}</div>
+      <div style="font-size:26px;font-weight:800;color:${txtc};line-height:1;">${cnt}</div>
+      <div style="font-size:10px;color:${txtc};margin-top:4px;">${icon} ${isReq?'required':'not yet active'}</div>
+    </div>`;
+  }).join('');
+
+  const eventRows = u.events.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e=>`
     <tr style="cursor:pointer;" onclick="window.openEventModal(${JSON.stringify({...e,_user:u}).replace(/"/g,'&quot;')})">
-      <td class="td-main">${e.name}</td>
+      <td class="td-main">${escHtml(e.name)}</td>
       <td style="font-size:12px;color:var(--text2);">${fmtDate(e.date)}</td>
       <td>${tagHTML(e.type)}</td>
-      <td style="font-size:12px;">${e.location||'—'}</td>
+      <td style="font-size:12px;">${escHtml(e.location||'—')}</td>
       <td style="font-weight:600;">${e.attendees||0}</td>
-      <td style="font-size:12px;color:var(--text2);">${Math.round((e.duration||0)/60*10)/10}h</td>
-      <td style="max-width:160px;"><div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">${(e.summary||'').slice(0,60)||'—'}</div></td>
-      <td>${(e.photos&&e.photos.length)?`<span style="font-size:12px;">📷 ${e.photos.length}</span>`:(e.photoLink?'<span style="font-size:12px;">🔗</span>':'—')}</td>
-    </tr>
-  `).join('') || '<tr><td colspan="8" class="empty">No events logged.</td></tr>';
+      <td style="font-size:12px;color:var(--text2);">${e.duration||0}min</td>
+      <td><span style="font-size:11px;background:var(--surface2);padding:2px 7px;border-radius:4px;font-weight:600;">${e.quarter||'—'}</span></td>
+      <td>${isValid(e)?'<span style="color:var(--green);font-weight:700;">✓</span>':'<span style="color:var(--red);">✗</span>'}</td>
+      <td>${(e.photos&&e.photos.length)?`📷 ${e.photos.length}`:(e.photoLink?'🔗':'—')}</td>
+    </tr>`).join('') || '<tr><td colspan="9" class="empty">No events logged yet.</td></tr>';
 
   document.getElementById('panel-amb-detail').innerHTML = `
     <button class="back-btn" onclick="window.navTo('ambassadors')">← Back to ambassadors</button>
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
       <div class="amb-avatar" style="background:${color};width:56px;height:56px;font-size:22px;">${letter}</div>
       <div>
-        <div style="font-size:20px;font-weight:700;">${u.displayName||'(No name set)'}</div>
-        <div style="font-size:13px;color:var(--text2);">${u.email}</div>
+        <div style="font-size:20px;font-weight:700;">${escHtml(u.displayName||'(No name set)')}</div>
+        <div style="font-size:13px;color:var(--text2);">${escHtml(u.email)}</div>
       </div>
       <div style="margin-left:auto;">${tierBadge(qCount)}</div>
     </div>
+    ${miss>0 ? `<div class="alert alert-red" style="margin-bottom:16px;">⚠ This ambassador is missing <strong>${miss} required quarter${miss>1?'s':''}</strong> — they need to log at least 1 event in each past and current quarter.</div>` : `<div class="alert" style="background:var(--green-bg);border-left:3px solid var(--green-b);margin-bottom:16px;">✓ All required quarters are covered!</div>`}
     <div class="g4" style="margin-bottom:16px;">
       <div class="metric c-blue"><div class="metric-lbl">Total events</div><div class="metric-val">${u.events.length}</div></div>
       <div class="metric c-green"><div class="metric-lbl">This quarter</div><div class="metric-val">${qCount}</div></div>
-      <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${totalReach}</div></div>
-      <div class="metric c-purple"><div class="metric-lbl">Hours delivered</div><div class="metric-val">${Math.round(totalHrs/60)}</div></div>
+      <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${reach}</div></div>
+      <div class="metric c-purple"><div class="metric-lbl">Hours delivered</div><div class="metric-val">${Math.round(hrs/60)}</div></div>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">${qtrSummaryCards}</div>
     <div class="card">
       <div class="card-hd">Event history</div>
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Event</th><th>Date</th><th>Type</th><th>Location</th><th>Attendees</th><th>Duration</th><th>Summary</th><th>Photos</th></tr></thead>
+          <thead><tr><th>Event</th><th>Date</th><th>Type</th><th>Location</th><th>Attendees</th><th>Duration</th><th>Quarter</th><th>Valid?</th><th>Photos</th></tr></thead>
           <tbody>${eventRows}</tbody>
         </table>
       </div>
@@ -566,103 +714,189 @@ window.showAmbDetail = (uid) => {
   navTo('amb-detail');
 };
 
-// ── ALL EVENTS ──
-function renderAllEvents() {
-  const search = (document.getElementById('ev-search').value||'').toLowerCase();
-  const typeFilter = document.getElementById('ev-filter-type').value;
-  const qFilter = document.getElementById('ev-filter-quarter').value;
+// ── QUARTERLY COMPLIANCE TABLE ──
+function renderComplianceTable() {
+  const filter   = document.getElementById('comp-filter').value;
+  const sortBy   = document.getElementById('comp-sort').value;
+  const required = pastOrCurrentQuarters();
 
-  const all = allUsers.flatMap(u => u.events.map(e => ({...e, _user:u})))
-    .filter(e => {
-      const matchSearch = !search || e.name.toLowerCase().includes(search);
-      const matchType = !typeFilter || e.type === typeFilter;
-      const matchQ = !qFilter || e.quarter === qFilter;
-      return matchSearch && matchType && matchQ;
-    }).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const tbody = document.getElementById('comp-tbody');
+  const empty = document.getElementById('comp-empty');
 
-  const tbody = document.getElementById('ev-tbody');
-  const empty = document.getElementById('ev-empty');
-  if (!all.length) {
+  // Update alert message
+  const missing = allUsers.filter(u=>missingCount(u)>0);
+  const alertEl = document.getElementById('comp-alert');
+  if (alertEl) {
+    if (missing.length === 0) {
+      alertEl.className = 'alert alert-blue';
+      alertEl.innerHTML = `✓ All ${allUsers.length} ambassadors have covered every required quarter so far.`;
+    } else {
+      alertEl.className = 'alert alert-red';
+      alertEl.innerHTML = `⚠ <strong>${missing.length} ambassador${missing.length>1?'s':''}</strong> ${missing.length>1?'are':'is'} missing at least one required quarter. Required quarters this year: <strong>${required.join(', ')}</strong>.`;
+    }
+  }
+
+  let list = [...allUsers];
+
+  // Filter
+  if (filter === 'atrisk') list = list.filter(u => missingCount(u) > 0);
+  if (filter === 'ok')     list = list.filter(u => missingCount(u) === 0);
+
+  // Sort
+  if (sortBy === 'missing')  list.sort((a,b) => missingCount(b)-missingCount(a) || b.events.length-a.events.length);
+  if (sortBy === 'name')     list.sort((a,b) => (a.displayName||a.email).localeCompare(b.displayName||b.email));
+  if (sortBy === 'events')   list.sort((a,b) => b.events.length - a.events.length);
+
+  if (!list.length) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
-  tbody.innerHTML = all.map(e => `
+
+  tbody.innerHTML = list.map(u => {
+    const counts = qtrCounts(u);
+    const miss   = missingCount(u);
+    const letter = avatarLetter(u);
+    const color  = avatarColor(letter);
+
+    const qtrCells = ['Q1','Q2','Q3','Q4'].map(qtr => {
+      const isReq = required.includes(qtr);
+      const cnt   = counts[qtr];
+      if (!isReq && cnt === 0) return `<td style="text-align:center;" class="comp-future">—</td>`;
+      if (cnt > 0)             return `<td style="text-align:center;" class="comp-ok">✓ ${cnt}</td>`;
+      return `<td style="text-align:center;" class="comp-miss">✗</td>`;
+    }).join('');
+
+    const statusHTML = miss === 0
+      ? `<span class="pill pill-green">✓ Compliant</span>`
+      : `<span class="pill pill-red">⚠ ${miss} missing</span>`;
+
+    return `<tr class="${miss>0?'comp-row-atrisk':''}" style="cursor:pointer;" onclick="window.showAmbDetail('${u.uid}')">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${letter}</div>
+          <div>
+            <div class="td-main">${escHtml(u.displayName||'(No name)')}</div>
+            <div class="td-sub">${escHtml(u.email)}</div>
+          </div>
+        </div>
+      </td>
+      ${qtrCells}
+      <td style="text-align:center;font-weight:700;color:${miss>0?'var(--red)':'var(--green)'};">${miss}</td>
+      <td style="text-align:center;font-weight:600;">${u.events.length}</td>
+      <td>${statusHTML}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('comp-filter').onchange = renderComplianceTable;
+document.getElementById('comp-sort').onchange   = renderComplianceTable;
+
+// ── ALL EVENTS ──
+function renderAllEvents() {
+  // Populate ambassador filter dropdown
+  const ambSel = document.getElementById('ev-filter-amb');
+  const curAmb = ambSel.value;
+  ambSel.innerHTML = '<option value="">All ambassadors</option>' +
+    allUsers.map(u=>`<option value="${escHtml(u.uid)}">${escHtml(u.displayName||u.email)}</option>`).join('');
+  if (curAmb) ambSel.value = curAmb;
+
+  applyEventFilters();
+}
+
+function applyEventFilters() {
+  const search     = (document.getElementById('ev-search').value||'').toLowerCase();
+  const typeFilter = document.getElementById('ev-filter-type').value;
+  const qFilter    = document.getElementById('ev-filter-quarter').value;
+  const ambFilter  = document.getElementById('ev-filter-amb').value;
+
+  const all = allUsers.flatMap(u=>u.events.map(e=>({...e,_user:u})))
+    .filter(e=>{
+      if (ambFilter  && e._user.uid !== ambFilter) return false;
+      if (typeFilter && e.type !== typeFilter)     return false;
+      if (qFilter    && e.quarter !== qFilter)     return false;
+      if (search && !(e.name||'').toLowerCase().includes(search) &&
+                    !(e._user.displayName||e._user.email||'').toLowerCase().includes(search)) return false;
+      return true;
+    })
+    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+
+  const tbody = document.getElementById('ev-tbody');
+  const empty = document.getElementById('ev-empty');
+  document.getElementById('ev-count').textContent = all.length + ' event' + (all.length!==1?'s':'');
+
+  if (!all.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = all.map(e=>`
     <tr style="cursor:pointer;" onclick="window.openEventModal(${JSON.stringify(e).replace(/"/g,'&quot;')})">
-      <td><div class="td-main">${e._user.displayName||e._user.email}</div></td>
-      <td><div class="td-main">${e.name}</div></td>
+      <td>
+        <div class="td-main">${escHtml(e._user.displayName||e._user.email)}</div>
+      </td>
+      <td><div class="td-main">${escHtml(e.name)}</div></td>
       <td style="font-size:12px;color:var(--text2);">${fmtDate(e.date)}</td>
       <td>${tagHTML(e.type)}</td>
-      <td style="font-size:12px;">${e.location||'—'}</td>
+      <td style="font-size:12px;">${escHtml(e.location||'—')}</td>
       <td style="font-weight:600;">${e.attendees||0}</td>
       <td style="font-size:12px;color:var(--text2);">${e.duration||0}min</td>
-      <td style="max-width:150px;"><div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">${(e.summary||'').slice(0,50)||'—'}</div></td>
-      <td>${(e.photos&&e.photos.length)?`📷 ${e.photos.length}`:(e.photoLink?'🔗':'—')}</td>
-    </tr>
-  `).join('');
+      <td><span style="font-size:11px;background:var(--surface2);padding:2px 7px;border-radius:4px;font-weight:600;">${e.quarter||'—'}</span></td>
+      <td>${isValid(e)?'<span style="color:var(--green);font-weight:700;">✓</span>':'<span style="color:var(--red);">✗</span>'}</td>
+    </tr>`).join('');
 }
-document.getElementById('ev-search').oninput = renderAllEvents;
-document.getElementById('ev-filter-type').onchange = renderAllEvents;
-document.getElementById('ev-filter-quarter').onchange = renderAllEvents;
+
+document.getElementById('ev-search').oninput        = applyEventFilters;
+document.getElementById('ev-filter-type').onchange  = applyEventFilters;
+document.getElementById('ev-filter-quarter').onchange = applyEventFilters;
+document.getElementById('ev-filter-amb').onchange   = applyEventFilters;
 
 // ── PHOTOS ──
 function renderPhotos() {
-  const grid = document.getElementById('photos-grid');
-  const empty = document.getElementById('photos-empty');
   document.getElementById('photos-loading').style.display = 'none';
+  const grid  = document.getElementById('photos-grid');
+  const empty = document.getElementById('photos-empty');
 
-  const allPhotos = [];
+  const photosMap  = {};
+  const linkEvents = [];
+
   allUsers.forEach(u => {
     u.events.forEach(e => {
       if (e.photos && e.photos.length) {
-        e.photos.forEach(p => allPhotos.push({src:p, event:e.name, amb:u.displayName||u.email, date:e.date}));
+        const k = u.displayName || u.email;
+        if (!photosMap[k]) photosMap[k] = [];
+        e.photos.forEach(p => photosMap[k].push({ src:p, event:e.name, date:e.date }));
+      } else if (e.photoLink) {
+        linkEvents.push({ ...e, _user:u });
       }
     });
   });
 
-  const linkEvents = allUsers.flatMap(u => u.events.filter(e => e.photoLink && !(e.photos && e.photos.length)).map(e => ({...e, _user:u})));
-
-  if (!allPhotos.length && !linkEvents.length) {
-    grid.style.display = 'none';
-    empty.style.display = 'block';
-    return;
+  if (!Object.keys(photosMap).length && !linkEvents.length) {
+    grid.style.display = 'none'; empty.style.display = 'block'; return;
   }
-
-  grid.style.display = 'block';
-  empty.style.display = 'none';
-
-  // Group by ambassador
-  const byAmb = {};
-  allPhotos.forEach(p => {
-    const k = p.amb;
-    if (!byAmb[k]) byAmb[k] = [];
-    byAmb[k].push(p);
-  });
-
-  grid.innerHTML = Object.entries(byAmb).map(([amb, photos]) => `
+  grid.style.display = 'block'; empty.style.display = 'none';
+  grid.innerHTML = Object.entries(photosMap).map(([amb, photos]) => `
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-hd" style="margin-bottom:12px;">${amb}</div>
-      <div class="photo-grid">
-        ${photos.map(p => `
+      <div class="card-hd">${escHtml(amb)}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;">
+        ${photos.map(p=>`
           <div>
-            <img class="photo-thumb" src="${p.src}" alt="${p.event}" onclick="window.openLightbox('${p.src}')" loading="lazy"/>
-            <div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:center;">${p.event}</div>
-          </div>
-        `).join('')}
+            <img src="${escHtml(p.src)}" alt="${escHtml(p.event)}" loading="lazy"
+              style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--rs);border:1px solid var(--border);cursor:pointer;"
+              onclick="window.openLightbox('${escHtml(p.src)}')"/>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px;text-align:center;">${escHtml(p.event)}</div>
+          </div>`).join('')}
       </div>
-    </div>
-  `).join('') + (linkEvents.length ? `
+    </div>`).join('') +
+  (linkEvents.length ? `
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-hd">Events with photo links (no upload)</div>
-      ${linkEvents.map(e => `
+      <div class="card-hd">Events with photo links</div>
+      ${linkEvents.map(e=>`
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
-          <div><span style="font-weight:500;">${e.name}</span> <span style="color:var(--text3);font-size:11px;">— ${e._user.displayName||e._user.email}</span></div>
-          <a href="${e.photoLink}" target="_blank" class="btn btn-sm">Open link ↗</a>
-        </div>
-      `).join('')}
-    </div>
-  ` : '');
+          <div><span style="font-weight:500;">${escHtml(e.name)}</span>
+            <span style="color:var(--text3);font-size:11px;"> — ${escHtml(e._user.displayName||e._user.email)}</span></div>
+          <a href="${escHtml(e.photoLink)}" target="_blank" class="btn btn-sm">Open ↗</a>
+        </div>`).join('')}
+    </div>` : '');
 }
 
 // ── EVENT MODAL ──
@@ -670,30 +904,32 @@ window.openEventModal = (e) => {
   document.getElementById('ev-modal-title').textContent = e.name;
   const body = document.getElementById('ev-modal-body');
   const photosHTML = (e.photos && e.photos.length)
-    ? `<div class="photo-grid">${e.photos.map(p=>`<img class="photo-thumb" src="${p}" onclick="window.openLightbox('${p}')" loading="lazy"/>`).join('')}</div>`
+    ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;">
+        ${e.photos.map(p=>`<img src="${escHtml(p)}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--rs);border:1px solid var(--border);cursor:pointer;" onclick="window.openLightbox('${escHtml(p)}')"/>`).join('')}
+      </div>`
     : e.photoLink
-      ? `<a href="${e.photoLink}" target="_blank" class="btn btn-sm">Open photo link ↗</a>`
+      ? `<a href="${escHtml(e.photoLink)}" target="_blank" class="btn btn-sm">Open photo link ↗</a>`
       : '<span style="color:var(--text3);font-size:13px;">No photos submitted.</span>';
 
   body.innerHTML = `
-    <div class="detail-section">
-      <h3>Event info</h3>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:10px;">Event info</div>
       <div class="detail-grid">
         <div class="detail-item"><div class="detail-item-lbl">Date</div><div class="detail-item-val">${fmtDate(e.date)}</div></div>
         <div class="detail-item"><div class="detail-item-lbl">Type</div><div class="detail-item-val">${tagHTML(e.type)}</div></div>
-        <div class="detail-item"><div class="detail-item-lbl">Location</div><div class="detail-item-val">${e.location||'—'}</div></div>
+        <div class="detail-item"><div class="detail-item-lbl">Location</div><div class="detail-item-val">${escHtml(e.location||'—')}</div></div>
         <div class="detail-item"><div class="detail-item-lbl">Duration</div><div class="detail-item-val">${e.duration||0} min</div></div>
-        <div class="detail-item"><div class="detail-item-lbl">Attendees</div><div class="detail-item-val" style="font-size:18px;font-weight:700;">${e.attendees||0}</div></div>
+        <div class="detail-item"><div class="detail-item-lbl">Attendees</div><div class="detail-item-val" style="font-size:20px;font-weight:700;">${e.attendees||0}</div></div>
         <div class="detail-item"><div class="detail-item-lbl">Quarter</div><div class="detail-item-val">${e.quarter||'—'}</div></div>
       </div>
     </div>
-    ${e.summary ? `<div class="detail-section"><h3>Activity summary</h3><div class="summary-box">${e.summary}</div></div>` : ''}
-    ${e.notes ? `<div class="detail-section"><h3>Notes / feedback</h3><div class="summary-box">${e.notes}</div></div>` : ''}
-    <div class="detail-section">
-      <h3>Photo proof</h3>
+    ${e.summary ? `<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;">Activity Summary</div><div style="background:var(--surface2);border-radius:var(--rs);padding:12px 14px;font-size:13px;line-height:1.6;">${escHtml(e.summary)}</div></div>` : ''}
+    ${e.notes ? `<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;">Notes</div><div style="background:var(--surface2);border-radius:var(--rs);padding:12px 14px;font-size:13px;line-height:1.6;">${escHtml(e.notes)}</div></div>` : ''}
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:10px;">Photo Proof</div>
       ${photosHTML}
     </div>
-    ${e._user ? `<div style="margin-top:8px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Submitted by ${e._user.displayName||e._user.email}</div>` : ''}
+    ${e._user ? `<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Submitted by ${escHtml(e._user.displayName||e._user.email)}</div>` : ''}
   `;
   document.getElementById('event-modal').classList.add('open');
 };
@@ -703,19 +939,29 @@ document.getElementById('event-modal').onclick = (e) => { if(e.target===e.curren
 // ── LIGHTBOX ──
 window.openLightbox = (src) => {
   document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox').classList.add('open');
+  const lb = document.getElementById('lightbox');
+  lb.style.display = 'flex'; lb.classList.add('open');
+};
+document.getElementById('lightbox').onclick = () => {
+  const lb = document.getElementById('lightbox');
+  lb.style.display = 'none'; lb.classList.remove('open');
 };
 
 // ── NAV ──
 window.navTo = (panel) => {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('panel-'+panel).classList.add('show');
+  const el = document.getElementById('panel-'+panel);
+  if (el) el.classList.add('show');
   const btn = document.querySelector(`[data-panel="${panel}"]`);
   if (btn) btn.classList.add('active');
 };
 document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
-  btn.onclick = () => navTo(btn.dataset.panel);
+  btn.onclick = () => {
+    navTo(btn.dataset.panel);
+    if (btn.dataset.panel === 'compliance') renderComplianceTable();
+    if (btn.dataset.panel === 'events')     renderAllEvents();
+  };
 });
 </script>
 </body>
