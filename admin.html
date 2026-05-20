@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bambu Lab · Regional Director Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4f3f0;--surface:#fff;--surface2:#f0efe9;--surface3:#e8e6de;
+  --border:#dddbd2;--border2:#c9c6bb;
+  --text:#19180f;--text2:#6b6a62;--text3:#9e9c93;
+  --green:#2d7a3a;--green-bg:#eaf4ec;--green-b:#b2d9b9;
+  --amber:#7a5010;--amber-bg:#fdf3e0;--amber-b:#e8c86a;
+  --blue:#1a4f9e;--blue-bg:#e8f0fb;--blue-b:#a8c0ed;
+  --red:#b83a1e;--red-bg:#fceee9;--red-b:#f0b09c;
+  --purple:#5b3ab5;--purple-bg:#f0ecfb;--purple-b:#c4b2ed;
+  --r:10px;--rs:6px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --shm:0 4px 16px rgba(0,0,0,.1),0 2px 4px rgba(0,0,0,.05);
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
+/* AUTH */
+#auth-overlay{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.auth-card{width:360px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px;box-shadow:var(--shm);text-align:center;}
+.auth-logo{width:40px;height:40px;background:var(--text);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;margin:0 auto 16px;}
+.auth-card h2{font-size:18px;font-weight:700;margin-bottom:4px;}
+.auth-card p{font-size:12px;color:var(--text3);margin-bottom:24px;}
+.field{margin-bottom:12px;text-align:left;}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:5px;}
+.field input{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);color:var(--text);}
+.field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,79,158,.08);}
+/* HEADER */
+.hdr{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:var(--sh);}
+.hdr-logo{display:flex;align-items:center;gap:10px;}
+.hdr-mark{width:30px;height:30px;background:var(--text);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;}
+.hdr-title{font-size:14px;font-weight:600;}
+.hdr-sub{font-size:11px;color:var(--text3);}
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 10px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+.nav-group{margin-bottom:18px;}
+.nav-group-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:0 8px;margin-bottom:4px;}
+.nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border:none;background:none;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;color:var(--text2);cursor:pointer;text-align:left;transition:all .12s;}
+.nav-btn:hover{background:var(--surface2);color:var(--text);}
+.nav-btn.active{background:var(--text);color:#fff;}
+.nav-icon{font-size:15px;width:18px;text-align:center;}
+.nav-div{height:1px;background:var(--border);margin:8px 2px;}
+.main{flex:1;padding:28px 32px;min-width:0;}
+.panel{display:none;}
+.panel.show{display:block;}
+/* COMPONENTS */
+.page-hd{margin-bottom:20px;}
+.page-hd h1{font-size:22px;font-weight:700;margin-bottom:3px;}
+.page-hd p{font-size:13px;color:var(--text2);}
+.page-hd-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.page-hd-row .page-hd{margin-bottom:0;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all .12s;white-space:nowrap;}
+.btn:hover{background:var(--surface2);}
+.btn-primary{background:var(--text);color:#fff;border-color:var(--text);}
+.btn-primary:hover{opacity:.85;background:var(--text);}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh);}
+.card-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.mt16{margin-top:16px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.metric::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.metric.c-blue::before{background:var(--blue);}
+.metric.c-green::before{background:var(--green);}
+.metric.c-amber::before{background:var(--amber);}
+.metric.c-purple::before{background:var(--purple);}
+.metric-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px;}
+.metric-val{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-.5px;}
+.metric-sub{font-size:12px;color:var(--text2);}
+.pill{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.pill-green{background:var(--green-bg);color:var(--green);}
+.pill-amber{background:var(--amber-bg);color:var(--amber);}
+.pill-blue{background:var(--blue-bg);color:var(--blue);}
+.pill-gray{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.pill-red{background:var(--red-bg);color:var(--red);}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.tag-workshop{background:var(--red-bg);color:var(--red);}
+.tag-demo{background:var(--blue-bg);color:var(--blue);}
+.tag-competition{background:var(--amber-bg);color:var(--amber);}
+.tag-class{background:var(--green-bg);color:var(--green);}
+.tag-club{background:var(--surface3);color:var(--text2);}
+.tag-fair{background:var(--purple-bg);color:var(--purple);}
+.tag-other{background:var(--surface2);color:var(--text2);}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+td{padding:10px 12px;vertical-align:middle;}
+.td-main{font-weight:500;font-size:13px;}
+.td-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.empty{text-align:center;padding:48px 20px;color:var(--text3);}
+select.filter-sel{padding:6px 10px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);color:var(--text);}
+input.search-input{padding:7px 12px;border:1px solid var(--border2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;background:var(--surface);color:var(--text);min-width:200px;}
+input.search-input:focus{outline:none;border-color:var(--blue);}
+/* AMBASSADOR CARDS */
+.amb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:16px;}
+.amb-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);cursor:pointer;transition:all .15s;}
+.amb-card:hover{box-shadow:var(--shm);border-color:var(--border2);}
+.amb-card-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.amb-avatar{width:44px;height:44px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;flex-shrink:0;}
+.amb-name{font-size:14px;font-weight:700;}
+.amb-email{font-size:11px;color:var(--text3);margin-top:2px;}
+.amb-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.amb-stat{background:var(--surface2);border-radius:var(--rs);padding:8px 10px;text-align:center;}
+.amb-stat-val{font-size:18px;font-weight:700;letter-spacing:-.3px;}
+.amb-stat-lbl{font-size:10px;color:var(--text2);margin-top:1px;}
+.amb-bar-wrap{background:var(--surface2);border-radius:4px;height:5px;overflow:hidden;margin-bottom:6px;}
+.amb-bar-fill{height:100%;border-radius:4px;transition:width .5s;}
+.amb-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+/* EVENT DETAIL MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r);width:680px;max-width:100%;box-shadow:var(--shm);margin:auto;}
+.modal-hdr{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:var(--r) var(--r) 0 0;}
+.modal-hdr h2{font-size:16px;font-weight:700;}
+.modal-body{padding:20px 22px 24px;}
+.detail-section{margin-bottom:18px;}
+.detail-section h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:10px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.detail-item{background:var(--surface2);border-radius:var(--rs);padding:10px 12px;}
+.detail-item-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:3px;}
+.detail-item-val{font-size:13px;font-weight:500;}
+.summary-box{background:var(--surface2);border-radius:var(--rs);padding:12px 14px;font-size:13px;line-height:1.6;color:var(--text);}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px;}
+.photo-thumb{width:100%;aspect-ratio:1;border-radius:var(--rs);object-fit:cover;cursor:pointer;border:1px solid var(--border);transition:opacity .15s;}
+.photo-thumb:hover{opacity:.85;}
+/* AMB DETAIL PANEL */
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;margin-bottom:16px;background:none;border:none;font-family:inherit;padding:0;}
+.back-btn:hover{color:var(--text);}
+/* PROGRESS BAR */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.prog-lbl{font-size:12px;color:var(--text2);width:60px;flex-shrink:0;}
+.prog-wrap{flex:1;background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.prog-count{font-size:12px;color:var(--text2);min-width:32px;text-align:right;}
+/* LIGHTBOX */
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;cursor:zoom-out;}
+#lightbox.open{display:flex;}
+#lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.5);}
+/* TIER BADGES */
+.tb{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.tb-none{background:var(--surface2);color:var(--text3);}
+.tb-active{background:var(--surface3);color:var(--text2);}
+.tb-silver{background:#eeede9;color:#4a4840;border:1px solid var(--border2);}
+.tb-gold{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b);}
+.tb-platinum{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b);}
+.alert{border-radius:var(--rs);padding:11px 14px;font-size:13px;margin-bottom:12px;line-height:1.5;}
+.alert-amber{background:var(--amber-bg);border-left:3px solid var(--amber-b);}
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .main{padding:16px;}
+  .g4{grid-template-columns:1fr 1fr;}
+  .g3{grid-template-columns:1fr 1fr;}
+  .g2{grid-template-columns:1fr;}
+  .hdr{padding:0 16px;}
+  .amb-grid{grid-template-columns:1fr;}
+}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">BL</div>
+    <h2>Regional Director</h2>
+    <p>Sign in with your admin account</p>
+    <div class="field"><label>Email</label><input type="email" id="auth-email" placeholder="director@bambulab.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="auth-pass" placeholder="Password"/></div>
+    <button class="btn btn-primary" id="btn-login" style="width:100%;margin-top:4px;justify-content:center;">Sign In</button>
+    <p id="auth-error" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px;"></p>
+  </div>
+</div>
+
+<header class="hdr">
+  <div class="hdr-logo">
+    <div class="hdr-mark">BL</div>
+    <div>
+      <div class="hdr-title">Bambu Lab · Regional Director</div>
+      <div class="hdr-sub" id="hdr-region">California Region · Admin View</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span id="hdr-email" style="font-size:12px;color:var(--text2);"></span>
+    <button class="btn btn-sm" id="btn-logout">Sign out</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-group">
+      <div class="nav-group-label">Overview</div>
+      <button class="nav-btn active" data-panel="overview"><span class="nav-icon">📊</span>Dashboard</button>
+    </div>
+    <div class="nav-div"></div>
+    <div class="nav-group">
+      <div class="nav-group-label">Ambassadors</div>
+      <button class="nav-btn" data-panel="ambassadors"><span class="nav-icon">👥</span>All Ambassadors</button>
+      <button class="nav-btn" data-panel="events"><span class="nav-icon">📅</span>All Events</button>
+    </div>
+    <div class="nav-div"></div>
+    <div class="nav-group">
+      <div class="nav-group-label">Reports</div>
+      <button class="nav-btn" data-panel="photos"><span class="nav-icon">📷</span>Photo Proof</button>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <div id="panel-overview" class="panel show">
+      <div class="page-hd"><h1>Regional Overview</h1><p>All ambassador activity across California.</p></div>
+      <div class="g4" id="ov-metrics" style="margin-bottom:16px;"></div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd">Ambassador tiers</div>
+          <div id="ov-tiers"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Activity by event type</div>
+          <div id="ov-types"></div>
+        </div>
+      </div>
+      <div class="card mt16">
+        <div class="card-hd">Recent events across all ambassadors</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Ambassador</th><th>Event</th><th>Type</th><th>Date</th><th>Attendees</th><th>Summary</th><th>Photos</th></tr></thead>
+            <tbody id="ov-recent-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- AMBASSADORS LIST -->
+    <div id="panel-ambassadors" class="panel">
+      <div class="page-hd-row">
+        <div class="page-hd"><h1>All Ambassadors</h1><p>Click any card to see full event history and details.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input class="search-input" id="amb-search" placeholder="🔍  Search name or email…"/>
+          <select class="filter-sel" id="amb-filter-tier">
+            <option value="">All tiers</option>
+            <option value="Platinum">Platinum</option>
+            <option value="Gold">Gold</option>
+            <option value="Silver">Silver</option>
+            <option value="Active">Active</option>
+            <option value="None">None</option>
+          </select>
+        </div>
+      </div>
+      <div id="amb-loading" style="padding:40px;text-align:center;color:var(--text3);">Loading ambassadors…</div>
+      <div class="amb-grid" id="amb-grid" style="display:none;"></div>
+    </div>
+
+    <!-- AMBASSADOR DETAIL (injected dynamically) -->
+    <div id="panel-amb-detail" class="panel"></div>
+
+    <!-- ALL EVENTS -->
+    <div id="panel-events" class="panel">
+      <div class="page-hd-row">
+        <div class="page-hd"><h1>All Events</h1><p>Every completed event across all ambassadors.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input class="search-input" id="ev-search" placeholder="🔍  Search event name…" style="min-width:160px;"/>
+          <select class="filter-sel" id="ev-filter-type"><option value="">All types</option><option value="workshop">Workshop</option><option value="demo">Demo</option><option value="competition">Competition</option><option value="class">Class</option><option value="club">Club</option><option value="fair">Fair</option><option value="other">Other</option></select>
+          <select class="filter-sel" id="ev-filter-quarter"><option value="">All quarters</option><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option></select>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:4px;">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Ambassador</th><th>Event</th><th>Date</th><th>Type</th><th>Location</th><th>Attendees</th><th>Duration</th><th>Summary</th><th>Photos</th></tr></thead>
+            <tbody id="ev-tbody"></tbody>
+          </table>
+          <div id="ev-empty" class="empty" style="display:none;">No events found.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHOTO PROOF -->
+    <div id="panel-photos" class="panel">
+      <div class="page-hd"><h1>Photo Proof</h1><p>All event photos submitted by ambassadors.</p></div>
+      <div id="photos-loading" style="padding:40px;text-align:center;color:var(--text3);">Loading photos…</div>
+      <div id="photos-grid" style="display:none;"></div>
+      <div id="photos-empty" class="empty" style="display:none;">No photos submitted yet.</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- EVENT DETAIL MODAL -->
+<div class="overlay" id="event-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="ev-modal-title">Event Details</h2>
+      <button class="btn btn-sm" id="ev-modal-close">✕ Close</button>
+    </div>
+    <div class="modal-body" id="ev-modal-body"></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="this.classList.remove('open')">
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC3ZA_XQyhcOZpEK8WbP5UbuxQnnKwFGW8",
+  authDomain: "bambu-ambassador-hub.firebaseapp.com",
+  projectId: "bambu-ambassador-hub",
+  storageBucket: "bambu-ambassador-hub.firebasestorage.app",
+  messagingSenderId: "54146763962",
+  appId: "1:54146763962:web:06c74942d25b008e8c0683",
+  measurementId: "G-2VHL7TJGCS"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let allUsers = []; // { uid, email, displayName, events[], ... }
+let currentUser = null;
+
+// ── AUTH ──
+document.getElementById('btn-login').onclick = async () => {
+  document.getElementById('auth-error').textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth,
+      document.getElementById('auth-email').value,
+      document.getElementById('auth-pass').value);
+  } catch(e) { document.getElementById('auth-error').textContent = e.message; }
+};
+document.getElementById('btn-logout').onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    document.getElementById('auth-overlay').style.display = 'flex';
+    currentUser = null;
+    return;
+  }
+  // Check isAdmin
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  if (!snap.exists() || !snap.data().isAdmin) {
+    await signOut(auth);
+    document.getElementById('auth-error').textContent = 'Access denied. This account does not have admin privileges.';
+    document.getElementById('auth-overlay').style.display = 'flex';
+    return;
+  }
+  currentUser = user;
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('hdr-email').textContent = user.email;
+  loadAllData();
+});
+
+// ── DATA LOADING ──
+async function loadAllData() {
+  const snap = await getDocs(collection(db, 'users'));
+  allUsers = [];
+  snap.forEach(d => {
+    const data = d.data();
+    if (data.isAdmin) return; // skip admin accounts
+    const events = (data.events || []).filter(e => e.status === 'done');
+    allUsers.push({
+      uid: d.id,
+      email: data.email || d.id,
+      displayName: data.displayName || '',
+      events,
+      badges: data.badges || {},
+    });
+  });
+  renderOverview();
+  renderAmbassadors();
+  renderAllEvents();
+  renderPhotos();
+}
+
+// ── HELPERS ──
+function tierFromN(n){ return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
+function tierClass(t){ return {Platinum:'tb-platinum',Gold:'tb-gold',Silver:'tb-silver',Active:'tb-active',None:'tb-none'}[t]||'tb-none'; }
+function currentQ(){ const m=new Date().getMonth(); return m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4'; }
+function fmtDate(d){ if(!d) return '—'; try{ return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return d; } }
+function avatarLetter(u){ return (u.displayName||u.email||'?')[0].toUpperCase(); }
+function colorForLetter(l){ const colors=['#1a4f9e','#2d7a3a','#7a5010','#5b3ab5','#b83a1e']; return colors[(l.charCodeAt(0)||0)%colors.length]; }
+function tagHTML(type){ return `<span class="tag tag-${type||'other'}">${type||'other'}</span>`; }
+function tierBadge(n){ const t=tierFromN(n); return `<span class="tb ${tierClass(t)}">${t}</span>`; }
+
+// ── OVERVIEW ──
+function renderOverview() {
+  const q = currentQ();
+  const totalEvs = allUsers.reduce((s,u) => s + u.events.length, 0);
+  const totalReach = allUsers.reduce((s,u) => s + u.events.reduce((a,e) => a + (parseInt(e.attendees)||0), 0), 0);
+  const totalHrs = allUsers.reduce((s,u) => s + u.events.reduce((a,e) => a + (parseInt(e.duration)||0), 0), 0);
+  const active = allUsers.filter(u => u.events.length > 0).length;
+
+  document.getElementById('ov-metrics').innerHTML = `
+    <div class="metric c-blue"><div class="metric-lbl">Total ambassadors</div><div class="metric-val">${allUsers.length}</div><div class="metric-sub">${active} with events</div></div>
+    <div class="metric c-green"><div class="metric-lbl">Total events</div><div class="metric-val">${totalEvs}</div></div>
+    <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${totalReach.toLocaleString()}</div></div>
+    <div class="metric c-purple"><div class="metric-lbl">Hours delivered</div><div class="metric-val">${Math.round(totalHrs/60)}</div></div>
+  `;
+
+  // Tier breakdown
+  const tiers = {Platinum:0,Gold:0,Silver:0,Active:0,None:0};
+  allUsers.forEach(u => { const t = tierFromN(u.events.filter(e=>e.quarter===q).length); tiers[t]++; });
+  const maxT = Math.max(...Object.values(tiers), 1);
+  document.getElementById('ov-tiers').innerHTML = Object.entries(tiers).map(([t,n]) =>
+    `<div class="prog-row">
+      <div style="width:70px;font-size:12px;color:var(--text2);">${t}</div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${(n/maxT)*100}%;background:var(--blue);"></div></div>
+      <div class="prog-count">${n}</div>
+    </div>`
+  ).join('');
+
+  // Event type breakdown
+  const types = {};
+  allUsers.forEach(u => u.events.forEach(e => { types[e.type||'other'] = (types[e.type||'other']||0)+1; }));
+  const maxTy = Math.max(...Object.values(types), 1);
+  document.getElementById('ov-types').innerHTML = Object.entries(types).sort((a,b)=>b[1]-a[1]).map(([t,n]) =>
+    `<div class="prog-row">
+      <div style="width:80px;font-size:12px;color:var(--text2);text-transform:capitalize;">${t}</div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${(n/maxTy)*100}%;background:var(--green);"></div></div>
+      <div class="prog-count">${n}</div>
+    </div>`
+  ).join('') || '<div style="color:var(--text3);font-size:13px;">No data yet.</div>';
+
+  // Recent events
+  const recent = allUsers.flatMap(u => u.events.map(e => ({...e, _user:u})))
+    .filter(e => e.date).sort((a,b) => b.date.localeCompare(a.date)).slice(0,15);
+  document.getElementById('ov-recent-tbody').innerHTML = recent.map(e => `
+    <tr style="cursor:pointer;" onclick="window.openEventModal(${JSON.stringify(e).replace(/"/g,'&quot;')})">
+      <td><div class="td-main">${e._user.displayName || e._user.email}</div></td>
+      <td><div class="td-main">${e.name}</div><div class="td-sub">${e.location||''}</div></td>
+      <td>${tagHTML(e.type)}</td>
+      <td style="font-size:12px;color:var(--text2);">${fmtDate(e.date)}</td>
+      <td style="font-size:13px;font-weight:600;">${e.attendees||0}</td>
+      <td style="max-width:180px;"><div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${e.summary||e.notes||'—'}</div></td>
+      <td style="font-size:12px;">${(e.photos && e.photos.length > 0) ? `📷 ${e.photos.length}` : (e.photoLink ? '🔗 link' : '—')}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" class="empty">No events yet.</td></tr>';
+}
+
+// ── AMBASSADORS ──
+function renderAmbassadors() {
+  const search = (document.getElementById('amb-search').value || '').toLowerCase();
+  const tierFilter = document.getElementById('amb-filter-tier').value;
+  const q = currentQ();
+  document.getElementById('amb-loading').style.display = 'none';
+  const grid = document.getElementById('amb-grid');
+  grid.style.display = 'grid';
+
+  const filtered = allUsers.filter(u => {
+    const matchSearch = !search || (u.displayName+u.email).toLowerCase().includes(search);
+    const qCount = u.events.filter(e=>e.quarter===q).length;
+    const tier = tierFromN(qCount);
+    const matchTier = !tierFilter || tier === tierFilter;
+    return matchSearch && matchTier;
+  }).sort((a,b) => b.events.length - a.events.length);
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">No ambassadors found.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(u => {
+    const qCount = u.events.filter(e=>e.quarter===q).length;
+    const tier = tierFromN(qCount);
+    const totalReach = u.events.reduce((s,e) => s+(parseInt(e.attendees)||0), 0);
+    const hasPhotos = u.events.some(e => (e.photos && e.photos.length) || e.photoLink);
+    const maxForPlat = 8;
+    const pct = Math.min((qCount/maxForPlat)*100, 100);
+    const letter = avatarLetter(u);
+    const color = colorForLetter(letter);
+    return `<div class="amb-card" onclick="window.showAmbDetail('${u.uid}')">
+      <div class="amb-card-top">
+        <div class="amb-avatar" style="background:${color};">${letter}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="amb-name">${u.displayName || '(No name set)'}</div>
+          <div class="amb-email">${u.email}</div>
+        </div>
+        ${tierBadge(qCount)}
+      </div>
+      <div class="amb-stats">
+        <div class="amb-stat"><div class="amb-stat-val">${u.events.length}</div><div class="amb-stat-lbl">Events</div></div>
+        <div class="amb-stat"><div class="amb-stat-val">${qCount}</div><div class="amb-stat-lbl">This Qtr</div></div>
+        <div class="amb-stat"><div class="amb-stat-val">${totalReach}</div><div class="amb-stat-lbl">Reached</div></div>
+      </div>
+      <div class="amb-bar-wrap"><div class="amb-bar-fill" style="width:${pct}%;background:${pct>=100?'var(--green)':pct>=60?'var(--amber)':'var(--blue)'};"></div></div>
+      <div class="amb-footer">
+        <span style="font-size:11px;color:var(--text3);">${qCount}/${maxForPlat} events toward Platinum</span>
+        <span style="font-size:11px;color:var(--text3);">${hasPhotos?'📷 has photos':''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('amb-search').oninput = renderAmbassadors;
+document.getElementById('amb-filter-tier').onchange = renderAmbassadors;
+
+// ── AMB DETAIL ──
+window.showAmbDetail = (uid) => {
+  const u = allUsers.find(x => x.uid === uid);
+  if (!u) return;
+  const q = currentQ();
+  const qCount = u.events.filter(e=>e.quarter===q).length;
+  const totalReach = u.events.reduce((s,e)=>s+(parseInt(e.attendees)||0),0);
+  const totalHrs = u.events.reduce((s,e)=>s+(parseInt(e.duration)||0),0);
+  const letter = avatarLetter(u);
+  const color = colorForLetter(letter);
+
+  const eventRows = u.events.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map((e,i) => `
+    <tr style="cursor:pointer;" onclick="window.openEventModal(${JSON.stringify({...e,_user:u}).replace(/"/g,'&quot;')})">
+      <td class="td-main">${e.name}</td>
+      <td style="font-size:12px;color:var(--text2);">${fmtDate(e.date)}</td>
+      <td>${tagHTML(e.type)}</td>
+      <td style="font-size:12px;">${e.location||'—'}</td>
+      <td style="font-weight:600;">${e.attendees||0}</td>
+      <td style="font-size:12px;color:var(--text2);">${Math.round((e.duration||0)/60*10)/10}h</td>
+      <td style="max-width:160px;"><div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">${(e.summary||'').slice(0,60)||'—'}</div></td>
+      <td>${(e.photos&&e.photos.length)?`<span style="font-size:12px;">📷 ${e.photos.length}</span>`:(e.photoLink?'<span style="font-size:12px;">🔗</span>':'—')}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" class="empty">No events logged.</td></tr>';
+
+  document.getElementById('panel-amb-detail').innerHTML = `
+    <button class="back-btn" onclick="window.navTo('ambassadors')">← Back to ambassadors</button>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div class="amb-avatar" style="background:${color};width:56px;height:56px;font-size:22px;">${letter}</div>
+      <div>
+        <div style="font-size:20px;font-weight:700;">${u.displayName||'(No name set)'}</div>
+        <div style="font-size:13px;color:var(--text2);">${u.email}</div>
+      </div>
+      <div style="margin-left:auto;">${tierBadge(qCount)}</div>
+    </div>
+    <div class="g4" style="margin-bottom:16px;">
+      <div class="metric c-blue"><div class="metric-lbl">Total events</div><div class="metric-val">${u.events.length}</div></div>
+      <div class="metric c-green"><div class="metric-lbl">This quarter</div><div class="metric-val">${qCount}</div></div>
+      <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${totalReach}</div></div>
+      <div class="metric c-purple"><div class="metric-lbl">Hours delivered</div><div class="metric-val">${Math.round(totalHrs/60)}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">Event history</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Event</th><th>Date</th><th>Type</th><th>Location</th><th>Attendees</th><th>Duration</th><th>Summary</th><th>Photos</th></tr></thead>
+          <tbody>${eventRows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  navTo('amb-detail');
+};
+
+// ── ALL EVENTS ──
+function renderAllEvents() {
+  const search = (document.getElementById('ev-search').value||'').toLowerCase();
+  const typeFilter = document.getElementById('ev-filter-type').value;
+  const qFilter = document.getElementById('ev-filter-quarter').value;
+
+  const all = allUsers.flatMap(u => u.events.map(e => ({...e, _user:u})))
+    .filter(e => {
+      const matchSearch = !search || e.name.toLowerCase().includes(search);
+      const matchType = !typeFilter || e.type === typeFilter;
+      const matchQ = !qFilter || e.quarter === qFilter;
+      return matchSearch && matchType && matchQ;
+    }).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  const tbody = document.getElementById('ev-tbody');
+  const empty = document.getElementById('ev-empty');
+  if (!all.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = all.map(e => `
+    <tr style="cursor:pointer;" onclick="window.openEventModal(${JSON.stringify(e).replace(/"/g,'&quot;')})">
+      <td><div class="td-main">${e._user.displayName||e._user.email}</div></td>
+      <td><div class="td-main">${e.name}</div></td>
+      <td style="font-size:12px;color:var(--text2);">${fmtDate(e.date)}</td>
+      <td>${tagHTML(e.type)}</td>
+      <td style="font-size:12px;">${e.location||'—'}</td>
+      <td style="font-weight:600;">${e.attendees||0}</td>
+      <td style="font-size:12px;color:var(--text2);">${e.duration||0}min</td>
+      <td style="max-width:150px;"><div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">${(e.summary||'').slice(0,50)||'—'}</div></td>
+      <td>${(e.photos&&e.photos.length)?`📷 ${e.photos.length}`:(e.photoLink?'🔗':'—')}</td>
+    </tr>
+  `).join('');
+}
+document.getElementById('ev-search').oninput = renderAllEvents;
+document.getElementById('ev-filter-type').onchange = renderAllEvents;
+document.getElementById('ev-filter-quarter').onchange = renderAllEvents;
+
+// ── PHOTOS ──
+function renderPhotos() {
+  const grid = document.getElementById('photos-grid');
+  const empty = document.getElementById('photos-empty');
+  document.getElementById('photos-loading').style.display = 'none';
+
+  const allPhotos = [];
+  allUsers.forEach(u => {
+    u.events.forEach(e => {
+      if (e.photos && e.photos.length) {
+        e.photos.forEach(p => allPhotos.push({src:p, event:e.name, amb:u.displayName||u.email, date:e.date}));
+      }
+    });
+  });
+
+  const linkEvents = allUsers.flatMap(u => u.events.filter(e => e.photoLink && !(e.photos && e.photos.length)).map(e => ({...e, _user:u})));
+
+  if (!allPhotos.length && !linkEvents.length) {
+    grid.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+
+  grid.style.display = 'block';
+  empty.style.display = 'none';
+
+  // Group by ambassador
+  const byAmb = {};
+  allPhotos.forEach(p => {
+    const k = p.amb;
+    if (!byAmb[k]) byAmb[k] = [];
+    byAmb[k].push(p);
+  });
+
+  grid.innerHTML = Object.entries(byAmb).map(([amb, photos]) => `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-hd" style="margin-bottom:12px;">${amb}</div>
+      <div class="photo-grid">
+        ${photos.map(p => `
+          <div>
+            <img class="photo-thumb" src="${p.src}" alt="${p.event}" onclick="window.openLightbox('${p.src}')" loading="lazy"/>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:center;">${p.event}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('') + (linkEvents.length ? `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-hd">Events with photo links (no upload)</div>
+      ${linkEvents.map(e => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+          <div><span style="font-weight:500;">${e.name}</span> <span style="color:var(--text3);font-size:11px;">— ${e._user.displayName||e._user.email}</span></div>
+          <a href="${e.photoLink}" target="_blank" class="btn btn-sm">Open link ↗</a>
+        </div>
+      `).join('')}
+    </div>
+  ` : '');
+}
+
+// ── EVENT MODAL ──
+window.openEventModal = (e) => {
+  document.getElementById('ev-modal-title').textContent = e.name;
+  const body = document.getElementById('ev-modal-body');
+  const photosHTML = (e.photos && e.photos.length)
+    ? `<div class="photo-grid">${e.photos.map(p=>`<img class="photo-thumb" src="${p}" onclick="window.openLightbox('${p}')" loading="lazy"/>`).join('')}</div>`
+    : e.photoLink
+      ? `<a href="${e.photoLink}" target="_blank" class="btn btn-sm">Open photo link ↗</a>`
+      : '<span style="color:var(--text3);font-size:13px;">No photos submitted.</span>';
+
+  body.innerHTML = `
+    <div class="detail-section">
+      <h3>Event info</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-item-lbl">Date</div><div class="detail-item-val">${fmtDate(e.date)}</div></div>
+        <div class="detail-item"><div class="detail-item-lbl">Type</div><div class="detail-item-val">${tagHTML(e.type)}</div></div>
+        <div class="detail-item"><div class="detail-item-lbl">Location</div><div class="detail-item-val">${e.location||'—'}</div></div>
+        <div class="detail-item"><div class="detail-item-lbl">Duration</div><div class="detail-item-val">${e.duration||0} min</div></div>
+        <div class="detail-item"><div class="detail-item-lbl">Attendees</div><div class="detail-item-val" style="font-size:18px;font-weight:700;">${e.attendees||0}</div></div>
+        <div class="detail-item"><div class="detail-item-lbl">Quarter</div><div class="detail-item-val">${e.quarter||'—'}</div></div>
+      </div>
+    </div>
+    ${e.summary ? `<div class="detail-section"><h3>Activity summary</h3><div class="summary-box">${e.summary}</div></div>` : ''}
+    ${e.notes ? `<div class="detail-section"><h3>Notes / feedback</h3><div class="summary-box">${e.notes}</div></div>` : ''}
+    <div class="detail-section">
+      <h3>Photo proof</h3>
+      ${photosHTML}
+    </div>
+    ${e._user ? `<div style="margin-top:8px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Submitted by ${e._user.displayName||e._user.email}</div>` : ''}
+  `;
+  document.getElementById('event-modal').classList.add('open');
+};
+document.getElementById('ev-modal-close').onclick = () => document.getElementById('event-modal').classList.remove('open');
+document.getElementById('event-modal').onclick = (e) => { if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); };
+
+// ── LIGHTBOX ──
+window.openLightbox = (src) => {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+};
+
+// ── NAV ──
+window.navTo = (panel) => {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+panel).classList.add('show');
+  const btn = document.querySelector(`[data-panel="${panel}"]`);
+  if (btn) btn.classList.add('active');
+};
+document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
+  btn.onclick = () => navTo(btn.dataset.panel);
+});
+</script>
+</body>
+</html>
