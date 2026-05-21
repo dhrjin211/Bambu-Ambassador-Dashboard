@@ -303,10 +303,10 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
             <thead>
               <tr>
                 <th>Ambassador</th>
-                <th style="text-align:center;">Q1 · Jul-Sep</th>
+                <th style="text-align:center;">Q1 · Jul–Sep</th>
                 <th style="text-align:center;">Q2 · Oct–Dec</th>
-                <th style="text-align:center;">Q3 · Jan-Mar</th>
-                <th style="text-align:center;">Q4 · Apr-May₹</th>
+                <th style="text-align:center;">Q3 · Jan–Mar</th>
+                <th style="text-align:center;">Q4 · Apr–May</th>
                 <th style="text-align:center;">Missing</th>
                 <th style="text-align:center;">Total Events</th>
                 <th>Status</th>
@@ -326,7 +326,7 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <input class="search-input" id="ev-search" placeholder="🔍  Search event or ambassador…" style="min-width:200px;"/>
           <select class="filter-sel" id="ev-filter-type"><option value="">All types</option><option value="workshop">Workshop</option><option value="demo">Demo</option><option value="competition">Competition</option><option value="class">Class</option><option value="club">Club</option><option value="fair">Fair</option><option value="other">Other</option></select>
-          <select class="filter-sel" id="ev-filter-quarter"><option value="">All quarters</option><option value="Q1">Q1 · Jan–Mar</option><option value="Q2">Q2 · Apr–Jun</option><option value="Q3">Q3 · Jul–Sep</option><option value="Q4">Q4 · Oct–Dec</option></select>
+          <select class="filter-sel" id="ev-filter-quarter"><option value="">All quarters</option><option value="Q1">Q1 · Jul–Sep</option><option value="Q2">Q2 · Oct–Dec</option><option value="Q3">Q3 · Jan–Mar</option><option value="Q4">Q4 · Apr–May</option></select>
           <select class="filter-sel" id="ev-filter-amb"><option value="">All ambassadors</option></select>
           <span id="ev-count" style="font-size:12px;color:var(--text3);align-self:center;"></span>
         </div>
@@ -399,15 +399,15 @@ let allUsers = [];       // live array rebuilt on every snapshot
 let currentUser = null;
 let _unsubUsers = null;  // real-time listener handle
 
-// ── Program quarters: which quarters are "active" (current or past in program year) ──
-// Program: May 2026 – May 2027 → Q2 2026 onward is relevant
-// For simplicity, we consider all 4 calendar quarters and mark the ones that have
-// already started as "required" (ambassadors must have ≥1 event in them).
+// ── Program quarter schedule (July 2026 – May 2027) ──
+// Q1: Jul–Sep   Q2: Oct–Dec   Q3: Jan–Mar   Q4: Apr–May
 function pastOrCurrentQuarters() {
-  const now = new Date();
-  const currentQNum = Math.floor(now.getMonth() / 3) + 1; // 1-4
-  // return array of Q labels that have at least partially passed
-  return ['Q1','Q2','Q3','Q4'].filter((_,i) => (i+1) <= currentQNum);
+  const m = new Date().getMonth(); // 0=Jan … 11=Dec
+  if (m >= 6 && m <= 8)  return ['Q1'];                // Jul–Sep  → Q1 active
+  if (m >= 9 && m <= 11) return ['Q1','Q2'];           // Oct–Dec  → Q1+Q2
+  if (m >= 0 && m <= 2)  return ['Q1','Q2','Q3'];      // Jan–Mar  → Q1+Q2+Q3
+  if (m >= 3 && m <= 4)  return ['Q1','Q2','Q3','Q4']; // Apr–May  → all
+  return []; // Jun — between program years
 }
 
 // ── AUTH ──
@@ -518,7 +518,7 @@ function setSyncStatus(msg, live) {
 // ── HELPERS ──
 function tierFromN(n)  { return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
 function tierClass(t)  { return {Platinum:'tb-platinum',Gold:'tb-gold',Silver:'tb-silver',Active:'tb-active',None:'tb-none'}[t]||'tb-none'; }
-function currentQ()    { const m=new Date().getMonth(); return m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4'; }
+function currentQ()    { const m=new Date().getMonth(); return (m>=6&&m<=8)?'Q1':(m>=9&&m<=11)?'Q2':(m>=0&&m<=2)?'Q3':(m>=3&&m<=4)?'Q4':'Q1'; }
 function isValid(e)    { return (parseInt(e.attendees)||0)>=5 && (parseInt(e.duration)||0)>=30; }
 function fmtDate(d)    { if(!d) return '—'; try{ return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return d; } }
 function avatarLetter(u){ return ((u.displayName||u.email||'?')[0]||'?').toUpperCase(); }
