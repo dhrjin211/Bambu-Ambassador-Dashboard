@@ -746,11 +746,10 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0;}
             <option value="done">Completed</option>
           </select>
           <select class="filter-sel" id="filter-quarter">
-            <option value="">All quarters</option>
-            <option value="Q1">Q1 · Jan–Mar</option>
-            <option value="Q2">Q2 · Apr–Jun</option>
-            <option value="Q3">Q3 · Jul–Sep</option>
-            <option value="Q4">Q4 · Oct–Dec</option>
+            <option value="Q1">Q1 · Jul–Sep</option>
+              <option value="Q2">Q2 · Oct–Dec</option>
+              <option value="Q3">Q3 · Jan–Mar 2027</option>
+              <option value="Q4">Q4 · Apr–May 2027</option>
           </select>
           <select class="filter-sel" id="filter-valid">
             <option value="">All events</option>
@@ -1031,10 +1030,10 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0;}
           <div class="field">
             <label>Quarter</label>
             <select id="f-quarter">
-              <option value="Q1">Q1 · Jan–Mar</option>
-              <option value="Q2">Q2 · Apr–Jun</option>
-              <option value="Q3">Q3 · Jul–Sep</option>
-              <option value="Q4">Q4 · Oct–Dec</option>
+             <option value="Q1">Q1 · Jul–Sep</option>
+              <option value="Q2">Q2 · Oct–Dec</option>
+              <option value="Q3">Q3 · Jan–Mar 2027</option>
+              <option value="Q4">Q4 · Apr–May 2027</option>
             </select>
           </div>
           <div class="field">
@@ -1378,7 +1377,7 @@ function saveToCache(uid, data) {
 async function saveDB() {
   if (!currentUser) return;
   saveToCache(currentUser.uid, DB);
-  try { await setDoc(doc(db, 'users', currentUser.uid), DB); }
+  try { await setDoc(doc(db, 'users', currentUser.uid), { ...DB, email: currentUser.email }); }
   catch(err) { console.error('Firestore write failed:', err); }
 }
 function applyDBSnapshot(data) {
@@ -1458,7 +1457,8 @@ function updateHdrUsername() {
 /* ══════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════ */
-function currentQ()   { const m = new Date().getMonth(); return m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4'; }
+// Program schedule: Q1=Jul–Sep, Q2=Oct–Dec, Q3=Jan–Mar, Q4=Apr–May
+function currentQ()   { const m = new Date().getMonth(); return (m>=6&&m<=8)?'Q1':(m>=9&&m<=11)?'Q2':(m>=0&&m<=2)?'Q3':(m>=3&&m<=4)?'Q4':'Q1'; }
 function tierFromN(n) { return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
 function isValid(e)   { return (parseInt(e.attendees)||0) >= 5 && (parseInt(e.duration)||0) >= 30; }
 function doneEvs()    { return DB.events.filter(e => e.status !== 'planned'); }
@@ -1778,6 +1778,10 @@ document.getElementById('modal-save-btn').onclick = async (e) => {
           attendees:   ev.attendees,
           duration:    ev.duration,
           quarter:     ev.quarter || '',
+          summary:     ev.summary || null,
+          notes:       ev.notes   || null,
+          photoLink:   ev.photoLink || null,
+          photos:      ev.photos   || null,
           savedAt:     new Date().toISOString()
         });
       } else if (oldEv && oldEv.status === 'done' && newStatus !== 'done') {
