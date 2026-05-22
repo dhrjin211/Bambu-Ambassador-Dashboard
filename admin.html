@@ -458,6 +458,28 @@ document.getElementById('btn-login').onclick = async () => {
     btn.disabled = false; btn.textContent = 'Sign In';
   }
 };
+
+document.getElementById('btn-logout').onclick = () => {
+  if (_unsubUsers) { _unsubUsers(); _unsubUsers = null; }
+  signOut(auth);
+};
+
+/// ── AUTH ──
+document.getElementById('btn-login').onclick = async () => {
+  document.getElementById('auth-error').textContent = '';
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    await signInWithEmailAndPassword(auth,
+      document.getElementById('auth-email').value.trim(),
+      document.getElementById('auth-pass').value);
+  } catch(e) {
+    document.getElementById('auth-error').textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+};
+
 document.getElementById('btn-logout').onclick = () => {
   if (_unsubUsers) { _unsubUsers(); _unsubUsers = null; }
   signOut(auth);
@@ -472,12 +494,18 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Verify admin flag
+  // 1. Verify Admin Status
   let snap;
-  try { snap = await getDoc(doc(db, 'users', user.uid)); } catch(e) { snap = null; }
+  try { 
+    snap = await getDoc(doc(db, 'users', user.uid)); 
+  } catch(e) { 
+    console.error("Admin check failed:", e);
+    snap = null; 
+  }
+  
   if (!snap || !snap.exists() || !snap.data().isAdmin) {
     await signOut(auth);
-    document.getElementById('auth-error').textContent = 'Access denied — this account does not have admin privileges.';
+    document.getElementById('auth-error').textContent = 'Access denied — This account is not marked as Admin.';
     document.getElementById('auth-overlay').style.display = 'flex';
     return;
   }
@@ -487,20 +515,14 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('hdr-email').textContent = user.email;
   setSyncStatus('Connecting…', false);
 
-  // ── REAL-TIME LISTENER on global_events ──
-  // We read from `global_events` (not `users`) because Firestore rules only
-  // allow each user to read their own doc. `global_events` is written by every
-  // ambassador when they save a completed event and is readable by all
-  // authenticated users — same collection used by the Global Impact feed.
-  // We group by uid to reconstruct per-ambassador profiles on the fly.
-  // ── REAL-TIME LISTENER (USERS + EVENTS) ──
+  // 2. REAL-TIME DATA (Dual Listener for Users + Events)
   if (_unsubUsers) _unsubUsers();
-  
-  let allUsersMap = {};
-  let allEventsData = [];
+
+  let allUsersMap = {};   
+  let allEventsData = []; 
 
   function buildAndRender() {
-    // Merge users and their events
+    // Merges lists: users stay visible even with 0 events
     allUsers = Object.values(allUsersMap).map(u => ({
       ...u,
       events: allEventsData.filter(e => e.uid === u.uid)
@@ -514,21 +536,21 @@ onAuthStateChanged(auth, async (user) => {
     renderPhotos();
   }
 
-  // 1. Listen to ALL Users to build the master roster
+  // Listener A: The Roster (Finds everyone even with 0 events)
   const unsubU = onSnapshot(collection(db, 'users'), (snap) => {
     snap.forEach(d => {
       const data = d.data();
       allUsersMap[d.id] = {
         uid: d.id,
-        displayName: data.profile?.fullName || data.displayName || '',
-        email: data.email || d.id.slice(0, 10) + '…',
+        displayName: data.profile?.fullName || data.displayName || 'Unnamed User',
+        email: data.email || d.id.slice(0, 10) + '...',
         events: []
       };
     });
     buildAndRender();
   }, (err) => console.error('Users listener error:', err));
 
-  // 2. Listen to ALL Events to populate activity
+  // Listener B: Detailed Activity
   const unsubE = onSnapshot(query(collection(db, 'global_events'), orderBy('savedAt', 'desc')), (snap) => {
     allEventsData = [];
     snap.forEach(d => {
@@ -554,14 +576,13 @@ onAuthStateChanged(auth, async (user) => {
   }, (err) => console.error('Events listener error:', err));
 
   _unsubUsers = () => { unsubU(); unsubE(); };
+});
 
 function setSyncStatus(msg, live) {
   document.getElementById('sync-status').textContent = msg;
   const dot = document.querySelector('.sync-dot');
   if (dot) dot.style.background = live ? 'var(--green)' : 'var(--amber)';
 }
-
-// ── HELPERS ──
 function tierFromN(n)  { return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
 function tierClass(t)  { return {Platinum:'tb-platinum',Gold:'tb-gold',Silver:'tb-silver',Active:'tb-active',None:'tb-none'}[t]||'tb-none'; }
 function currentQ() {
