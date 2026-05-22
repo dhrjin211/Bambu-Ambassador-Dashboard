@@ -584,7 +584,8 @@ function qtrCounts(u) {
 function missingCount(u) {
   const required = pastOrCurrentQuarters();
   const counts = qtrCounts(u);
-  // This looks for any required quarter where the event count is less than 2
+  // It checks if they have LESS THAN 2. 
+  // So if they have 1, this returns true, and they are counted as "missing".
   return required.filter(q => counts[q] < 2).length;
 }
 
@@ -643,78 +644,35 @@ function renderOverview() {
 
 // ── AMBASSADORS ──
 function renderAmbassadors() {
-  const search     = (document.getElementById('amb-search').value||'').toLowerCase();
-  const tierFilter = document.getElementById('amb-filter-tier').value;
-  const compFilter = document.getElementById('amb-filter-compliance').value;
-  const q = currentQ();
-  document.getElementById('amb-loading').style.display = 'none';
-  const grid = document.getElementById('amb-grid');
-  grid.style.display = 'grid';
+  const container = document.getElementById('ambassadors-list');
+  if (!container) return;
 
-  const required = pastOrCurrentQuarters();
+  container.innerHTML = allUsers.map(u => {
+    const q = currentQ();
+    const qCount = u.events.filter(e => e.quarter === q).length;
+    const miss = missingCount(u); // This uses the < 2 logic
+    const letter = avatarLetter(u);
+    const color = avatarColor(letter);
 
-  const filtered = allUsers.filter(u => {
-    const matchSearch = !search || (u.displayName+' '+u.email).toLowerCase().includes(search);
-    const qCount = u.events.filter(e=>e.quarter===q).length;
-    const tier   = tierFromN(qCount);
-    const matchTier = !tierFilter || tier === tierFilter;
-    const miss = missingCount(u);
-    const matchComp = !compFilter || (compFilter==='atrisk'?miss>0:miss===0);
-    return matchSearch && matchTier && matchComp;
-  }).sort((a,b) => missingCount(b) - missingCount(a) || b.events.length - a.events.length);
+    // FIX: This determines if the card text is Green or Red
+    const statusText = miss > 0 
+      ? `<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px;">⚠ Missing ${miss} required quarter${miss>1?'s':''}</div>` 
+      : `<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px;">✓ All required quarters covered</div>`;
 
-  if (!filtered.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">No ambassadors found.</div>'; return; }
-
-  grid.innerHTML = filtered.map(u => {
-    const qCount  = u.events.filter(e=>e.quarter===q).length;
-    const tier    = tierFromN(qCount);
-    const reach   = u.events.reduce((s,e)=>s+(parseInt(e.attendees)||0),0);
-    const letter  = avatarLetter(u);
-    const color   = avatarColor(letter);
-    const counts  = qtrCounts(u);
-    const miss    = missingCount(u);
-    const atRisk  = miss > 0;
-
- const qtrCells = ['Q1','Q2','Q3','Q4'].map(qtr => {
-      const isReq = required.includes(qtr);
-      const cnt   = counts[qtr];
-      
-      if (!isReq && cnt === 0) return `<td style="text-align:center;" class="comp-future">—</td>`;
-      
-      // CHANGE: check if cnt is 2 or more
-      if (cnt >= 2) {
-          return `<td style="text-align:center;" class="comp-ok">✓ ${cnt}</td>`;
-      } else if (cnt > 0) {
-          // New state: they have 1 event but need 2
-          return `<td style="text-align:center;" class="comp-miss" style="color:var(--amber)">⚠ ${cnt}/2</td>`;
-      }
-      return `<td style="text-align:center;" class="comp-miss">✗ 0/2</td>`;
-    }).join('');
-    
-    return `<div class="amb-card${atRisk?' at-risk':''}" onclick="window.showAmbDetail('${u.uid}')">
-      <div class="amb-card-top">
-        <div class="amb-avatar" style="background:${color};">${letter}</div>
-        <div style="flex:1;min-width:0;">
-          <div class="amb-name">${escHtml(u.displayName||'(No name set)')}</div>
-          <div class="amb-email">${escHtml(u.email)}</div>
+    return `
+      <div class="amb-card" onclick="window.showAmbDetail('${u.uid}')">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div class="amb-avatar" style="background:${color};">${letter}</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(u.displayName||'No name')}</div>
+            ${statusText}
+          </div>
         </div>
-        ${tierBadge(qCount)}
-      </div>
-      <div class="qtr-grid">${qtrCells}</div>
-      <div class="amb-stats">
-        <div class="amb-stat"><div class="amb-stat-val">${u.events.length}</div><div class="amb-stat-lbl">Events</div></div>
-        <div class="amb-stat"><div class="amb-stat-val">${qCount}</div><div class="amb-stat-lbl">This Qtr</div></div>
-        <div class="amb-stat"><div class="amb-stat-val">${reach}</div><div class="amb-stat-lbl">Reached</div></div>
-      </div>
-      ${miss > 0 
-  ? `<div class="alert alert-red" style="margin-bottom:16px;">
-       ⚠ This ambassador is missing <strong>${miss} required quarter${miss > 1 ? 's' : ''}</strong> — they need to log at least 2 events in each past and current quarter.
-     </div>` 
-  : `<div class="alert" style="background:var(--green-bg);border-left:3px solid var(--green-b);margin-bottom:16px;color:var(--green);padding:10px;">
-       ✓ All required quarters are covered!
-     </div>`
-}
-    </div>`;
+        <div class="g2">
+          <div class="metric-sm"><div class="metric-lbl">Total</div><div class="metric-val">${u.events.length}</div></div>
+          <div class="metric-sm"><div class="metric-lbl">This Q</div><div class="metric-val">${qCount}/2</div></div>
+        </div>
+      </div>`;
   }).join('');
 }
 
@@ -806,10 +764,7 @@ function renderComplianceTable() {
   const sort   = document.getElementById('comp-sort').value;
   const required = pastOrCurrentQuarters();
 
-  let list = allUsers.map(u => {
-    return { ...u, miss: missingCount(u) };
-  });
-
+  let list = allUsers.map(u => ({ ...u, miss: missingCount(u) }));
   if (filter === 'atrisk') list = list.filter(u => u.miss > 0);
   if (filter === 'compliant') list = list.filter(u => u.miss === 0);
 
@@ -825,21 +780,14 @@ function renderComplianceTable() {
     const color  = avatarColor(letter);
     const miss   = u.miss;
 
-    // ── THIS WAS THE MISSING PART: Generating the Q1-Q4 cells ──
     const qtrCells = ['Q1','Q2','Q3','Q4'].map(qtr => {
       const isReq = required.includes(qtr);
       const cnt   = counts[qtr] || 0;
+      if (!isReq && cnt === 0) return `<td style="text-align:center;color:var(--text3);">—</td>`;
       
-      if (!isReq && cnt === 0) return `<td style="text-align:center; color:var(--text3);">—</td>`;
-      
-      // Goal is 2
-      if (cnt >= 2) {
-        return `<td style="text-align:center;" class="comp-ok">✓ ${cnt}</td>`;
-      } else if (cnt === 1) {
-        return `<td style="text-align:center;" class="comp-miss" style="background:#fffcf0; color:#b08900;">⚠ 1/2</td>`;
-      } else {
-        return `<td style="text-align:center;" class="comp-miss">✗ 0/2</td>`;
-      }
+      if (cnt >= 2) return `<td style="text-align:center;" class="comp-ok">✓ ${cnt}</td>`;
+      if (cnt === 1) return `<td style="text-align:center;" class="comp-miss" style="background:#fffcf0;color:#b08900;font-weight:bold;">⚠ 1/2</td>`;
+      return `<td style="text-align:center;" class="comp-miss">✗ 0/2</td>`;
     }).join('');
 
     const statusHTML = miss === 0
@@ -849,16 +797,13 @@ function renderComplianceTable() {
     return `<tr class="${miss > 0 ? 'comp-row-atrisk' : ''}" style="cursor:pointer;" onclick="window.showAmbDetail('${u.uid}')">
       <td>
         <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${letter}</div>
-          <div>
-            <div class="td-main">${escHtml(u.displayName || '(No name)')}</div>
-            <div class="td-sub">${escHtml(u.email)}</div>
-          </div>
+          <div style="width:28px;height:28px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${letter}</div>
+          <div><div class="td-main">${escHtml(u.displayName||'No name')}</div><div class="td-sub">${escHtml(u.email)}</div></div>
         </div>
       </td>
       ${qtrCells}
-      <td style="text-align:center; font-weight:700; color:${miss > 0 ? 'var(--red)' : 'var(--green)'};">${miss}</td>
-      <td style="text-align:center; font-weight:600;">${u.events.length}</td>
+      <td style="text-align:center;font-weight:700;color:${miss > 0 ? 'var(--red)' : 'var(--green)'}">${miss}</td>
+      <td style="text-align:center;">${u.events.length}</td>
       <td>${statusHTML}</td>
     </tr>`;
   }).join('');
