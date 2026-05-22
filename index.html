@@ -1458,7 +1458,19 @@ function updateHdrUsername() {
    HELPERS
 ══════════════════════════════════════════════ */
 // Program schedule: Q1=Jul–Sep, Q2=Oct–Dec, Q3=Jan–Mar, Q4=Apr–May
-function currentQ()   { const m = new Date().getMonth(); return (m>=6&&m<=8)?'Q1':(m>=9&&m<=11)?'Q2':(m>=0&&m<=2)?'Q3':(m>=3&&m<=4)?'Q4':'Q1'; }
+function currentQ() {
+  const d = new Date();
+  const m = d.getMonth();
+  const y = d.getFullYear();
+  
+  if (y < 2026 || (y === 2026 && m < 6)) return 'Q1'; // Pre-program
+  if (y === 2026 && m >= 6 && m <= 8) return 'Q1';
+  if (y === 2026 && m >= 9 && m <= 11) return 'Q2';
+  if (y === 2027 && m >= 0 && m <= 2) return 'Q3';
+  if (y >= 2027 && m >= 3) return 'Q4';
+  
+  return 'Q1'; // Fallback
+}
 function tierFromN(n) { return n>=8?'Platinum':n>=5?'Gold':n>=3?'Silver':n>=1?'Active':'None'; }
 function isValid(e)   { return (parseInt(e.attendees)||0) >= 5 && (parseInt(e.duration)||0) >= 30; }
 function doneEvs()    { return DB.events.filter(e => e.status !== 'planned'); }
