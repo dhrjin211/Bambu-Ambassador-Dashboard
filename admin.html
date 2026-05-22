@@ -583,8 +583,9 @@ function qtrCounts(u) {
 /** How many required (past/current) quarters is this ambassador missing? */
 function missingCount(u) {
   const required = pastOrCurrentQuarters();
-  const counts   = qtrCounts(u);
-  return required.filter(q => counts[q] === 0).length;
+  const counts = qtrCounts(u);
+  // This looks for any required quarter where the event count is less than 2
+  return required.filter(q => counts[q] < 2).length;
 }
 
 // ── OVERVIEW ──
@@ -674,16 +675,22 @@ function renderAmbassadors() {
     const miss    = missingCount(u);
     const atRisk  = miss > 0;
 
-    const qtrCells = ['Q1','Q2','Q3','Q4'].map(qtr => {
+ const qtrCells = ['Q1','Q2','Q3','Q4'].map(qtr => {
       const isReq = required.includes(qtr);
       const cnt   = counts[qtr];
-      const cls   = isReq ? (cnt>0?'has':'missing') : (cnt>0?'has':'future');
-      return `<div class="qtr-cell ${cls}">
-        <span class="qtr-cell-label">${qtr}</span>
-        <span class="qtr-cell-count">${cnt>0?cnt:'✗'}</span>
-      </div>`;
+      
+      if (!isReq && cnt === 0) return `<td style="text-align:center;" class="comp-future">—</td>`;
+      
+      // CHANGE: check if cnt is 2 or more
+      if (cnt >= 2) {
+          return `<td style="text-align:center;" class="comp-ok">✓ ${cnt}</td>`;
+      } else if (cnt > 0) {
+          // New state: they have 1 event but need 2
+          return `<td style="text-align:center;" class="comp-miss" style="color:var(--amber)">⚠ ${cnt}/2</td>`;
+      }
+      return `<td style="text-align:center;" class="comp-miss">✗ 0/2</td>`;
     }).join('');
-
+    
     return `<div class="amb-card${atRisk?' at-risk':''}" onclick="window.showAmbDetail('${u.uid}')">
       <div class="amb-card-top">
         <div class="amb-avatar" style="background:${color};">${letter}</div>
