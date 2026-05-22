@@ -802,76 +802,63 @@ window.showAmbDetail = (uid) => {
 };
 // ── QUARTERLY COMPLIANCE TABLE ──
 function renderComplianceTable() {
-  const filter   = document.getElementById('comp-filter').value;
-  const sortBy   = document.getElementById('comp-sort').value;
+  const filter = document.getElementById('comp-filter').value;
+  const sort   = document.getElementById('comp-sort').value;
   const required = pastOrCurrentQuarters();
 
-  const tbody = document.getElementById('comp-tbody');
-  const empty = document.getElementById('comp-empty');
+  let list = allUsers.map(u => {
+    return { ...u, miss: missingCount(u) };
+  });
 
-  // Update alert message
-  const missing = allUsers.filter(u=>missingCount(u)>0);
-  const alertEl = document.getElementById('comp-alert');
-  if (alertEl) {
-    if (missing.length === 0) {
-      alertEl.className = 'alert alert-blue';
-      alertEl.innerHTML = `✓ All ${allUsers.length} ambassadors have covered every required quarter so far.`;
-    } else {
-      alertEl.className = 'alert alert-red';
-      alertEl.innerHTML = `⚠ <strong>${missing.length} ambassador${missing.length>1?'s':''}</strong> ${missing.length>1?'are':'is'} missing at least one required quarter. Required quarters this year: <strong>${required.join(', ')}</strong>.`;
-    }
-  }
+  if (filter === 'atrisk') list = list.filter(u => u.miss > 0);
+  if (filter === 'compliant') list = list.filter(u => u.miss === 0);
 
-  let list = [...allUsers];
+  list.sort((a, b) => {
+    if (sort === 'miss') return b.miss - a.miss;
+    if (sort === 'events') return b.events.length - a.events.length;
+    return a.displayName.localeCompare(b.displayName);
+  });
 
-  // Filter
-  if (filter === 'atrisk') list = list.filter(u => missingCount(u) > 0);
-  if (filter === 'ok')     list = list.filter(u => missingCount(u) === 0);
-
-  // Sort
-  if (sortBy === 'missing')  list.sort((a,b) => missingCount(b)-missingCount(a) || b.events.length-a.events.length);
-  if (sortBy === 'name')     list.sort((a,b) => (a.displayName||a.email).localeCompare(b.displayName||b.email));
-  if (sortBy === 'events')   list.sort((a,b) => b.events.length - a.events.length);
-
-  if (!list.length) {
-    tbody.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
-
-  tbody.innerHTML = list.map(u => {
+  document.getElementById('ov-compliance-body').innerHTML = list.map(u => {
     const counts = qtrCounts(u);
-    const miss   = missingCount(u);
     const letter = avatarLetter(u);
     const color  = avatarColor(letter);
+    const miss   = u.miss;
 
+    // ── THIS WAS THE MISSING PART: Generating the Q1-Q4 cells ──
     const qtrCells = ['Q1','Q2','Q3','Q4'].map(qtr => {
       const isReq = required.includes(qtr);
-      const cnt   = counts[qtr];
-      if (!isReq && cnt === 0) return `<td style="text-align:center;" class="comp-future">—</td>`;
-      if (cnt >= 2) return `<td style="text-align:center;" class="comp-ok">✓ ${cnt}</td>`;
-if (cnt > 0)  return `<td style="text-align:center;" class="comp-miss" style="color:var(--amber)">⚠ 1/2</td>`;
-      return `<td style="text-align:center;" class="comp-miss">✗</td>`;
+      const cnt   = counts[qtr] || 0;
+      
+      if (!isReq && cnt === 0) return `<td style="text-align:center; color:var(--text3);">—</td>`;
+      
+      // Goal is 2
+      if (cnt >= 2) {
+        return `<td style="text-align:center;" class="comp-ok">✓ ${cnt}</td>`;
+      } else if (cnt === 1) {
+        return `<td style="text-align:center;" class="comp-miss" style="background:#fffcf0; color:#b08900;">⚠ 1/2</td>`;
+      } else {
+        return `<td style="text-align:center;" class="comp-miss">✗ 0/2</td>`;
+      }
     }).join('');
 
     const statusHTML = miss === 0
       ? `<span class="pill pill-green">✓ Compliant</span>`
       : `<span class="pill pill-red">⚠ ${miss} missing</span>`;
 
-    return `<tr class="${miss>0?'comp-row-atrisk':''}" style="cursor:pointer;" onclick="window.showAmbDetail('${u.uid}')">
+    return `<tr class="${miss > 0 ? 'comp-row-atrisk' : ''}" style="cursor:pointer;" onclick="window.showAmbDetail('${u.uid}')">
       <td>
         <div style="display:flex;align-items:center;gap:8px;">
           <div style="width:28px;height:28px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${letter}</div>
           <div>
-            <div class="td-main">${escHtml(u.displayName||'(No name)')}</div>
+            <div class="td-main">${escHtml(u.displayName || '(No name)')}</div>
             <div class="td-sub">${escHtml(u.email)}</div>
           </div>
         </div>
       </td>
       ${qtrCells}
-      <td style="text-align:center;font-weight:700;color:${miss>0?'var(--red)':'var(--green)'};">${miss}</td>
-      <td style="text-align:center;font-weight:600;">${u.events.length}</td>
+      <td style="text-align:center; font-weight:700; color:${miss > 0 ? 'var(--red)' : 'var(--green)'};">${miss}</td>
+      <td style="text-align:center; font-weight:600;">${u.events.length}</td>
       <td>${statusHTML}</td>
     </tr>`;
   }).join('');
