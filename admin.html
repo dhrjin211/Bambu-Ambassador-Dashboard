@@ -401,13 +401,19 @@ let _unsubUsers = null;  // real-time listener handle
 
 // ── Program quarter schedule (July 2026 – May 2027) ──
 // Q1: Jul–Sep   Q2: Oct–Dec   Q3: Jan–Mar   Q4: Apr–May
+// Replace your existing pastOrCurrentQuarters() function with this:
 function pastOrCurrentQuarters() {
-  const m = new Date().getMonth(); // 0=Jan … 11=Dec
-  if (m >= 6 && m <= 8)  return ['Q1'];                // Jul–Sep  → Q1 active
-  if (m >= 9 && m <= 11) return ['Q1','Q2'];           // Oct–Dec  → Q1+Q2
-  if (m >= 0 && m <= 2)  return ['Q1','Q2','Q3'];      // Jan–Mar  → Q1+Q2+Q3
-  if (m >= 3 && m <= 4)  return ['Q1','Q2','Q3','Q4']; // Apr–May  → all
-  return []; // Jun — between program years
+  const d = new Date();
+  const m = d.getMonth();
+  const y = d.getFullYear();
+  
+  if (y < 2026 || (y === 2026 && m < 6)) return []; // Pre-program: No required quarters yet
+  if (y === 2026 && m >= 6 && m <= 8) return ['Q1'];
+  if (y === 2026 && m >= 9 && m <= 11) return ['Q1', 'Q2'];
+  if (y === 2027 && m >= 0 && m <= 2) return ['Q1', 'Q2', 'Q3'];
+  if (y >= 2027 && m >= 3) return ['Q1', 'Q2', 'Q3', 'Q4'];
+  
+  return [];
 }
 
 // ── AUTH ──
