@@ -489,40 +489,30 @@ document.getElementById('btn-logout').onclick = () => {
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     document.getElementById('auth-overlay').style.display = 'flex';
-    setSyncStatus('—', false);
     currentUser = null;
     return;
   }
 
-  // 1. Verify Admin Status
-  let snap;
-  try { 
-    snap = await getDoc(doc(db, 'users', user.uid)); 
-  } catch(e) { 
-    console.error("Admin check failed:", e);
-    snap = null; 
-  }
-  
-  if (!snap || !snap.exists() || !snap.data().isAdmin) {
+  // 1. Admin Verification
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  if (!snap.exists() || !snap.data().isAdmin) {
     await signOut(auth);
-    document.getElementById('auth-error').textContent = 'Access denied — This account is not marked as Admin.';
-    document.getElementById('auth-overlay').style.display = 'flex';
+    document.getElementById('auth-error').textContent = 'Unauthorized.';
     return;
   }
 
   currentUser = user;
   document.getElementById('auth-overlay').style.display = 'none';
-  document.getElementById('hdr-email').textContent = user.email;
-  setSyncStatus('Connecting…', false);
 
-  // 2. REAL-TIME DATA (Dual Listener for Users + Events)
+  // 2. THE DUAL LISTENER (This is the "200% sure" fix)
   if (_unsubUsers) _unsubUsers();
 
   let allUsersMap = {};   
   let allEventsData = []; 
 
   function buildAndRender() {
-    // Merges lists: users stay visible even with 0 events
+    // This merges the lists. Because we map Object.values(allUsersMap), 
+    // "Test User 2" stays in the list even if their events array is empty.
     allUsers = Object.values(allUsersMap).map(u => ({
       ...u,
       events: allEventsData.filter(e => e.uid === u.uid)
@@ -530,50 +520,35 @@ onAuthStateChanged(auth, async (user) => {
     
     setSyncStatus('Live · ' + new Date().toLocaleTimeString(), true);
     renderOverview();
-    renderAmbassadors();
+    renderAmbassadors(); // This will now show both cards
     renderAllEvents();
     renderComplianceTable();
-    renderPhotos();
   }
 
-  // Listener A: The Roster (Finds everyone even with 0 events)
+  // Listener A: Scans the 'users' collection (The Roster)
   const unsubU = onSnapshot(collection(db, 'users'), (snap) => {
     snap.forEach(d => {
       const data = d.data();
       allUsersMap[d.id] = {
         uid: d.id,
-        displayName: data.profile?.fullName || data.displayName || 'Unnamed User',
-        email: data.email || d.id.slice(0, 10) + '...',
+        // Grabs "Test User 2" or "Test Account"
+        displayName: data.displayName || 'Unnamed Ambassador',
+        email: data.email || 'No Email',
         events: []
       };
     });
     buildAndRender();
-  }, (err) => console.error('Users listener error:', err));
+  });
 
-  // Listener B: Detailed Activity
-  const unsubE = onSnapshot(query(collection(db, 'global_events'), orderBy('savedAt', 'desc')), (snap) => {
+  // Listener B: Scans 'global_events' (The Activity)
+  const unsubE = onSnapshot(collection(db, 'global_events'), (snap) => {
     allEventsData = [];
     snap.forEach(d => {
-      const e = { id: d.id, ...d.data() };
-      if (!e.uid) return;
-      allEventsData.push({
-        uid:       e.uid,
-        name:      e.name      || '—',
-        date:      e.date      || '',
-        location:  e.location  || '',
-        type:      e.type      || 'other',
-        attendees: parseInt(e.attendees) || 0,
-        duration:  parseInt(e.duration)  || 0,
-        quarter:   e.quarter   || '',
-        status:    'done',
-        summary:   e.summary   || '',
-        notes:     e.notes     || '',
-        photos:    e.photos    || null,
-        photoLink: e.photoLink || null,
-      });
+      const e = d.data();
+      if (e.uid) allEventsData.push({ id: d.id, ...e });
     });
     buildAndRender();
-  }, (err) => console.error('Events listener error:', err));
+  });
 
   _unsubUsers = () => { unsubU(); unsubE(); };
 });
