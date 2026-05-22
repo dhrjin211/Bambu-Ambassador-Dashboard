@@ -716,18 +716,11 @@ document.getElementById('amb-filter-tier').onchange  = renderAmbassadors;
 document.getElementById('amb-filter-compliance').onchange = renderAmbassadors;
 
 // ── AMB DETAIL ──
-window.showAmbDetail = (uid) => {
-  const u = allUsers.find(x=>x.uid===uid);
-  if (!u) return;
-  const q      = currentQ();
-  const qCount = u.events.filter(e=>e.quarter===q).length;
-  const reach  = u.events.reduce((s,e)=>s+(parseInt(e.attendees)||0),0);
-  const hrs    = u.events.reduce((s,e)=>s+(parseInt(e.duration)||0),0);
-  const letter = avatarLetter(u);
-  const color  = avatarColor(letter);
-  const counts = qtrCounts(u);
-  const required = pastOrCurrentQuarters();
-  const miss   = missingCount(u);
+// Inside renderAmbassadors...
+const counts = qtrCounts(u);
+const required = pastOrCurrentQuarters();
+const missing = required.filter(q => counts[q] < 2); // Changed from 1 to 2
+const isAtRisk = missing.length > 0;
 
   const qtrSummaryCards = ['Q1','Q2','Q3','Q4'].map(qtr => {
     const isReq = required.includes(qtr);
