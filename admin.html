@@ -716,26 +716,41 @@ document.getElementById('amb-filter-tier').onchange  = renderAmbassadors;
 document.getElementById('amb-filter-compliance').onchange = renderAmbassadors;
 
 // ── AMB DETAIL ──
-// Inside renderAmbassadors...
-const counts = qtrCounts(u);
-const required = pastOrCurrentQuarters();
-const missing = required.filter(q => counts[q] < 2); // Changed from 1 to 2
-const isAtRisk = missing.length > 0;
+window.showAmbDetail = (uid) => {
+  const u = allUsers.find(x => x.uid === uid);
+  if (!u) return;
 
+  // 1. Core Logic & Variables
+  const q = currentQ();
+  const qCount = u.events.filter(e => e.quarter === q).length;
+  const reach  = u.events.reduce((s, e) => s + (parseInt(e.attendees) || 0), 0);
+  const hrs    = u.events.reduce((s, e) => s + (parseInt(e.duration) || 0), 0);
+  const letter = avatarLetter(u);
+  const color  = avatarColor(letter);
+  const counts = qtrCounts(u);
+  const required = pastOrCurrentQuarters();
+  const miss   = missingCount(u);
+
+  // 2. Build the Q1-Q4 Summary Cards (2-event logic)
   const qtrSummaryCards = ['Q1','Q2','Q3','Q4'].map(qtr => {
     const isReq = required.includes(qtr);
     const cnt   = counts[qtr];
-    const bg    = isReq ? (cnt>0?'var(--green-bg)':'var(--red-bg)') : 'var(--surface2)';
-    const border= isReq ? (cnt>0?'var(--green-b)':'var(--red-b)') : 'var(--border)';
-    const txtc  = isReq ? (cnt>0?'var(--green)':'var(--red)') : 'var(--text3)';
-    const icon  = isReq ? (cnt>0?'✓':cnt===0?'✗':'') : '—';
-    return `<div style="background:${bg};border:1px solid ${border};border-radius:var(--r);padding:14px;text-align:center;">
+    
+    // Logic: Red if required but < 2 events. Green if >= 2.
+    const isCompliant = cnt >= 2;
+    const bg     = isReq ? (isCompliant ? 'var(--green-bg)' : 'var(--red-bg)') : 'var(--surface2)';
+    const border = isReq ? (isCompliant ? 'var(--green-b)' : 'var(--red-b)') : 'var(--border)';
+    const txtc   = isReq ? (isCompliant ? 'var(--green)' : 'var(--red)') : 'var(--text3)';
+    const icon   = isReq ? (isCompliant ? '✓' : '✗') : '—';
+    
+    return `<div style="background:${bg};border:1px solid ${border};border-radius:var(--rs);padding:14px;text-align:center;">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${txtc};margin-bottom:4px;">${qtr}</div>
       <div style="font-size:26px;font-weight:800;color:${txtc};line-height:1;">${cnt}</div>
-      <div style="font-size:10px;color:${txtc};margin-top:4px;">${icon} ${isReq?'required':'not yet active'}</div>
+      <div style="font-size:10px;color:${txtc};margin-top:4px;">${icon} ${isReq ? (cnt === 1 ? '1/2 events' : (isCompliant ? 'Met' : 'Missing')) : 'inactive'}</div>
     </div>`;
   }).join('');
 
+  // 3. Build the Event Rows
   const eventRows = u.events.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e=>`
     <tr style="cursor:pointer;" onclick="window.openEventModal(${JSON.stringify({...e,_user:u}).replace(/"/g,'&quot;')})">
       <td class="td-main">${escHtml(e.name)}</td>
@@ -747,26 +762,35 @@ const isAtRisk = missing.length > 0;
       <td><span style="font-size:11px;background:var(--surface2);padding:2px 7px;border-radius:4px;font-weight:600;">${e.quarter||'—'}</span></td>
       <td>${isValid(e)?'<span style="color:var(--green);font-weight:700;">✓</span>':'<span style="color:var(--red);">✗</span>'}</td>
       <td>${(e.photos&&e.photos.length)?`📷 ${e.photos.length}`:(e.photoLink?'🔗':'—')}</td>
-    </tr>`).join('') || '<tr><td colspan="9" class="empty">No events logged yet.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="9" class="empty" style="text-align:center;padding:40px;color:var(--text3);">No events logged yet.</td></tr>';
 
+  // 4. Update the Panel HTML
   document.getElementById('panel-amb-detail').innerHTML = `
-    <button class="back-btn" onclick="window.navTo('ambassadors')">← Back to ambassadors</button>
+    <button class="back-btn" onclick="window.navTo('ambassadors')" style="margin-bottom:20px; cursor:pointer;">← Back to ambassadors</button>
+    
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
-      <div class="amb-avatar" style="background:${color};width:56px;height:56px;font-size:22px;">${letter}</div>
+      <div class="amb-avatar" style="background:${color};width:56px;height:56px;font-size:22px;color:white;display:flex;align-items:center;justify-content:center;border-radius:50%;">${letter}</div>
       <div>
         <div style="font-size:20px;font-weight:700;">${escHtml(u.displayName||'(No name set)')}</div>
         <div style="font-size:13px;color:var(--text2);">${escHtml(u.email)}</div>
       </div>
       <div style="margin-left:auto;">${tierBadge(qCount)}</div>
     </div>
-    ${miss>0 ? `<div class="alert alert-red" style="margin-bottom:16px;">⚠ This ambassador is missing <strong>${miss} required quarter${miss>1?'s':''}</strong> — they need to log at least 1 event in each past and current quarter.</div>` : `<div class="alert" style="background:var(--green-bg);border-left:3px solid var(--green-b);margin-bottom:16px;">✓ All required quarters are covered!</div>`}
+
+    ${miss > 0 
+      ? `<div class="alert alert-red" style="margin-bottom:16px;">⚠ This ambassador is missing <strong>${miss} required quarter${miss>1?'s':''}</strong> — they need to log at least 2 events in each past and current quarter.</div>` 
+      : `<div class="alert" style="background:var(--green-bg);border-left:3px solid var(--green-b);margin-bottom:16px;padding:12px;color:var(--green);font-weight:500;">✓ All required quarters are covered!</div>`
+    }
+
     <div class="g4" style="margin-bottom:16px;">
       <div class="metric c-blue"><div class="metric-lbl">Total events</div><div class="metric-val">${u.events.length}</div></div>
-      <div class="metric c-green"><div class="metric-lbl">This quarter</div><div class="metric-val">${qCount}</div></div>
-      <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${reach}</div></div>
-      <div class="metric c-purple"><div class="metric-lbl">Hours delivered</div><div class="metric-val">${Math.round(hrs/60)}</div></div>
+      <div class="metric c-green"><div class="metric-lbl">This quarter</div><div class="metric-val">${qCount}/2</div></div>
+      <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${reach.toLocaleString()}</div></div>
+      <div class="metric c-purple"><div class="metric-lbl">Hours delivered</div><div class="metric-val">${Math.round(hrs/60)}h</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">${qtrSummaryCards}</div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">${qtrSummaryCards}</div>
+
     <div class="card">
       <div class="card-hd">Event history</div>
       <div class="tbl-wrap">
@@ -777,9 +801,10 @@ const isAtRisk = missing.length > 0;
       </div>
     </div>
   `;
-  navTo('amb-detail');
-};
 
+  // 5. Switch View
+  window.navTo('amb-detail');
+};
 // ── QUARTERLY COMPLIANCE TABLE ──
 function renderComplianceTable() {
   const filter   = document.getElementById('comp-filter').value;
