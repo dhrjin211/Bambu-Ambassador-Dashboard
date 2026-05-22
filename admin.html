@@ -706,7 +706,7 @@ function renderAmbassadors() {
         <div class="amb-stat"><div class="amb-stat-val">${qCount}</div><div class="amb-stat-lbl">This Qtr</div></div>
         <div class="amb-stat"><div class="amb-stat-val">${reach}</div><div class="amb-stat-lbl">Reached</div></div>
       </div>
-      ${atRisk ? `<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px;">⚠ Missing ${miss} required quarter${miss>1?'s':''}</div>` : `<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px;">✓ All required quarters covered</div>`}
+      ${miss > 0 ? `<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px;">⚠ Missing ${miss} required quarter${miss>1?'s':''}</div>` : `<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px;">✓ All required quarters covered</div>`}
     </div>`;
   }).join('');
 }
