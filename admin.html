@@ -493,54 +493,67 @@ onAuthStateChanged(auth, async (user) => {
   // ambassador when they save a completed event and is readable by all
   // authenticated users — same collection used by the Global Impact feed.
   // We group by uid to reconstruct per-ambassador profiles on the fly.
+  // ── REAL-TIME LISTENER (USERS + EVENTS) ──
   if (_unsubUsers) _unsubUsers();
-  _unsubUsers = onSnapshot(
-    query(collection(db, 'global_events'), orderBy('savedAt', 'desc')),
-    (querySnap) => {
-      // Group events by ambassador uid
-      const byUid = {};
-      querySnap.forEach(d => {
-        const e = { id: d.id, ...d.data() };
-        if (!e.uid) return;
-        if (!byUid[e.uid]) {
-          byUid[e.uid] = {
-            uid:         e.uid,
-            displayName: e.displayName || '',
-            email:       e.displayName || e.uid.slice(0, 10) + '…',
-            events:      [],
-            badges:      {},
-          };
-        }
-        // Normalise the event shape to match index.html's DB.events format
-        byUid[e.uid].events.push({
-          name:      e.name      || '—',
-          date:      e.date      || '',
-          location:  e.location  || '',
-          type:      e.type      || 'other',
-          attendees: parseInt(e.attendees) || 0,
-          duration:  parseInt(e.duration)  || 0,
-          quarter:   e.quarter   || '',
-          status:    'done',
-          summary:   e.summary   || '',
-          notes:     e.notes     || '',
-          photos:    e.photos    || null,
-          photoLink: e.photoLink || null,
-        });
+  
+  let allUsersMap = {};
+  let allEventsData = [];
+
+  function buildAndRender() {
+    // Merge users and their events
+    allUsers = Object.values(allUsersMap).map(u => ({
+      ...u,
+      events: allEventsData.filter(e => e.uid === u.uid)
+    }));
+    
+    setSyncStatus('Live · ' + new Date().toLocaleTimeString(), true);
+    renderOverview();
+    renderAmbassadors();
+    renderAllEvents();
+    renderComplianceTable();
+    renderPhotos();
+  }
+
+  // 1. Listen to ALL Users to build the master roster
+  const unsubU = onSnapshot(collection(db, 'users'), (snap) => {
+    snap.forEach(d => {
+      const data = d.data();
+      allUsersMap[d.id] = {
+        uid: d.id,
+        displayName: data.profile?.fullName || data.displayName || '',
+        email: data.email || d.id.slice(0, 10) + '…',
+        events: []
+      };
+    });
+    buildAndRender();
+  }, (err) => console.error('Users listener error:', err));
+
+  // 2. Listen to ALL Events to populate activity
+  const unsubE = onSnapshot(query(collection(db, 'global_events'), orderBy('savedAt', 'desc')), (snap) => {
+    allEventsData = [];
+    snap.forEach(d => {
+      const e = { id: d.id, ...d.data() };
+      if (!e.uid) return;
+      allEventsData.push({
+        uid:       e.uid,
+        name:      e.name      || '—',
+        date:      e.date      || '',
+        location:  e.location  || '',
+        type:      e.type      || 'other',
+        attendees: parseInt(e.attendees) || 0,
+        duration:  parseInt(e.duration)  || 0,
+        quarter:   e.quarter   || '',
+        status:    'done',
+        summary:   e.summary   || '',
+        notes:     e.notes     || '',
+        photos:    e.photos    || null,
+        photoLink: e.photoLink || null,
       });
-      allUsers = Object.values(byUid);
-      setSyncStatus('Live · ' + new Date().toLocaleTimeString(), true);
-      renderOverview();
-      renderAmbassadors();
-      renderAllEvents();
-      renderComplianceTable();
-      renderPhotos();
-    },
-    (err) => {
-      console.error('global_events listener error:', err);
-      setSyncStatus('Error: ' + err.code, false);
-    }
-  );
-});
+    });
+    buildAndRender();
+  }, (err) => console.error('Events listener error:', err));
+
+  _unsubUsers = () => { unsubU(); unsubE(); };
 
 function setSyncStatus(msg, live) {
   document.getElementById('sync-status').textContent = msg;
