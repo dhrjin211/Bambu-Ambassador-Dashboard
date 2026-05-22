@@ -706,7 +706,14 @@ function renderAmbassadors() {
         <div class="amb-stat"><div class="amb-stat-val">${qCount}</div><div class="amb-stat-lbl">This Qtr</div></div>
         <div class="amb-stat"><div class="amb-stat-val">${reach}</div><div class="amb-stat-lbl">Reached</div></div>
       </div>
-      ${miss > 0 ? `<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px;">⚠ Missing ${miss} required quarter${miss>1?'s':''}</div>` : `<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px;">✓ All required quarters covered</div>`}
+      ${miss > 0 
+  ? `<div class="alert alert-red" style="margin-bottom:16px;">
+       ⚠ This ambassador is missing <strong>${miss} required quarter${miss > 1 ? 's' : ''}</strong> — they need to log at least 2 events in each past and current quarter.
+     </div>` 
+  : `<div class="alert" style="background:var(--green-bg);border-left:3px solid var(--green-b);margin-bottom:16px;color:var(--green);padding:10px;">
+       ✓ All required quarters are covered!
+     </div>`
+}
     </div>`;
   }).join('');
 }
