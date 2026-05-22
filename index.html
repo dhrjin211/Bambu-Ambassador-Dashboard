@@ -1492,12 +1492,16 @@ function renderOverview() {
 
 function renderOverviewCore() {
   const done = doneEvs(), q = currentQ();
-  const qc   = done.filter(e => e.quarter === q).length;
-  const tier  = tierFromN(qc);
+const qc = done.filter(e => e.quarter === q).length;
+const tier = tierFromN(qc);
+const met = qc >= 2; // New 2-event rule logic
   const reach = done.reduce((s,e) => s + (parseInt(e.attendees)||0), 0);
   document.getElementById('ov-metrics').innerHTML = `
     <div class="metric c-blue"><div class="metric-lbl">Total events</div><div class="metric-val">${done.length}</div></div>
-    <div class="metric c-green"><div class="metric-lbl">This quarter</div><div class="metric-val">${qc}</div></div>
+    <div class="metric c-green">
+  <div class="metric-lbl">Quarterly Goal</div>
+  <div class="metric-val">${qc >= 2 ? '✓ Met' : qc + '/2'}</div>
+</div>
     <div class="metric c-amber"><div class="metric-lbl">People reached</div><div class="metric-val">${reach.toLocaleString()}</div></div>
     <div class="metric c-purple"><div class="metric-lbl">Current tier</div><div class="metric-val" style="font-size:18px;">${tier}</div></div>
   `;
@@ -1544,7 +1548,7 @@ function renderQtrBars() {
     const count = done.filter(e => e.quarter === qtr).length;
     return `<div class="prog-row">
       <div class="prog-lbl" style="width:40px;">${qtr}</div>
-      <div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(count*20,100)}%;background:${qtr===q?'var(--blue)':'var(--green)'}"></div></div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(count*50,100)}%;background:${qtr===q?'var(--blue)':'var(--green)'}"></div></div>
       <div class="prog-count">${count}</div>
     </div>`;
   }).join('');
