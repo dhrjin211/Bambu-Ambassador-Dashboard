@@ -525,21 +525,26 @@ onAuthStateChanged(auth, async (user) => {
     renderComplianceTable();
   }
 
-  // Listener A: Scans the 'users' collection (The Roster)
+// Listener A: The Roster (Finds everyone even with 0 events)
   const unsubU = onSnapshot(collection(db, 'users'), (snap) => {
     snap.forEach(d => {
       const data = d.data();
+      
+      // 🛑 THE FIX: Skip this user if they are an Admin
+      if (data.isAdmin === true) return; 
+
       allUsersMap[d.id] = {
         uid: d.id,
-        // Grabs "Test User 2" or "Test Account"
-        displayName: data.displayName || 'Unnamed Ambassador',
-        email: data.email || 'No Email',
+        displayName: data.displayName || data.profile?.fullName || 'Unnamed User',
+        email: data.email || d.id.slice(0, 10) + '...',
         events: []
       };
     });
     buildAndRender();
-  });
+  }, (err) => console.error('Users listener error:', err));
 
+
+  
   // Listener B: Scans 'global_events' (The Activity)
   const unsubE = onSnapshot(collection(db, 'global_events'), (snap) => {
     allEventsData = [];
