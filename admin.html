@@ -357,7 +357,8 @@ input.search-input:focus{outline:none;border-color:var(--blue);}
           <select class="filter-sel" id="ev-filter-quarter"><option value="">All quarters</option><option value="Q1">Q1 · Jul–Sep</option><option value="Q2">Q2 · Oct–Dec</option><option value="Q3">Q3 · Jan–Mar</option><option value="Q4">Q4 · Apr–May</option></select>
           <select class="filter-sel" id="ev-filter-amb"><option value="">All ambassadors</option></select>
           <span id="ev-count" style="font-size:12px;color:var(--text3);align-self:center;"></span>
-          <button class="btn btn-sm" id="btn-export-csv" style="margin-left:auto; background:var(--green); color:white; border-color:var(--green);">📥 Export with Photos (.xls)</button>
+          <button class="btn btn-sm" id="btn-export-excel" style="margin-left:auto; background:var(--blue); color:white; border-color:var(--blue);">📊 Export to Excel</button>
+          <button class="btn btn-sm" id="btn-export-pdf" style="background:var(--green); color:white; border-color:var(--green);">📄 Export PDF (with Photos)</button>
         </div>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-top:4px;">
@@ -1038,16 +1039,15 @@ document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
     if (btn.dataset.panel === 'events')     renderAllEvents();
   };
 });
-  // ── EXPORT TO HTML (with embedded photos) ──
-document.getElementById('btn-export-csv').onclick = () => {
-  // 1. Gather all events
+  // ── SHARED: gather + sort export data ──
+function gatherExportData() {
   let exportData = [];
   allUsers.forEach(u => {
     u.events.forEach(e => {
       exportData.push({
         ambassadorName: u.displayName || u.email || 'No Name',
         email: u.email || '',
-        date: e.date || 'No Date',
+        date: e.date || '',
         eventName: e.name || '',
         type: e.type || '',
         location: e.location || '',
@@ -1061,79 +1061,140 @@ document.getElementById('btn-export-csv').onclick = () => {
       });
     });
   });
-
-  // 2. Sort by Ambassador Name then Date
   exportData.sort((a, b) => {
     if (a.ambassadorName === b.ambassadorName) return new Date(a.date) - new Date(b.date);
     return a.ambassadorName.localeCompare(b.ambassadorName);
   });
+  return exportData;
+}
 
-  // 3. Build HTML table with embedded images
+// ── EXPORT TO EXCEL (CSV, clean) ──
+document.getElementById('btn-export-excel').onclick = () => {
+  const data = gatherExportData();
+  const headers = ['Ambassador Name','Email','Event Date','Event Name','Type','Location','Attendees','Duration (min)','Quarter','Valid?','Summary','Photos'];
+  const esc = s => `"${String(s).replace(/"/g,'""')}"`;
+  let csv = headers.map(esc).join(',') + '\n';
+  data.forEach(r => {
+    const photoVal = r.photos.length ? `${r.photos.length} photo(s) — see PDF export` : (r.photoLink || 'None');
+    csv += [
+      esc(r.ambassadorName), esc(r.email), esc(r.date), esc(r.eventName),
+      esc(r.type), esc(r.location), esc(r.attendees), esc(r.duration),
+      esc(r.quarter), esc(r.valid), esc(r.summary), esc(photoVal)
+    ].join(',') + '\n';
+  });
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'Bambu_Ambassador_Data.csv';
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+};
+
+// ── EXPORT TO PDF (with embedded photos) ──
+document.getElementById('btn-export-pdf').onclick = () => {
+  const data = gatherExportData();
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const dateStr = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 
-  const rows = exportData.map(row => {
-    let photosCell = '';
-    if (row.photos && row.photos.length) {
-      photosCell = row.photos.map(src =>
-        `<img src="${src}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;border:1px solid #ddd;margin:2px;" />`
-      ).join('');
-    } else if (row.photoLink) {
-      photosCell = `<a href="${esc(row.photoLink)}" target="_blank">${esc(row.photoLink)}</a>`;
-    } else {
-      photosCell = '<span style="color:#999;">None</span>';
-    }
+  const typeColors = {
+    workshop:'#fceee9','demo':'#e8f0fb','competition':'#fdf3e0',
+    class:'#eaf4ec','club':'#e8e6de','fair':'#f0ecfb','other':'#f0efe9'
+  };
 
-    return `<tr>
-      <td>${esc(row.ambassadorName)}</td>
-      <td>${esc(row.email)}</td>
-      <td>${esc(row.date)}</td>
-      <td>${esc(row.eventName)}</td>
-      <td>${esc(row.type)}</td>
-      <td>${esc(row.location)}</td>
-      <td style="text-align:center;">${esc(row.attendees)}</td>
-      <td style="text-align:center;">${esc(row.duration)}</td>
-      <td style="text-align:center;">${esc(row.quarter)}</td>
-      <td style="text-align:center;font-weight:600;color:${row.valid==='Yes'?'#2d7a3a':'#b83a1e'};">${esc(row.valid)}</td>
-      <td style="font-size:12px;max-width:300px;">${esc(row.summary)}</td>
-      <td>${photosCell}</td>
-    </tr>`;
+  const cards = data.map(r => {
+    const typeColor = typeColors[r.type] || '#f5f4f0';
+    const photosHTML = r.photos.length
+      ? r.photos.map(src => `<img src="${src}" style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid #ddd;margin:3px;"/>`).join('')
+      : r.photoLink
+        ? `<a href="${esc(r.photoLink)}">${esc(r.photoLink)}</a>`
+        : '<span style="color:#999;font-size:12px;">No photos submitted</span>';
+
+    return `
+    <div style="background:#fff;border:1px solid #dddbd2;border-radius:10px;padding:20px 24px;margin-bottom:16px;page-break-inside:avoid;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="font-size:17px;font-weight:700;color:#19180f;">${esc(r.eventName)}</div>
+          <div style="font-size:13px;color:#6b6a62;margin-top:2px;">${esc(r.ambassadorName)} · ${esc(r.email)}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <span style="background:${typeColor};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:capitalize;">${esc(r.type)}</span>
+          <span style="background:${r.valid==='Yes'?'#eaf4ec':'#fceee9'};color:${r.valid==='Yes'?'#2d7a3a':'#b83a1e'};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">${r.valid==='Yes'?'✓ Valid':'✗ Invalid'}</span>
+          <span style="background:#f0efe9;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#6b6a62;">${esc(r.quarter)}</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
+        <div style="background:#f5f4f0;border-radius:7px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9e9c93;margin-bottom:3px;">Date</div>
+          <div style="font-size:13px;font-weight:600;">${esc(r.date)}</div>
+        </div>
+        <div style="background:#f5f4f0;border-radius:7px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9e9c93;margin-bottom:3px;">Location</div>
+          <div style="font-size:13px;font-weight:600;">${esc(r.location)||'—'}</div>
+        </div>
+        <div style="background:#f5f4f0;border-radius:7px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9e9c93;margin-bottom:3px;">Attendees</div>
+          <div style="font-size:18px;font-weight:700;color:#1a4f9e;">${r.attendees}</div>
+        </div>
+        <div style="background:#f5f4f0;border-radius:7px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9e9c93;margin-bottom:3px;">Duration</div>
+          <div style="font-size:13px;font-weight:600;">${r.duration} min</div>
+        </div>
+      </div>
+      ${r.summary ? `<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9e9c93;margin-bottom:5px;">Summary</div><div style="font-size:13px;color:#19180f;line-height:1.55;">${esc(r.summary)}</div></div>` : ''}
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9e9c93;margin-bottom:8px;">Photo Proof</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">${photosHTML}</div>
+      </div>
+    </div>`;
   }).join('');
+
+  // summary stats
+  const totalEvents = data.length;
+  const totalAttendees = data.reduce((s,r) => s + (parseInt(r.attendees)||0), 0);
+  const totalHours = (data.reduce((s,r) => s + (parseInt(r.duration)||0), 0) / 60).toFixed(1);
+  const validCount = data.filter(r => r.valid === 'Yes').length;
 
   const html = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title>Bambu Ambassador Data</title>
+<title>Bambu Ambassador Report — ${dateStr}</title>
 <style>
-  body { font-family: Arial, sans-serif; font-size: 13px; }
-  table { border-collapse: collapse; width: 100%; }
-  th { background: #19180f; color: #fff; padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
-  td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
-  tr:nth-child(even) td { background: #f9f9f7; }
-  tr:hover td { background: #f0f0ea; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f5f4f0; padding: 32px; color: #19180f; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .no-print { display: none; }
+  }
 </style>
 </head>
 <body>
-<h2 style="font-family:Arial;margin-bottom:16px;">Bambu Lab Ambassador Events — ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</h2>
-<table>
-  <thead><tr>
-    <th>Ambassador Name</th><th>Email</th><th>Event Date</th><th>Event Name</th>
-    <th>Type</th><th>Location</th><th>Attendees</th><th>Duration (min)</th>
-    <th>Quarter</th><th>Valid?</th><th>Summary</th><th>Photos</th>
-  </tr></thead>
-  <tbody>${rows}</tbody>
-</table>
+  <!-- Header -->
+  <div style="background:#19180f;color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:24px;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;opacity:.5;margin-bottom:6px;">Bambu Lab · Ambassador Program</div>
+    <div style="font-size:26px;font-weight:700;margin-bottom:4px;">Event Report</div>
+    <div style="font-size:13px;opacity:.6;">Generated ${dateStr}</div>
+  </div>
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+    ${[['Total Events',totalEvents,'#1a4f9e'],['Total Attendees',totalAttendees,'#2d7a3a'],['Teaching Hours',totalHours+'h','#7a5010'],['Valid Events',validCount,'#5b3ab5']].map(([l,v,c])=>`
+    <div style="background:#fff;border:1px solid #dddbd2;border-radius:10px;padding:16px 18px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9e9c93;margin-bottom:5px;">${l}</div>
+      <div style="font-size:28px;font-weight:700;color:${c};">${v}</div>
+    </div>`).join('')}
+  </div>
+  <!-- Print button -->
+  <div class="no-print" style="margin-bottom:20px;">
+    <button onclick="window.print()" style="background:#19180f;color:#fff;border:none;padding:10px 20px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">🖨 Print / Save as PDF</button>
+    <span style="font-size:12px;color:#9e9c93;margin-left:12px;">Use your browser's Print → Save as PDF for best results</span>
+  </div>
+  <!-- Event Cards -->
+  ${cards}
 </body>
 </html>`;
 
-  // 4. Download as .xls (Excel opens HTML tables natively)
-  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'Bambu_Ambassador_Data.xls';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
 };
 </script>
 </body>
