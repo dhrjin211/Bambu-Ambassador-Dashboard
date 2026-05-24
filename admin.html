@@ -1091,7 +1091,7 @@ document.getElementById('btn-export-csv').onclick = () => {
   // 5. Create workbook and download
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Ambassador Data');
-  XLSX.writeFile(wb, 'Bambu_Ambassador_Data.xlsx');
+  XLSX.writeFile(wb, 'Bambu_Ambassador_Data.ods');
 };
 </script>
 </body>
